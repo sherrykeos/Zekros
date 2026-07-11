@@ -19,14 +19,12 @@ import {
   createGoogleUser,
   linkGoogleAccount,
   findUserById,
+  deleteVerificationTokenByUserId,
 } from "./auth.repository.js";
 
 import { createId } from "@paralleldrive/cuid2";
 
-import {
-  hashPassword,
-  comparePassword,
-} from "../services/password.service.js";
+import { hashPassword, comparePassword } from "../services/password.service.js";
 import { generateToken, hashToken } from "../services/token.service.js";
 import { sendEmail } from "../services/email.service.js";
 import {
@@ -40,9 +38,6 @@ import auth from "../config/auth.config.js";
 
 import createVerificationEmail from "../templates/email/verify-email.js";
 import createResetPasswordEmail from "../templates/email/reset-password.js";
-
-
-
 
 function createError(message, statusCode = 400) {
   const error = new Error(message);
@@ -527,6 +522,104 @@ async function getCurrentUser(userId) {
   };
 }
 
+async function resendVerification(email) {
+  const user = await findUserByEmail(email);
+
+  // Prevent email enumeration
+  if (!user) {
+    return {
+      success: true,
+      message:
+        "If an account exists and is not yet verified, a verification email has been sent.",
+    };
+  }
+
+  if (user.isEmailVerified) {
+    return {
+      success: true,
+      message:
+        "If an account exists and is not yet verified, a verification email has been sent.",
+    };
+  }
+
+  // Invalidate any previously issued verification token.
+  await deleteVerificationTokenByUserId(user.id);
+
+  /* ------------------------------------------------------- */
+  /* Verification Token */
+  /* ------------------------------------------------------- */
+
+  const verificationToken = generateToken(auth.verificationToken.bytes);
+
+  const verificationTokenHash = hashToken(verificationToken);
+
+  const expiresAt = new Date(
+    Date.now() + auth.verificationToken.expiresInMinutes * 60 * 1000,
+  );
+
+  await createVerificationToken(user.id, verificationTokenHash, expiresAt);
+
+  /* ------------------------------------------------------- */
+  /* Verification Link */
+  /* ------------------------------------------------------- */
+
+  const verificationUrl = `${app.frontendUrl}/auth/verify?token=${verificationToken}`;
+
+  /* ------------------------------------------------------- */
+  /* Send Email */
+  /* ------------------------------------------------------- */
+
+  await sendEmail({
+    to: user.email,
+    subject: `Verify your ${app.name} account`,
+    html: createVerificationEmail({
+      username: user.username,
+      verificationUrl,
+    }),
+  });
+
+  return {
+    success: true,
+    message:
+      "If an account exists and is not yet verified, a verification email has been sent.",
+  };
+}
+
+async function changePassword(userId, currentPassword, newPassword) {
+  const user = await findUserById(userId);
+
+  if (!user) {
+    throw createError("User not found.", 404);
+  }
+
+  if (!user.passwordHash) {
+    throw createError(
+      "Password change is not available for this account.",
+      400,
+    );
+  }
+
+  const isPasswordValid = await comparePassword(
+    currentPassword,
+    user.passwordHash,
+  );
+
+  if (!isPasswordValid) {
+    throw createError("Current password is incorrect.", 400);
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+
+  await updateUserPassword(user.id, passwordHash);
+
+  await deleteAllUserSessions(user.id);
+
+  return {
+    success: true,
+    message: "Password changed successfully. Please sign in again.",
+  };
+}
+
 export {
   register,
   verifyEmail,
@@ -537,5 +630,6 @@ export {
   resetPassword,
   googleLogin,
   getCurrentUser,
-
+  resendVerification,
+  changePassword,
 };

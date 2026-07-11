@@ -4,6 +4,8 @@ import {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  resendVerificationSchema,
+  changePasswordSchema,
   
 } from "./auth.validation.js";
 
@@ -45,6 +47,18 @@ async function verify(req, res, next) {
     const result = await authService.verifyEmail(req.query.token);
 
     return res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function resendVerification(req, res, next) {
+  try {
+    const data = resendVerificationSchema.parse(req.body);
+
+    const result = await authService.resendVerification(data.email);
+
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -127,15 +141,33 @@ async function me(req, res, next) {
   }
 }
 
+async function changePassword(req, res, next) {
+  try {
+    const data = changePasswordSchema.parse(req.body);
+
+    const result = await authService.changePassword(
+      req.user.id,
+      data.currentPassword,
+      data.newPassword,
+    );
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
 
 export {
   register,
   login,
   verify,
+  resendVerification,
   refresh,
   logout,
   forgotPassword,
   resetPassword,
   googleCallback,
   me,
+  changePassword,
 };

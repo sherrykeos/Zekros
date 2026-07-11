@@ -197,6 +197,14 @@ async function findUserByProviderId(providerId) {
   });
 }
 
+async function deleteVerificationTokenByUserId(userId) {
+  return prisma.verificationToken.deleteMany({
+    where: {
+      userId,
+    },
+  });
+}
+
 async function createGoogleUser(userData) {
   return prisma.user.create({
     data: userData,
@@ -248,6 +256,8 @@ export {
   deletePasswordResetToken,
 
   updateUserPassword,
+
+  deleteVerificationTokenByUserId,
 
   findUserByProviderId,
   createGoogleUser,

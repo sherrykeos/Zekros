@@ -1,7 +1,18 @@
 import { z } from "zod";
 
+
+const passwordSchema = z.string()
+  .min(8, "Password must be at least 8 characters long.")
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
+    "Password must contain uppercase, lowercase, number, and special character.",
+  );
+
+
 const emailSchema = z
   .email("Invalid email address")
+  .trim()
+  .toLowerCase()
   .transform((email) => email.toLowerCase());
 
 const registerSchema = z.object({
@@ -29,7 +40,7 @@ const registerSchema = z.object({
 
 const loginSchema = z.object({
   email: emailSchema,
-  password: z.string().min(1, "Password is required"),
+  password: passwordSchema,
 });
 
 const resendVerificationSchema = z.object({
@@ -43,16 +54,20 @@ const forgotPasswordSchema = z.object({
 const resetPasswordSchema = z.object({
   token: z.string().min(1, "Token is required"),
 
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(128)
-    .regex(/[A-Z]/, "Must contain one uppercase letter")
-    .regex(/[a-z]/, "Must contain one lowercase letter")
-    .regex(/[0-9]/, "Must contain one number")
-    .regex(/[^A-Za-z0-9]/, "Must contain one special character"),
+  password: passwordSchema,
 });
 
+const changePasswordSchema = z.object({
+    currentPassword: passwordSchema,
+    newPassword: passwordSchema,
+  })
+  .refine(
+    (data) => data.currentPassword !== data.newPassword,
+    {
+      message: "New password must be different from the current password.",
+      path: ["newPassword"],
+    },
+  );
 
 
 
@@ -62,5 +77,6 @@ export {
   resendVerificationSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  changePasswordSchema,
   
 };
