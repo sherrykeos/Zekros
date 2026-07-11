@@ -1,0 +1,114 @@
+import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { motion } from "motion/react";
+
+import { PlayHero } from "@/components/play/hero";
+import { QuickActions } from "@/components/play/quick-actions";
+import { GameModes } from "@/components/play/game-modes";
+import { ContinueMatch } from "@/components/play/continue-match";
+import { MultiplayerPanel } from "@/components/play/multiplayer-panel";
+import { RecentActivity } from "@/components/play/recent-activity";
+import { Tips } from "@/components/play/tips";
+import { Featured } from "@/components/play/featured";
+import { CreateRoomModal } from "@/components/play/modals/create-room";
+import { JoinRoomModal } from "@/components/play/modals/join-room";
+import { CustomMatchModal } from "@/components/play/modals/custom-match";
+import { useAuth } from "@/contexts/auth";
+import { usePlayEntry } from "@/contexts/play-entry";
+
+export const Route = createFileRoute("/app/play")({
+  head: () => ({
+    meta: [
+      { title: "Play — ZEKROS" },
+      { name: "description", content: "The ZEKROS Play Hub. Pick a mode, match an opponent, or jump back into a game." },
+    ],
+  }),
+  component: PlayPage,
+});
+
+const MULTIPLAYER_IDS = new Set(["quick", "create", "join", "multiplayer"]);
+
+function PlayPage() {
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openJoin, setOpenJoin] = useState(false);
+  const [openCustom, setOpenCustom] = useState(false);
+  const [joinCode, setJoinCode] = useState("");
+  const navigate = useNavigate();
+  const { status } = useAuth();
+  const { openAccountRequired } = usePlayEntry();
+
+  const isGuest = status === "guest" || status === "anonymous";
+
+  // TODO: in Phase 5 hand off the chosen mode/config to a match-launch service.
+  const handleQuickAction = (id: string) => {
+    if (isGuest && MULTIPLAYER_IDS.has(id)) {
+      openAccountRequired();
+      return;
+    }
+    switch (id) {
+      case "create":
+        setOpenCreate(true);
+        break;
+      case "join":
+        setOpenJoin(true);
+        break;
+      case "custom":
+        void navigate({ to: "/app/setup", state: { mode: "custom" } });
+        break;
+      case "smart":
+      case "perfect":
+      case "local":
+      case "quick":
+      case "multiplayer":
+        void navigate({ to: "/app/setup", state: { mode: id } });
+        break;
+      default:
+        void navigate({ to: "/app/setup" });
+        break;
+    }
+  };
+
+  const handleJoin = (code?: string) => {
+    if (isGuest) {
+      openAccountRequired();
+      return;
+    }
+    setJoinCode(code ?? "");
+    setOpenJoin(true);
+  };
+
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="space-y-10 pb-6"
+    >
+      <PlayHero onQuickPlay={() => handleQuickAction("quick")} />
+
+      {/* <ContinueMatch /> */}
+
+      <GameModes onLaunch={handleQuickAction} />
+      
+      <QuickActions onSelect={handleQuickAction} />
+
+
+      <MultiplayerPanel
+        onCreate={() => handleQuickAction("create")}
+        onJoin={handleJoin}
+      />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <RecentActivity />
+        <Tips />
+      </div>
+
+      <Featured />
+
+      <CreateRoomModal open={openCreate} onOpenChange={setOpenCreate} />
+      <JoinRoomModal open={openJoin} onOpenChange={setOpenJoin} initialCode={joinCode} />
+      <CustomMatchModal open={openCustom} onOpenChange={setOpenCustom} />
+    </motion.div>
+  );
+}
