@@ -75,4 +75,4 @@ class Rules {
   }
 }
 
-module.exports = Rules;
+export default Rules;

@@ -30,7 +30,7 @@ function failure(code, message) {
   };
 }
 
-module.exports = {
+export {
   success,
   failure,
 };

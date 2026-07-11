@@ -1,4 +1,4 @@
-const auth = require("../config/auth.config");
+import auth from "../config/auth.config.js";
 
 const REFRESH_COOKIE_NAME = "refreshToken";
 
@@ -35,7 +35,7 @@ function clearRefreshTokenCookie(res) {
   );
 }
 
-module.exports = {
+export {
   REFRESH_COOKIE_NAME,
   setRefreshTokenCookie,
   clearRefreshTokenCookie,

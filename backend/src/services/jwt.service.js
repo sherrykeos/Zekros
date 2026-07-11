@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const auth = require("../config/auth.config");
+import jwt from "jsonwebtoken";
+import auth from "../config/auth.config.js";
 
 /**
  * Generate Access Token
@@ -33,7 +33,7 @@ function verifyRefreshToken(token) {
   return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
 }
 
-module.exports = {
+export {
   generateAccessToken,
   generateRefreshToken,
   verifyAccessToken,

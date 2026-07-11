@@ -1,13 +1,13 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const passport = require("../auth/passport");
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import passport from "../auth/passport.js";
 
-const apiRoutes = require("../routes/index.route");
+import apiRoutes from "../routes/index.route.js";
 
-const notFound = require("../middleware/notFound");
-const errorHandler = require("../middleware/errorHandler");
+import notFound from "../middleware/notFound.js";
+import errorHandler from "../middleware/errorHandler.js";
 
 
 
@@ -33,48 +33,5 @@ app.use(errorHandler);
 
 
 
-module.exports = app;
-
-
-
-
-
-// const express = require('express');
-// const apiRoutes = require('./routes/index.route');
-// const notFound = require('./middleware/notFound');
-// const errorHandler = require('./middleware/errorHandler');
-
-// const app = express();
-
-// // 1. Enable JSON body parsing for incoming requests.
-// app.use(express.json());
-
-// /**
-//  * A simple health check endpoint to verify the server is running.
-//  * Useful for monitoring and deployment verification.
-//  */
-// app.get('/api/health', (req, res) => {
-//     res.status(200).json({
-//         success: true,
-//         message: 'Server is running.',
-//         uptime: process.uptime(),
-//     });
-// });
-
-// // 2. Mount the aggregated API routes.
-// app.use('/api', apiRoutes);
-
-// // 3. Register middleware for handling 404 Not Found errors.
-// // This should be placed after all other routes.
-// app.use(notFound);
-
-// // 4. Register the global error handling middleware.
-// // This must be the last piece of middleware.
-// app.use(errorHandler);
-
-// module.exports = app;
-
-
-
-
+export default app;
 

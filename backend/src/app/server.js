@@ -1,6 +1,6 @@
-const http = require("http");
-const app = require("./app");
-const initializeSocket = require("../socket/index.socket");
+import http from "http";
+import app from "./app.js";
+import initializeSocket from "../socket/index.socket.js";
 
 const PORT = process.env.PORT || 5000;
 const httpServer = http.createServer(app);

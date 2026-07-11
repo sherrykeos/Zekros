@@ -1,5 +1,5 @@
-const express = require('express');
-const MatchController = require('../controllers/MatchController');
+import express from "express";
+import MatchController from "../controllers/MatchController.js";
 
 const router = express.Router();
 
@@ -15,4 +15,4 @@ router.get('/:matchId/history', MatchController.getHistory);
 // GET /matches/:matchId/replay
 router.get('/:matchId/replay', MatchController.getReplayData);
 
-module.exports = router;
+export default router;

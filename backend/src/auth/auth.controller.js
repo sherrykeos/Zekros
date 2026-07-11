@@ -1,18 +1,17 @@
-// const { googleLogin, authService } = require("./auth.service");
-const authService = require("./auth.service");
-const {
+import * as authService from "./auth.service.js";
+import {
   registerSchema,
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
   
-} = require("./auth.validation");
+} from "./auth.validation.js";
 
-const {
+import {
   clearRefreshTokenCookie,
 
-} = require("../services/cookie.service");
-const { app } = require("../config/app.config");
+} from "../services/cookie.service.js";
+import { app } from "../config/app.config.js";
 
 
 
@@ -129,7 +128,7 @@ async function me(req, res, next) {
 }
 
 
-module.exports = {
+export {
   register,
   login,
   verify,
@@ -140,77 +139,3 @@ module.exports = {
   googleCallback,
   me,
 };
-
-
-// const { registerUser, loginUser, verifyEmail, resendVerificationEmail } = require("./auth.service");
-
-// function statusFrom(error) {
-//   return error.statusCode || 400;
-// }
-
-// async function register(req, res) {
-//   try {
-//     const user = await registerUser(req.body);
-
-//     return res.status(201).json({
-//       success: true,
-//       message: "Account created successfully. Please check your email to verify your account.",
-//       data: user,
-//     });
-//   } catch (error) {
-//     return res.status(statusFrom(error)).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// }
-
-// async function login(req, res) {
-//   try {
-//     const result = await loginUser(req.body);
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "Signed in successfully.",
-//       data: result,
-//     });
-//   } catch (error) {
-//     return res.status(statusFrom(error)).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// }
-
-// async function verify(req, res) {
-//   try {
-//     const result = await verifyEmail(req.query.token);
-
-//     return res.status(200).json(result);
-//   } catch (error) {
-//     return res.status(statusFrom(error)).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// }
-
-// async function resendVerification(req, res) {
-//   try {
-//     const result = await resendVerificationEmail(req.body);
-
-//     return res.status(200).json(result);
-//   } catch (error) {
-//     return res.status(statusFrom(error)).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// }
-
-// module.exports = {
-//   register,
-//   login,
-//   verify,
-//   resendVerification,
-// };

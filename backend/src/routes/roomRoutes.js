@@ -1,5 +1,5 @@
-const express = require('express');
-const RoomController = require('../controllers/RoomController');
+import express from "express";
+import RoomController from "../controllers/RoomController.js";
 
 const router = express.Router();
 
@@ -24,4 +24,4 @@ router.post('/:roomId/end', RoomController.endMatch);
 // DELETE /rooms/:roomId
 router.delete('/:roomId', RoomController.closeRoom);
 
-module.exports = router;
+export default router;

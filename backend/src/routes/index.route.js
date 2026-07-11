@@ -1,11 +1,11 @@
-const prisma = require("../lib/prisma");
-const express = require("express");
+import prisma from "../lib/prisma.js";
+import express from "express";
 
-const roomRoutes = require("./roomRoutes");
-const matchRoutes = require("./matchRoutes");
-const gameRoutes = require("./gameRoutes");
+import roomRoutes from "./roomRoutes.js";
+import matchRoutes from "./matchRoutes.js";
+import gameRoutes from "./gameRoutes.js";
 
-const authRoutes = require("../auth/auth.route");
+import authRoutes from "../auth/auth.route.js";
 
 const router = express.Router();
 
@@ -67,7 +67,7 @@ router.use("/auth", authRoutes);
 
 
 
-module.exports = router;
+export default router;
 
 
 

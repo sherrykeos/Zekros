@@ -1,7 +1,8 @@
-const registerConnectionEvents = require("./events/connectionEvents");
-const registerRoomEvents = require("./events/roomEvents");
-const registerGameEvents = require("./events/gameEvents");
-const socketAuth = require("./middleware/socketAuth");
+import { Server } from "socket.io";
+import registerConnectionEvents from "./events/connectionEvents.js";
+import registerRoomEvents from "./events/roomEvents.js";
+import registerGameEvents from "./events/gameEvents.js";
+import socketAuth from "./middleware/socketAuth.js";
 
 /**
  * Initializes Socket.IO alongside the existing HTTP server.
@@ -10,7 +11,6 @@ const socketAuth = require("./middleware/socketAuth");
  * @returns {import("socket.io").Server} Configured Socket.IO server instance.
  */
 function initializeSocket(httpServer) {
-  const { Server } = require("socket.io");
   const io = new Server(httpServer, {
     cors: {
       origin: "*",
@@ -29,4 +29,4 @@ function initializeSocket(httpServer) {
   return io;
 }
 
-module.exports = initializeSocket;
+export default initializeSocket;

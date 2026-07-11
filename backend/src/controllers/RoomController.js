@@ -1,4 +1,4 @@
-const RoomManager = require('../managers/RoomManager');
+import RoomManager from "../managers/RoomManager.js";
 
 /**
  * Handles room-related requests.
@@ -166,4 +166,4 @@ class RoomController {
     }
 }
 
-module.exports = RoomController;
+export default RoomController;

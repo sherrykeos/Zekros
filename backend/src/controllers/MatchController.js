@@ -1,4 +1,4 @@
-const MatchManager = require('../../managers/MatchManager');
+import MatchManager from "../managers/MatchManager.js";
 
 /**
  * Handles match-related requests.
@@ -89,4 +89,4 @@ class MatchController {
     }
 }
 
-module.exports = MatchController;
+export default MatchController;

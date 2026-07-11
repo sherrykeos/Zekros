@@ -58,4 +58,4 @@
   }
 }
 
-module.exports = NBot;
+export default NBot;

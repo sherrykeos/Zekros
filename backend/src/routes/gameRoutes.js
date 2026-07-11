@@ -1,5 +1,5 @@
-const express = require('express');
-const GameController = require('../controllers/GameController');
+import express from "express";
+import GameController from "../controllers/GameController.js";
 
 const router = express.Router();
 
@@ -12,4 +12,4 @@ router.get('/:matchId/state', GameController.getGameState);
 // POST /games/:matchId/reset
 router.post('/:matchId/reset', GameController.resetGame);
 
-module.exports = router;
+export default router;

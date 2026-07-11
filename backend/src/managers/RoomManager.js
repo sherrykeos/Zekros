@@ -1,10 +1,10 @@
-const Room = require("../entities/Room");
-const Player = require("../entities/Player");
-const matchManagerInstance = require("./MatchManager");
-const BotService = require("../services/BotService");
-const generateId = require("../utils/id");
-const generateRoomCode = require("../utils/generateRoomCode");
-const { success, failure } = require("../utils/managerResponse");
+import Room from "../entities/Room.js";
+import Player from "../entities/Player.js";
+import matchManagerInstance from "./MatchManager.js";
+import BotService from "../services/BotService.js";
+import generateId from "../utils/id.js";
+import generateRoomCode from "../utils/generateRoomCode.js";
+import { success, failure } from "../utils/managerResponse.js";
 
 const ROOM_MANAGER_ERRORS = Object.freeze({
   ROOM_NOT_FOUND: "ROOM_NOT_FOUND",
@@ -371,6 +371,6 @@ class RoomManager {
 RoomManager.ERRORS = ROOM_MANAGER_ERRORS;
 
 const roomManagerInstance = new RoomManager();
-module.exports = roomManagerInstance;
+export default roomManagerInstance;
 
 

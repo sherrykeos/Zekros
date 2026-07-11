@@ -1,5 +1,5 @@
-const { verifyAccessToken } = require("../services/jwt.service");
-const { findUserById } = require("../auth/auth.repository");
+import { verifyAccessToken } from "../services/jwt.service.js";
+import { findUserById } from "../auth/auth.repository.js";
 
 async function authenticate(req, res, next) {
   try {
@@ -36,4 +36,4 @@ async function authenticate(req, res, next) {
   }
 }
 
-module.exports = authenticate;
+export default authenticate;

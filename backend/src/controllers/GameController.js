@@ -1,6 +1,6 @@
-const GameManager = require('../managers/GameManager');
-const MatchManager = require('../managers/MatchManager');
-const RoomManager = require('../managers/RoomManager');
+import GameManager from "../managers/GameManager.js";
+import MatchManager from "../managers/MatchManager.js";
+import RoomManager from "../managers/RoomManager.js";
 
 class GameController {
     static async makeMove(req, res, next) {
@@ -68,4 +68,4 @@ class GameController {
     }
 }
 
-module.exports = GameController;
+export default GameController;

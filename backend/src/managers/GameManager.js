@@ -1,5 +1,5 @@
-const GameEngine = require("../src/Engine/GameEngine");
-const { success, failure } = require("../utils/managerResponse");
+import GameEngine from "../Engine/GameEngine.js";
+import { success, failure } from "../utils/managerResponse.js";
 
 const GAME_MANAGER_ERRORS = Object.freeze({
   INVALID_MATCH_ID: "GAME_INVALID_MATCH_ID",
@@ -137,5 +137,5 @@ class GameManager {
 GameManager.ERRORS = GAME_MANAGER_ERRORS;
 
 const gameManagerInstance = new GameManager();
-module.exports = gameManagerInstance;
+export default gameManagerInstance;
 

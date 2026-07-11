@@ -1,4 +1,4 @@
-const { z } = require("zod");
+import { z } from "zod";
 
 const emailSchema = z
   .email("Invalid email address")
@@ -56,7 +56,7 @@ const resetPasswordSchema = z.object({
 
 
 
-module.exports = {
+export {
   registerSchema,
   loginSchema,
   resendVerificationSchema,

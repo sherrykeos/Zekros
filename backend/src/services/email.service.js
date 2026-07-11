@@ -1,5 +1,5 @@
-const { BrevoClient } = require("@getbrevo/brevo");
-const { app } = require("../config/app.config");
+import { BrevoClient } from "@getbrevo/brevo";
+import { app } from "../config/app.config.js";
 
 const brevo = new BrevoClient({
   apiKey: process.env.BREVO_API_KEY,
@@ -33,6 +33,6 @@ async function sendEmail({ to, subject, html }) {
   }
 }
 
-module.exports = {
+export {
   sendEmail,
 };

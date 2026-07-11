@@ -1,4 +1,4 @@
-const crypto = require("crypto");
+import crypto from "crypto";
 
 const DEFAULT_ROOM_CODE_LENGTH = 7;
 const ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -24,4 +24,4 @@ function generateRoomCode(length = DEFAULT_ROOM_CODE_LENGTH) {
 generateRoomCode.DEFAULT_LENGTH = DEFAULT_ROOM_CODE_LENGTH;
 generateRoomCode.ALPHABET = ROOM_CODE_ALPHABET;
 
-module.exports = generateRoomCode;
+export default generateRoomCode;

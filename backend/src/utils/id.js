@@ -1,4 +1,4 @@
-const crypto = require("crypto");
+import crypto from "crypto";
 
 /**
  * Generates compact, non-sequential IDs suitable for in-memory entities now and
@@ -11,4 +11,4 @@ function generateId(prefix = "id") {
   return `${prefix}_${Date.now().toString(36)}_${crypto.randomBytes(6).toString("hex")}`;
 }
 
-module.exports = generateId;
+export default generateId;

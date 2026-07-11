@@ -1,6 +1,6 @@
-const brain = require("./brain");
-const planMoves = require("./planner");
-const config = require("./config");
+import brain from "./brain.js";
+import planMoves from "./planner.js";
+import config from "./config.js";
 
 class PBot {
   constructor(options = {}) {
@@ -52,4 +52,4 @@ class PBot {
   }
 }
 
-module.exports = PBot;
+export default PBot;

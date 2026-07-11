@@ -45,4 +45,4 @@ const validateRequest = (validator) => {
     };
 };
 
-module.exports = validateRequest;
+export default validateRequest;

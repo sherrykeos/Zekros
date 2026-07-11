@@ -1,4 +1,4 @@
-const generateId = require("../utils/id");
+import generateId from "../utils/id.js";
 
 const PLAYER_TYPE = Object.freeze({
   HUMAN: "HUMAN",
@@ -116,4 +116,4 @@ class Player {
 Player.TYPE = PLAYER_TYPE;
 Player.STATUS = PLAYER_STATUS;
 
-module.exports = Player;
+export default Player;

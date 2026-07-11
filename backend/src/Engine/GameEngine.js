@@ -1,5 +1,5 @@
-const Board = require("./board");
-const Rules = require("./rules");
+import Board from "./board.js";
+import Rules from "./rules.js";
 
 class GameEngine {
   static normalizeConfig(config) {
@@ -230,4 +230,4 @@ class GameEngine {
   }
 }
 
-module.exports = GameEngine;
+export default GameEngine;

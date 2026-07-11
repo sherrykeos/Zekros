@@ -1,6 +1,6 @@
-const { BrevoClient } = require("@getbrevo/brevo");
-const { app } = require("../config/app.config");
-const auth = require("../config/auth.config");
+import { BrevoClient } from "@getbrevo/brevo";
+import { app } from "../config/app.config.js";
+import auth from "../config/auth.config.js";
 
 const brevo = new BrevoClient({
   apiKey: process.env.BREVO_API_KEY,
@@ -53,6 +53,6 @@ async function sendVerificationEmail(email, username, token) {
   });
 }
 
-module.exports = {
+export {
   sendVerificationEmail,
 };

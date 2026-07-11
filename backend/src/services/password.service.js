@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 
 const SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUNDS) || 12; //how hard the password will be hashed.
 
@@ -16,7 +16,7 @@ async function comparePassword(password, hashedPassword) {
   return bcrypt.compare(password, hashedPassword);
 }
 
-module.exports = {
+export {
   hashPassword,
   comparePassword,
 };

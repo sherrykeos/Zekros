@@ -1,8 +1,8 @@
-const Match = require("../src/entities/Match");
-const gameManagerInstance = require("./GameManager");
-const BotService = require("../services/BotService");
-const generateId = require("../utils/id");
-const { success, failure } = require("../utils/managerResponse");
+import Match from "../entities/Match.js";
+import gameManagerInstance from "./GameManager.js";
+import BotService from "../services/BotService.js";
+import generateId from "../utils/id.js";
+import { success, failure } from "../utils/managerResponse.js";
 
 const MATCH_MANAGER_ERRORS = Object.freeze({
   INVALID_CONFIG: "MATCH_INVALID_CONFIG",
@@ -263,4 +263,4 @@ class MatchManager {
 MatchManager.ERRORS = MATCH_MANAGER_ERRORS;
 
 const matchManagerInstance = new MatchManager();
-module.exports = matchManagerInstance;
+export default matchManagerInstance;

@@ -1,4 +1,4 @@
-const crypto = require("crypto");
+import crypto from "crypto";
 
 /**
  * Generate a secure random token.
@@ -17,7 +17,7 @@ function hashToken(token) {
     .digest("hex");
 }
 
-module.exports = {
+export {
   generateToken,
   hashToken,
 };

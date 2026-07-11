@@ -8,4 +8,4 @@ function socketAuth(socket, next) {
   next();
 }
 
-module.exports = socketAuth;
+export default socketAuth;

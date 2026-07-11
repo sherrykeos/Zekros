@@ -1,4 +1,4 @@
-const prisma = require("../lib/prisma");
+import prisma from "../lib/prisma.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Users                                    */
@@ -219,7 +219,7 @@ async function linkGoogleAccount(userId, providerId, avatar) {
 }
 /* -------------------------------------------------------------------------- */
 
-module.exports = {
+export {
   // Users
   findUserById,
   findUserByEmail,
@@ -253,70 +253,3 @@ module.exports = {
   createGoogleUser,
   linkGoogleAccount,
 };
-
-
-// const prisma = require("../lib/prisma");
-
-// async function findByEmail(email) {
-//   return prisma.user.findUnique({
-//     where: { email },
-//   });
-// }
-
-// async function findByUsername(username) {
-//   return prisma.user.findUnique({
-//     where: { username },
-//   });
-// }
-
-// async function findById(id) {
-//   return prisma.user.findUnique({
-//     where: { id },
-//   });
-// }
-
-// async function createUser(userData) {
-//   return prisma.user.create({
-//     data: userData,
-//   });
-// }
-
-// async function saveVerificationToken(userId, tokenHash, expiry) {
-//   return prisma.user.update({
-//     where: { id: userId },
-//     data: {
-//       verificationToken: tokenHash,
-//       verificationExpiry: expiry,
-//     },
-//   });
-// }
-
-// async function findByVerificationToken(tokenHash) {
-//   return prisma.user.findFirst({
-//     where: {
-//       verificationToken: tokenHash,
-//     },
-//   });
-// }
-
-// async function markEmailVerified(userId) {
-//   return prisma.user.update({
-//     where: { id: userId },
-//     data: {
-//       isEmailVerified: true,
-//       emailVerifiedAt: new Date(),
-//       verificationToken: null,
-//       verificationExpiry: null,
-//     },
-//   });
-// }
-
-// module.exports = {
-//   findByEmail,
-//   findByUsername,
-//   findById,
-//   createUser,
-//   saveVerificationToken,
-//   findByVerificationToken,
-//   markEmailVerified,
-// };

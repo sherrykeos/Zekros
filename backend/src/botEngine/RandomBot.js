@@ -1,4 +1,4 @@
-const GameEngine = require("../Engine/GameEngine");
+import GameEngine from "../Engine/GameEngine.js";
 
 class RandomBot {
   getMove(gameState) {
@@ -15,4 +15,4 @@ class RandomBot {
   }
 }
 
-module.exports = RandomBot;
+export default RandomBot;

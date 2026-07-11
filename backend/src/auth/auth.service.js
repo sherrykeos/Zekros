@@ -1,4 +1,4 @@
-const {
+import {
   findUserByEmail,
   findUserByUsername,
   createUser,
@@ -19,27 +19,27 @@ const {
   createGoogleUser,
   linkGoogleAccount,
   findUserById,
-} = require("./auth.repository");
+} from "./auth.repository.js";
 
-const { createId } = require("@paralleldrive/cuid2");
+import { createId } from "@paralleldrive/cuid2";
 
-const {
+import {
   hashPassword,
   comparePassword,
-} = require("../services/password.service");
-const { generateToken, hashToken } = require("../services/token.service");
-const { sendEmail } = require("../services/email.service");
-const {
+} from "../services/password.service.js";
+import { generateToken, hashToken } from "../services/token.service.js";
+import { sendEmail } from "../services/email.service.js";
+import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
-} = require("../services/jwt.service");
-const { setRefreshTokenCookie } = require("../services/cookie.service");
-const { app } = require("../config/app.config");
-const auth = require("../config/auth.config");
+} from "../services/jwt.service.js";
+import { setRefreshTokenCookie } from "../services/cookie.service.js";
+import { app } from "../config/app.config.js";
+import auth from "../config/auth.config.js";
 
-const createVerificationEmail = require("../templates/email/verify-email");
-const createResetPasswordEmail = require("../templates/email/reset-password");
+import createVerificationEmail from "../templates/email/verify-email.js";
+import createResetPasswordEmail from "../templates/email/reset-password.js";
 
 
 
@@ -527,7 +527,7 @@ async function getCurrentUser(userId) {
   };
 }
 
-module.exports = {
+export {
   register,
   verifyEmail,
   login,
@@ -539,153 +539,3 @@ module.exports = {
   getCurrentUser,
 
 };
-
-// const { registerSchema, loginSchema, resendVerificationSchema } = require("./auth.validation");
-// const {
-//   findByEmail,
-//   findByUsername,
-//   createUser,
-//   saveVerificationToken,
-//   findByVerificationToken,
-//   markEmailVerified,
-// } = require("./user.repository");
-// const { hashPassword, comparePassword } = require("../services/password.service");
-// const { generateToken } = require("../services/jwt.service");
-// const { sendVerificationEmail } = require("../utils/email");
-// const crypto = require("crypto");
-
-// const VERIFICATION_TOKEN_BYTES = 32;
-// const VERIFICATION_EXPIRY_MINUTES = 30;
-
-// function createHttpError(message, statusCode = 400) {
-//   const error = new Error(message);
-//   error.statusCode = statusCode;
-//   return error;
-// }
-
-// function hashVerificationToken(token) {
-//   return crypto.createHash("sha256").update(token).digest("hex");
-// }
-
-// function createVerificationToken() {
-//   const token = crypto.randomBytes(VERIFICATION_TOKEN_BYTES).toString("hex");
-
-//   return {
-//     token,
-//     tokenHash: hashVerificationToken(token),
-//     expiresAt: new Date(Date.now() + VERIFICATION_EXPIRY_MINUTES * 60 * 1000),
-//   };
-// }
-
-// function publicUser(user) {
-//   return {
-//     id: user.id,
-//     username: user.username,
-//     email: user.email,
-//     isEmailVerified: user.isEmailVerified,
-//   };
-// }
-
-// async function issueVerificationEmail(user) {
-//   const verification = createVerificationToken();
-
-//   // Store only the hash so a database leak cannot be used to verify accounts.
-//   await saveVerificationToken(user.id, verification.tokenHash, verification.expiresAt);
-
-//   // Send the raw token once through email; the backend never persists it.
-//   await sendVerificationEmail(user.email, user.username, verification.token);
-// }
-
-// async function registerUser(userData) {
-//   const data = registerSchema.parse(userData);
-
-//   const existingEmail = await findByEmail(data.email);
-//   if (existingEmail) {
-//     throw createHttpError("Email already exists", 409);
-//   }
-
-//   const existingUsername = await findByUsername(data.username);
-//   if (existingUsername) {
-//     throw createHttpError("Username already exists", 409);
-//   }
-
-//   const user = await createUser({
-//     username: data.username,
-//     email: data.email,
-//     password: await hashPassword(data.password),
-//   });
-
-//   await issueVerificationEmail(user);
-
-//   return publicUser(user);
-// }
-
-// async function loginUser(credentials) {
-//   const data = loginSchema.parse(credentials);
-//   const user = await findByEmail(data.email);
-
-//   if (!user || !(await comparePassword(data.password, user.password))) {
-//     throw createHttpError("Invalid email or password.", 401);
-//   }
-
-//   if (!user.isEmailVerified) {
-//     throw createHttpError("Please verify your email before signing in.", 403);
-//   }
-
-//   const token = generateToken({
-//     sub: user.id,
-//     email: user.email,
-//     username: user.username,
-//   });
-
-//   return {
-//     token,
-//     user: publicUser(user),
-//   };
-// }
-
-// async function verifyEmail(token) {
-//   if (!token) {
-//     throw createHttpError("Verification token is missing.", 400);
-//   }
-
-//   const user = await findByVerificationToken(hashVerificationToken(token));
-
-//   if (!user || !user.verificationExpiry || user.verificationExpiry <= new Date()) {
-//     throw createHttpError("Invalid or expired verification link.", 400);
-//   }
-
-//   await markEmailVerified(user.id);
-
-//   return {
-//     success: true,
-//     message: "Email verified successfully.",
-//   };
-// }
-
-// async function resendVerificationEmail(payload) {
-//   const data = resendVerificationSchema.parse(payload);
-//   const user = await findByEmail(data.email);
-
-//   if (!user) {
-//     throw createHttpError("No account found for this email.", 404);
-//   }
-
-//   if (user.isEmailVerified) {
-//     throw createHttpError("This email address is already verified.", 409);
-//   }
-
-//   await issueVerificationEmail(user);
-
-//   return {
-//     success: true,
-//     message: "Verification email sent successfully.",
-//   };
-// }
-
-// module.exports = {
-//   registerUser,
-//   loginUser,
-//   verifyEmail,
-//   resendVerificationEmail,
-// };

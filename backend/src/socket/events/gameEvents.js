@@ -1,5 +1,5 @@
-const MatchManager = require("../../managers/MatchManager");
-const RoomManager = require("../../managers/RoomManager");
+import MatchManager from "../../managers/MatchManager.js";
+import RoomManager from "../../managers/RoomManager.js";
 
 const GAME_STATE_EVENT = "game-state";
 const GAME_ERROR_EVENT = "game-error";
@@ -312,4 +312,4 @@ function registerGameEvents(io, socket) {
   });
 }
 
-module.exports = registerGameEvents;
+export default registerGameEvents;

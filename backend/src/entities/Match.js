@@ -1,4 +1,4 @@
-const generateId = require("../utils/id");
+import generateId from "../utils/id.js";
 
 const MATCH_STATUS = Object.freeze({
   WAITING: "WAITING",
@@ -183,4 +183,4 @@ class Match {
 
 Match.STATUS = MATCH_STATUS;
 
-module.exports = Match;
+export default Match;

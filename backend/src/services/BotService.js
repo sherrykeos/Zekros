@@ -1,6 +1,6 @@
-const Player = require("../src/entities/Player");
-const NBot = require("../botEngine/NBot");
-const PBot = require("../botEngine/PBot");
+import Player from "../entities/Player.js";
+import NBot from "../botEngine/NBot.js";
+import PBot from "../botEngine/PBot/index.js";
 
 const GAME_MODES = Object.freeze({
   HUMAN_VS_HUMAN: "HUMAN_VS_HUMAN",
@@ -96,4 +96,4 @@ const botService = new BotService();
 botService.GAME_MODES = GAME_MODES;
 botService.BOT_SYMBOL = BOT_SYMBOL;
 
-module.exports = botService;
+export default botService;

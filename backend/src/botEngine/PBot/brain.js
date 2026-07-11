@@ -1,5 +1,5 @@
-const judge = require("./judge");
-const config = require("./config");
+import judge from "./judge.js";
+import config from "./config.js";
 
 function scoreWithDepth(score, depth) {
   if (score > config.DRAW_SCORE) {
@@ -85,4 +85,4 @@ function brain({ game, depth, alpha, beta, maximizing, botSymbol }) {
   return bestScore;
 }
 
-module.exports = brain;
+export default brain;

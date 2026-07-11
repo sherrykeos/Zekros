@@ -1,7 +1,7 @@
-const express = require('express');
-const roomRoutes = require('./roomRoutes');
-const matchRoutes = require('./matchRoutes');
-const gameRoutes = require('./gameRoutes');
+import express from "express";
+import roomRoutes from "../routes/roomRoutes.js";
+import matchRoutes from "../routes/matchRoutes.js";
+import gameRoutes from "../routes/gameRoutes.js";
 
 const router = express.Router();
 
@@ -10,4 +10,4 @@ router.use('/rooms', roomRoutes);
 router.use('/matches', matchRoutes);
 router.use('/games', gameRoutes);
 
-module.exports = router;
+export default router;

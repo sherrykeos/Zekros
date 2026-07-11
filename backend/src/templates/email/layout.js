@@ -1,4 +1,4 @@
-const { app } = require("../../config/app.config");
+import { app } from "../../config/app.config.js";
 
 function emailLayout({
   title,
@@ -183,4 +183,4 @@ text-align:center;
 `;
 }
 
-module.exports = emailLayout;
+export default emailLayout;

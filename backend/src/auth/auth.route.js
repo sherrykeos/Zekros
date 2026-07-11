@@ -1,15 +1,8 @@
-// const {
-//   register,
-//   login,
-//   verify,
-//   resendVerification,
-// } = require("./auth.controller");
-
-const express = require("express");
-const authController = require("./auth.controller");
-const passport = require("passport");
-const authenticate = require("./auth.middleware");
-const { app } = require("../config/app.config");
+import express from "express";
+import * as authController from "./auth.controller.js";
+import passport from "passport";
+import authenticate from "./auth.middleware.js";
+import { app } from "../config/app.config.js";
 
 const router = express.Router();
 
@@ -42,4 +35,4 @@ router.get(
 router.get("/me", authenticate, authController.me);
 // router.post("/resend-verification", authController.resendVerification);
 
-module.exports = router;
+export default router;

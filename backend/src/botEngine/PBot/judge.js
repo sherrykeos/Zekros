@@ -24,4 +24,4 @@ function judge(game, botSymbol) {
     return -10;
 }
 
-module.exports = judge;
+export default judge;

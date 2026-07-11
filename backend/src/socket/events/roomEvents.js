@@ -1,5 +1,5 @@
-const RoomManager = require("../../managers/RoomManager");
-const connectionEvents = require("./connectionEvents");
+import RoomManager from "../../managers/RoomManager.js";
+import connectionEvents from "./connectionEvents.js";
 
 const ROOM_UPDATE_EVENT = "room-updated";
 const ROOM_ERROR_EVENT = "room-error";
@@ -229,4 +229,4 @@ function registerRoomEvents(io, socket) {
   });
 }
 
-module.exports = registerRoomEvents;
+export default registerRoomEvents;

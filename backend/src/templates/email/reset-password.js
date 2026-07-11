@@ -1,6 +1,6 @@
-const emailLayout = require("./layout");
-const { app } = require("../../config/app.config");
-const auth = require("../../config/auth.config");
+import emailLayout from "./layout.js";
+import { app } from "../../config/app.config.js";
+import auth from "../../config/auth.config.js";
 
 function createResetPasswordEmail({
   username,
@@ -44,4 +44,4 @@ function createResetPasswordEmail({
   });
 }
 
-module.exports = createResetPasswordEmail;
+export default createResetPasswordEmail;

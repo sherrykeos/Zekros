@@ -1,4 +1,4 @@
-const config = require("./config");
+import config from "./config.js";
 
 function getOpponentSymbol(game, botSymbol) {
   return Object.keys(game.players).find((symbol) => symbol !== botSymbol) ?? null;
@@ -99,4 +99,4 @@ function planMoves(game, botSymbol) {
     .map(({ move }) => move);
 }
 
-module.exports = planMoves;
+export default planMoves;

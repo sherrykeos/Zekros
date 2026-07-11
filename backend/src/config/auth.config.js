@@ -1,4 +1,4 @@
-module.exports = {
+const auth = {
   verificationToken: {
     expiresInMinutes: 30,
     bytes: 32,
@@ -21,3 +21,5 @@ module.exports = {
     expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
   },
 };
+
+export default auth;

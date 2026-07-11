@@ -1,4 +1,4 @@
-const Player = require("./Player");
+import Player from "./Player.js";
 
 const ROOM_STATUS = Object.freeze({
   WAITING: "WAITING",
@@ -287,4 +287,4 @@ class Room {
 Room.STATUS = ROOM_STATUS;
 Room.DEFAULT_SETTINGS = DEFAULT_SETTINGS;
 
-module.exports = Room;
+export default Room;

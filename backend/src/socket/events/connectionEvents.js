@@ -1,5 +1,5 @@
-const RoomManager = require("../../managers/RoomManager");
-const Player = require("../../entities/Player");
+import RoomManager from "../../managers/RoomManager.js";
+import Player from "../../entities/Player.js";
 
 const DEFAULT_CLEANUP_GRACE_MS = 30000;
 const cleanupGraceMs = Number(process.env.SOCKET_CLEANUP_GRACE_MS ?? DEFAULT_CLEANUP_GRACE_MS);
@@ -370,4 +370,4 @@ registerConnectionEvents.scheduleRoomCleanup = scheduleRoomCleanup;
 registerConnectionEvents.cleanupRoomIfEmpty = cleanupRoomIfEmpty;
 registerConnectionEvents.isSocketConnected = isSocketConnected;
 
-module.exports = registerConnectionEvents;
+export default registerConnectionEvents;
