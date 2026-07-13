@@ -6,8 +6,11 @@ const router = express.Router();
 // GET /matches/:matchId
 router.get('/:matchId', MatchController.getMatch);
 
-// POST /matches/:matchId/restart
-router.post('/:matchId/restart', MatchController.restartMatch);
+// POST /matches/:matchId/rematch
+router.post('/:matchId/rematch', MatchController.createRematch);
+
+// Compatibility alias: restart now creates a rematch instead of reusing a Match.
+router.post('/:matchId/restart', MatchController.createRematch);
 
 // GET /matches/:matchId/history
 router.get('/:matchId/history', MatchController.getHistory);

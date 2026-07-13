@@ -1,5 +1,4 @@
 import GameManager from "../managers/GameManager.js";
-import MatchManager from "../managers/MatchManager.js";
 import RoomManager from "../managers/RoomManager.js";
 
 class GameController {
@@ -38,12 +37,12 @@ class GameController {
     static async resetGame(req, res, next) {
         try {
             const { matchId } = req.params;
-            const result = MatchManager.restartMatch(matchId);
+            const result = await RoomManager.createRematch(matchId);
 
             if (result.success) {
                 res.status(200).json(result);
             } else {
-                const statusCode = result.error.code === 'MATCH_NOT_FOUND' || result.error.code === 'GAME_NOT_FOUND' ? 404 : 400;
+                const statusCode = result.error.code === 'MATCH_NOT_FOUND' || result.error.code === 'ROOM_NOT_FOUND' ? 404 : 400;
                 res.status(statusCode).json(result);
             }
         } catch (error) {

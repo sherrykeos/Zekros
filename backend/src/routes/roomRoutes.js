@@ -21,6 +21,9 @@ router.post('/:roomId/start', RoomController.startMatch);
 // POST /rooms/:roomId/end
 router.post('/:roomId/end', RoomController.endMatch);
 
+// POST /rooms/:roomId/rematch
+router.post('/:roomId/rematch', RoomController.createRematch);
+
 // DELETE /rooms/:roomId
 router.delete('/:roomId', RoomController.closeRoom);
 

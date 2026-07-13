@@ -161,24 +161,30 @@ class MatchManager {
     return success(match);
   }
 
-  restartMatch(matchId, config = null, metadata = null) {
+
+  async createRematch(matchId, { metadata = null } = {}) {
     const matchResponse = this.getMatch(matchId);
 
     if (!matchResponse.success) {
       return matchResponse;
     }
 
-    const match = matchResponse.data;
-    const nextConfig = config ?? match.config;
-    const gameResponse = this.gameManager.resetGame(matchId, nextConfig);
+    const previousMatch = matchResponse.data;
 
-    if (!gameResponse.success) {
-      return gameResponse;
-    }
+    return this.createMatch({
+      config: { ...previousMatch.config },
+      metadata: this.createRematchMetadata(previousMatch, metadata),
+    });
+  }
 
-    match.reset(gameResponse.data, metadata);
+  createRematchMetadata(previousMatch, metadataOverride = null) {
+    const sourceMetadata = metadataOverride ?? previousMatch.metadata ?? {};
 
-    return success(match);
+    return {
+      ...previousMatch.clone(sourceMetadata),
+      previousMatchId: previousMatch.id,
+      rematchOf: sourceMetadata.rematchOf ?? previousMatch.metadata?.rematchOf ?? previousMatch.id,
+    };
   }
 
   async getHistory(matchId) {

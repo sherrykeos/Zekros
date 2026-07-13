@@ -164,6 +164,25 @@ class RoomController {
             next(error);
         }
     }
+
+    /**
+     * Creates a new match for the same room and keeps prior matches immutable.
+     */
+    static async createRematch(req, res, next) {
+        try {
+            const { roomId } = req.params;
+            const result = await RoomManager.createRematchForRoom(roomId);
+
+            if (result.success) {
+                res.status(200).json(result);
+            } else {
+                const statusCode = result.error.code === 'ROOM_NOT_FOUND' ? 404 : 400;
+                res.status(statusCode).json(result);
+            }
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default RoomController;

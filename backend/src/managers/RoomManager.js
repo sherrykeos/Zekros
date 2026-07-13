@@ -319,6 +319,85 @@ class RoomManager {
     return success(matchResponse.data);
   }
 
+  async createRematch(matchId) {
+    const room = this.findRoomByMatchId(matchId);
+
+    if (!room) {
+      return failure(ROOM_MANAGER_ERRORS.ROOM_NOT_FOUND, "Room not found for this match.");
+    }
+
+    const previousMatchResponse = this.matchManager.getMatch(matchId);
+
+    if (!previousMatchResponse.success) {
+      return previousMatchResponse;
+    }
+
+    const previousMatch = previousMatchResponse.data;
+
+    if (!this.canCreateRematch(previousMatch)) {
+      return failure(ROOM_MANAGER_ERRORS.MATCH_ALREADY_RUNNING, "Cannot create a rematch while the match is still in progress.");
+    }
+
+    const roomSnapshot = this.captureRoomSnapshot(room);
+    const metadata = this.createRematchMetadata(room, previousMatch);
+
+    let rematchResponse;
+
+    try {
+      rematchResponse = await this.matchManager.createRematch(matchId, { metadata });
+    } catch (error) {
+      this.restoreRoomSnapshot(room, roomSnapshot);
+      throw error;
+    }
+
+    if (!rematchResponse.success) {
+      this.restoreRoomSnapshot(room, roomSnapshot);
+      return rematchResponse;
+    }
+
+    room.setCurrentMatch(rematchResponse.data);
+
+    for (const player of room.players) {
+      player.setStatus(Player.STATUS.PLAYING);
+    }
+
+    return success(rematchResponse.data);
+  }
+
+  async createRematchForRoom(roomCode) {
+    const room = this.findRoom(roomCode);
+
+    if (!room) {
+      return failure(ROOM_MANAGER_ERRORS.ROOM_NOT_FOUND, "Room not found.");
+    }
+
+    const previousMatchId = room.currentMatch?.id ?? room.matches[room.matches.length - 1]?.id;
+
+    if (!previousMatchId) {
+      return failure(ROOM_MANAGER_ERRORS.MATCH_NOT_RUNNING, "Room has no match to rematch.");
+    }
+
+    return this.createRematch(previousMatchId);
+  }
+
+  async rematch(roomCode) {
+    return this.createRematchForRoom(roomCode);
+  }
+
+  canCreateRematch(match) {
+    return match.status === "FINISHED" || match.game.isGameOver();
+  }
+
+
+  createRematchMetadata(room, previousMatch) {
+    return {
+      ...previousMatch.clone(previousMatch.metadata),
+      roomCode: room.code,
+      gameMode: room.metadata?.gameMode ?? previousMatch.metadata?.gameMode,
+      participants: room.players.map((player) => player.toJSON()),
+    };
+  }
+
   ensureBotPlayer(room, gameMode) {
     const existingBot = this.botService.getBotParticipant(room.players);
 

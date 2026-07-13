@@ -111,27 +111,6 @@ class GameManager {
     return success(game.getState());
   }
 
-  /**
-   * Replaces a match's GameEngine with a fresh instance.
-   *
-   * @param {string} matchId Match id.
-   * @param {object} config GameEngine configuration.
-   * @returns {object} Standard manager response containing the fresh GameEngine.
-   */
-  resetGame(matchId, config) {
-    if (!this.games.has(matchId)) {
-      return failure(GAME_MANAGER_ERRORS.GAME_NOT_FOUND, "Game not found.");
-    }
-
-    if (!config) {
-      return failure(GAME_MANAGER_ERRORS.INVALID_CONFIG, "Game configuration is required.");
-    }
-
-    const game = new GameEngine(config);
-    this.games.set(matchId, game);
-
-    return success(game);
-  }
 }
 
 GameManager.ERRORS = GAME_MANAGER_ERRORS;

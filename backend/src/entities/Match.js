@@ -67,23 +67,6 @@ class Match {
     this.endedAt = new Date().toISOString();
   }
 
-  reset(game, metadata = null) {
-    if (!game) {
-      throw new Error("Match.reset requires a GameEngine instance created by GameManager.");
-    }
-
-    this.game = game;
-    this.config = { ...this.game.config };
-    this.moveHistory = [];
-    this.winner = null;
-    this.status = MATCH_STATUS.PLAYING;
-    this.startedAt = new Date().toISOString();
-    this.endedAt = null;
-
-    if (metadata) {
-      this.metadata = this.clone(metadata);
-    }
-  }
 
   getState() {
     return {

@@ -272,7 +272,7 @@ function handleGameOver(io, socket, payload = {}, acknowledge) {
 }
 
 /**
- * Handles resetting an existing match for a rematch.
+ * Handles creating a new active match for the same room.
  *
  * @param {import("socket.io").Server} io Socket.IO server instance.
  * @param {import("socket.io").Socket} socket Requesting socket.
@@ -280,14 +280,17 @@ function handleGameOver(io, socket, payload = {}, acknowledge) {
  * @param {Function|undefined} acknowledge Optional acknowledgement callback.
  */
 async function handleRematch(io, socket, payload = {}, acknowledge) {
-  const result = MatchManager.restartMatch(payload.matchId, payload.config, payload.metadata);
+  const roomCodeFromPayload = getRoomCode(payload);
+  const result = roomCodeFromPayload
+    ? await RoomManager.createRematchForRoom(roomCodeFromPayload)
+    : await RoomManager.createRematch(payload.matchId);
 
   if (!result.success) {
     emitEventError(socket, "rematch", result, acknowledge);
     return;
   }
 
-  const roomCode = getRoomCode(payload) ?? result.data.metadata?.roomCode ?? findRoomByMatchId(payload.matchId)?.code;
+  const roomCode = result.data.metadata?.roomCode ?? roomCodeFromPayload ?? findRoomByMatchId(result.data.id)?.code;
   const response = successResponse(
     createGameState({
       match: result.data,

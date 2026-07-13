@@ -1,4 +1,5 @@
 import MatchManager from "../managers/MatchManager.js";
+import RoomManager from "../managers/RoomManager.js";
 
 /**
  * Handles match-related requests.
@@ -26,20 +27,20 @@ class MatchController {
     }
 
     /**
-     * Restarts a match.
+     * Creates a new match in the same room without mutating prior history.
      * @param {import('express').Request} req - The Express request object.
      * @param {import('express').Response} res - The Express response object.
      * @param {import('express').NextFunction} next - The Express next middleware function.
      */
-    static async restartMatch(req, res, next) {
+    static async createRematch(req, res, next) {
         try {
             const { matchId } = req.params;
-            const result = await MatchManager.restartMatch(matchId);
+            const result = await RoomManager.createRematch(matchId);
 
             if (result.success) {
                 res.status(200).json(result);
             } else {
-                const statusCode = result.error.code === 'NOT_FOUND' ? 404 : 400;
+                const statusCode = result.error.code === 'ROOM_NOT_FOUND' || result.error.code === 'MATCH_NOT_FOUND' ? 404 : 400;
                 res.status(statusCode).json(result);
             }
         } catch (error) {
