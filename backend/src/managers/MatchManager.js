@@ -1,6 +1,7 @@
 import Match from "../entities/Match.js";
 import gameManagerInstance from "./GameManager.js";
 import BotService from "../services/BotService.js";
+import * as MatchService from "../services/match.service.js";
 import generateId from "../utils/id.js";
 import { success, failure } from "../utils/managerResponse.js";
 
@@ -16,19 +17,30 @@ const MATCH_MANAGER_ERRORS = Object.freeze({
 });
 
 class MatchManager {
-  constructor({ gameManager = gameManagerInstance, botService = BotService } = {}) {
+  constructor({
+    gameManager = gameManagerInstance,
+    botService = BotService,
+    matchService = MatchService,
+  } = {}) {
     this.gameManager = gameManager;
     this.botService = botService;
+    this.matchService = matchService;
     this.matches = new Map();
   }
 
-  createMatch({ id = generateId("match"), config, metadata = {} } = {}) {
+  async createMatch({ id = generateId("match"), config, metadata = {} } = {}) {
     if (!config) {
-      return failure(MATCH_MANAGER_ERRORS.INVALID_CONFIG, "Game configuration is required to create a match.");
+      return failure(
+        MATCH_MANAGER_ERRORS.INVALID_CONFIG,
+        "Game configuration is required to create a match.",
+      );
     }
 
     if (this.matches.has(id)) {
-      return failure(MATCH_MANAGER_ERRORS.MATCH_EXISTS, "A match already exists with this id.");
+      return failure(
+        MATCH_MANAGER_ERRORS.MATCH_EXISTS,
+        "A match already exists with this id.",
+      );
     }
 
     const gameResponse = this.gameManager.createGame(id, config);
@@ -39,6 +51,14 @@ class MatchManager {
 
     const match = new Match({ id, game: gameResponse.data, metadata });
     this.matches.set(id, match);
+
+    try {
+      await this.matchService.persistMatch(match);
+    } catch (error) {
+      this.matches.delete(id);
+      this.gameManager.deleteGame(id);
+      throw error;
+    }
 
     return success(match);
   }
@@ -68,7 +88,10 @@ class MatchManager {
     return success(true);
   }
 
-  makeMove(matchId, { playerId, move, allowBot = true, metadata = {} } = {}) {
+  async makeMove(
+    matchId,
+    { playerId, move, allowBot = true, metadata = {} } = {},
+  ) {
     const matchResponse = this.getMatch(matchId);
 
     if (!matchResponse.success) {
@@ -78,7 +101,10 @@ class MatchManager {
     const match = matchResponse.data;
 
     if (match.status === Match.STATUS.FINISHED || match.game.isGameOver()) {
-      return failure(MATCH_MANAGER_ERRORS.MATCH_FINISHED, "Match is already finished.");
+      return failure(
+        MATCH_MANAGER_ERRORS.MATCH_FINISHED,
+        "Match is already finished.",
+      );
     }
 
     const turnValidation = this.validateParticipantTurn(match, playerId);
@@ -88,7 +114,7 @@ class MatchManager {
     }
 
     const appliedMoves = [];
-    const humanMoveResponse = this.applyMove(match, move, {
+    const humanMoveResponse = await this.applyAndPersistMove(match, move, {
       ...metadata,
       playerId,
       source: "HUMAN",
@@ -101,7 +127,7 @@ class MatchManager {
     appliedMoves.push(humanMoveResponse.data);
 
     if (allowBot) {
-      const botResponse = this.executeBotTurns(match);
+      const botResponse = await this.executeBotTurns(match);
 
       if (!botResponse.success) {
         return botResponse;
@@ -113,7 +139,7 @@ class MatchManager {
     return success(this.createMoveResponse(match, appliedMoves));
   }
 
-  finishMatch(matchId, winner = null) {
+  async finishMatch(matchId, winner = null) {
     const matchResponse = this.getMatch(matchId);
 
     if (!matchResponse.success) {
@@ -121,7 +147,16 @@ class MatchManager {
     }
 
     const match = matchResponse.data;
+    const snapshot = this.captureRuntimeSnapshot(match);
+
     match.finish(winner ?? match.game.getWinner());
+
+    try {
+      await this.matchService.completeMatch(match);
+    } catch (error) {
+      this.restoreRuntimeSnapshot(match, snapshot);
+      throw error;
+    }
 
     return success(match);
   }
@@ -146,24 +181,24 @@ class MatchManager {
     return success(match);
   }
 
-  getHistory(matchId) {
-    const matchResponse = this.getMatch(matchId);
+  async getHistory(matchId) {
+    const history = await this.matchService.getHistory(matchId);
 
-    if (!matchResponse.success) {
-      return matchResponse;
+    if (!history) {
+      return failure(MATCH_MANAGER_ERRORS.MATCH_NOT_FOUND, "Match not found.");
     }
 
-    return success(matchResponse.data.getHistory());
+    return success(history);
   }
 
-  getReplayData(matchId) {
-    const matchResponse = this.getMatch(matchId);
+  async getReplayData(matchId) {
+    const replay = await this.matchService.getReplay(matchId);
 
-    if (!matchResponse.success) {
-      return matchResponse;
+    if (!replay) {
+      return failure(MATCH_MANAGER_ERRORS.MATCH_NOT_FOUND, "Match not found.");
     }
 
-    return success(matchResponse.data.getReplayData());
+    return success(replay);
   }
 
   validateParticipantTurn(match, playerId) {
@@ -176,14 +211,38 @@ class MatchManager {
     const participant = participants.find((entry) => entry.id === playerId);
 
     if (!participant) {
-      return failure(MATCH_MANAGER_ERRORS.PLAYER_NOT_IN_MATCH, "Player is not part of this match.");
+      return failure(
+        MATCH_MANAGER_ERRORS.PLAYER_NOT_IN_MATCH,
+        "Player is not part of this match.",
+      );
     }
 
     if (participant.symbol !== match.game.currentTurn) {
-      return failure(MATCH_MANAGER_ERRORS.NOT_PLAYER_TURN, "It's not your turn.");
+      return failure(
+        MATCH_MANAGER_ERRORS.NOT_PLAYER_TURN,
+        "It's not your turn.",
+      );
     }
 
     return success(true);
+  }
+
+  async applyAndPersistMove(match, move, metadata) {
+    const snapshot = this.captureRuntimeSnapshot(match);
+    const moveResponse = this.applyMove(match, move, metadata);
+
+    if (!moveResponse.success) {
+      return moveResponse;
+    }
+
+    try {
+      await this.matchService.persistMove(match, moveResponse.data);
+    } catch (error) {
+      this.restoreRuntimeSnapshot(match, snapshot);
+      throw error;
+    }
+
+    return moveResponse;
   }
 
   applyMove(match, move, metadata) {
@@ -191,13 +250,16 @@ class MatchManager {
     const moveResult = match.makeMove(move, metadata);
 
     if (!moveResult.success) {
-      return failure(MATCH_MANAGER_ERRORS.INVALID_MOVE, moveResult.message ?? "Invalid move.");
+      return failure(
+        MATCH_MANAGER_ERRORS.INVALID_MOVE,
+        moveResult.message ?? "Invalid move.",
+      );
     }
 
     return success(match.moveHistory[historyLengthBefore]);
   }
 
-  executeBotTurns(match) {
+  async executeBotTurns(match) {
     const appliedMoves = [];
     const maxBotMovesPerRequest = 1;
 
@@ -219,10 +281,13 @@ class MatchManager {
       });
 
       if (!move) {
-        return failure(MATCH_MANAGER_ERRORS.BOT_MOVE_FAILED, "Bot could not choose a legal move.");
+        return failure(
+          MATCH_MANAGER_ERRORS.BOT_MOVE_FAILED,
+          "Bot could not choose a legal move.",
+        );
       }
 
-      const moveResponse = this.applyMove(match, move, {
+      const moveResponse = await this.applyAndPersistMove(match, move, {
         playerId: botParticipant.id,
         source: "BOT",
         botName: botParticipant.name,
@@ -242,9 +307,38 @@ class MatchManager {
   getCurrentBotParticipant(match) {
     const participants = match.metadata?.participants ?? [];
 
-    return participants.find(
-      (participant) => participant.symbol === match.game.currentTurn && participant.type === "BOT",
-    ) ?? null;
+    return (
+      participants.find(
+        (participant) =>
+          participant.symbol === match.game.currentTurn &&
+          participant.type === "BOT",
+      ) ?? null
+    );
+  }
+
+  captureRuntimeSnapshot(match) {
+    return {
+      game: match.game.clone(),
+      config: { ...match.config },
+      moveHistory: match.getMoveHistory(),
+      winner: match.winner,
+      status: match.status,
+      startedAt: match.startedAt,
+      endedAt: match.endedAt,
+      metadata: match.clone(match.metadata),
+    };
+  }
+
+  restoreRuntimeSnapshot(match, snapshot) {
+    match.game = snapshot.game;
+    match.config = { ...snapshot.config };
+    match.moveHistory = snapshot.moveHistory.map((entry) => match.clone(entry));
+    match.winner = snapshot.winner;
+    match.status = snapshot.status;
+    match.startedAt = snapshot.startedAt;
+    match.endedAt = snapshot.endedAt;
+    match.metadata = match.clone(snapshot.metadata);
+    this.gameManager.games.set(match.id, match.game);
   }
 
   createMoveResponse(match, appliedMoves = []) {

@@ -4,8 +4,8 @@ import prisma from "../lib/prisma.js";
 /**
  * Create default statistics for a user.
  */
-export function create(userId) {
-  return prisma.userStats.create({
+export function create(userId, db=prisma) {
+  return db.userStats.create({
     data: {
       userId,
     },
@@ -15,8 +15,8 @@ export function create(userId) {
 /**
  * Fetch a user's statistics.
  */
-export function findByUser(userId) {
-  return prisma.userStats.findUnique({
+export function findByUser(userId, db=prisma) {
+  return db.userStats.findUnique({
     where: {
       userId,
     },
@@ -26,8 +26,8 @@ export function findByUser(userId) {
 /**
  * Update statistics.
  */
-export function update(userId, data) {
-  return prisma.userStats.update({
+export function update(userId, data, db=prisma) {
+  return db.userStats.update({
     where: {
       userId,
     },

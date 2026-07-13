@@ -7,7 +7,7 @@ class GameController {
         try {
             const { matchId } = req.params;
             const { playerId, move, roomCode } = req.body;
-            const result = RoomManager.makeMove({ matchId, playerId, move, roomCode });
+            const result = await RoomManager.makeMove({ matchId, playerId, move, roomCode });
 
             if (result.success) {
                 res.status(200).json(result);

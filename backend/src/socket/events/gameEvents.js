@@ -127,6 +127,24 @@ function broadcastGameState(io, roomCode, response) {
   }
 }
 
+function handleAsyncEvent(socket, eventName, acknowledge, operation) {
+  operation().catch((error) => {
+    emitEventError(
+      socket,
+      eventName,
+      {
+        success: false,
+        data: null,
+        error: {
+          code: "GAME_EVENT_FAILED",
+          message: error.message,
+        },
+      },
+      acknowledge,
+    );
+  });
+}
+
 /**
  * Handles starting a match for a room.
  *
@@ -135,9 +153,9 @@ function broadcastGameState(io, roomCode, response) {
  * @param {object} payload Client event payload.
  * @param {Function|undefined} acknowledge Optional acknowledgement callback.
  */
-function handleStartMatch(io, socket, payload = {}, acknowledge) {
+async function handleStartMatch(io, socket, payload = {}, acknowledge) {
   const roomCode = getRoomCode(payload);
-  const result = RoomManager.startMatch(roomCode, payload.config, payload.metadata);
+  const result = await RoomManager.startMatch(roomCode, payload.config, payload.metadata);
 
   if (!result.success) {
     emitEventError(socket, "start-match", result, acknowledge);
@@ -165,8 +183,8 @@ function handleStartMatch(io, socket, payload = {}, acknowledge) {
  * @param {object} payload Client event payload.
  * @param {Function|undefined} acknowledge Optional acknowledgement callback.
  */
-function handleMakeMove(io, socket, payload = {}, acknowledge) {
-  const result = RoomManager.makeMove({
+async function handleMakeMove(io, socket, payload = {}, acknowledge) {
+  const result = await RoomManager.makeMove({
     roomCode: getRoomCode(payload),
     matchId: payload.matchId,
     playerId: payload.playerId,
@@ -261,7 +279,7 @@ function handleGameOver(io, socket, payload = {}, acknowledge) {
  * @param {object} payload Client event payload.
  * @param {Function|undefined} acknowledge Optional acknowledgement callback.
  */
-function handleRematch(io, socket, payload = {}, acknowledge) {
+async function handleRematch(io, socket, payload = {}, acknowledge) {
   const result = MatchManager.restartMatch(payload.matchId, payload.config, payload.metadata);
 
   if (!result.success) {
@@ -292,11 +310,15 @@ function handleRematch(io, socket, payload = {}, acknowledge) {
  */
 function registerGameEvents(io, socket) {
   socket.on("start-match", (payload, acknowledge) => {
-    handleStartMatch(io, socket, payload, acknowledge);
+    handleAsyncEvent(socket, "start-match", acknowledge, () =>
+      handleStartMatch(io, socket, payload, acknowledge),
+    );
   });
 
   socket.on("make-move", (payload, acknowledge) => {
-    handleMakeMove(io, socket, payload, acknowledge);
+    handleAsyncEvent(socket, "make-move", acknowledge, () =>
+      handleMakeMove(io, socket, payload, acknowledge),
+    );
   });
 
   socket.on(GAME_STATE_EVENT, (payload, acknowledge) => {
@@ -308,7 +330,9 @@ function registerGameEvents(io, socket) {
   });
 
   socket.on("rematch", (payload, acknowledge) => {
-    handleRematch(io, socket, payload, acknowledge);
+    handleAsyncEvent(socket, "rematch", acknowledge, () =>
+      handleRematch(io, socket, payload, acknowledge),
+    );
   });
 }
 

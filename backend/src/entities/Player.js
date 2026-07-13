@@ -21,6 +21,7 @@ class Player {
   /**
    * @param {object} options Player creation options.
    * @param {string} [options.id] Stable player id for runtime and future storage.
+   * @param {string|null} [options.userId] Authenticated account id when known.
    * @param {string} [options.name] Display name shown in lobbies and matches.
    * @param {string|null} [options.symbol] Engine symbol assigned for a match.
    * @param {string} [options.type] HUMAN or BOT.
@@ -31,6 +32,7 @@ class Player {
    */
   constructor({
     id = generateId("player"),
+    userId = null,
     name = "Player",
     symbol = null,
     type = PLAYER_TYPE.HUMAN,
@@ -40,6 +42,7 @@ class Player {
     metadata = {},
   } = {}) {
     this.id = id;
+    this.userId = userId;
     this.name = name;
     this.symbol = symbol;
     this.type = type;
@@ -90,6 +93,7 @@ class Player {
   toJSON() {
     return {
       id: this.id,
+      userId: this.userId,
       name: this.name,
       symbol: this.symbol,
       type: this.type,

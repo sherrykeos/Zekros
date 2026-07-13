@@ -4,8 +4,8 @@ import prisma from "../lib/prisma.js";
 /**
  * Save a move.
  */
-export function create(data) {
-  return prisma.move.create({
+export function create(data, db=prisma) {
+  return db.move.create({
     data,
   });
 }
@@ -13,8 +13,8 @@ export function create(data) {
 /**
  * Fetch every move in chronological order.
  */
-export function findByMatch(matchId) {
-  return prisma.move.findMany({
+export function findByMatch(matchId, db=prisma) {
+  return db.move.findMany({
     where: {
       matchId,
     },
@@ -27,8 +27,8 @@ export function findByMatch(matchId) {
 /**
  * Return the latest move.
  */
-export function findLast(matchId) {
-  return prisma.move.findFirst({
+export function findLast(matchId, db=prisma) {
+  return db.move.findFirst({
     where: {
       matchId,
     },

@@ -3,8 +3,8 @@ import prisma from "../lib/prisma.js";
 /**
  * Create a new match.
  */
-export function create(data) {
-  return prisma.match.create({
+export function create(data, db=prisma) {
+  return db.match.create({
     data,
   });
 }
@@ -12,8 +12,8 @@ export function create(data) {
 /**
  * Find a match by id.
  */
-export function findById(matchId) {
-  return prisma.match.findUnique({
+export function findById(matchId, db=prisma) {
+  return db.match.findUnique({
     where: { id: matchId },
   });
 }
@@ -21,8 +21,8 @@ export function findById(matchId) {
 /**
  * Fetch a match with everything needed for replay/history.
  */
-export function findWithParticipantsAndMoves(matchId) {
-  return prisma.match.findUnique({
+export function findWithParticipantsAndMoves(matchId, db=prisma) {
+  return db.match.findUnique({
     where: { id: matchId },
     include: {
       participants: true,
@@ -38,8 +38,8 @@ export function findWithParticipantsAndMoves(matchId) {
 /**
  * Persist changes to a match.
  */
-export function update(matchId, data) {
-  return prisma.match.update({
+export function update(matchId, data, db=prisma) {
+  return db.match.update({
     where: { id: matchId },
     data,
   });

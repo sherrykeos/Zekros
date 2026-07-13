@@ -56,7 +56,7 @@ class MatchController {
     static async getHistory(req, res, next) {
         try {
             const { matchId } = req.params;
-            const result = MatchManager.getHistory(matchId);
+            const result = await MatchManager.getHistory(matchId);
 
             if (result.success) {
                 res.status(200).json(result);
@@ -77,7 +77,7 @@ class MatchController {
     static async getReplayData(req, res, next) {
         try {
             const { matchId } = req.params;
-            const result = MatchManager.getReplayData(matchId);
+            const result = await MatchManager.getReplayData(matchId);
             if (result.success) {
                 res.status(200).json(result);
             } else {

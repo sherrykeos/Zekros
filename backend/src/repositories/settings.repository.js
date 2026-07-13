@@ -3,8 +3,8 @@ import prisma from "../lib/prisma.js";
 /**
  * Create default settings.
  */
-export function create(userId) {
-  return prisma.userSettings.create({
+export function create(userId, db=prisma) {
+  return db.userSettings.create({
     data: {
       userId,
     },
@@ -14,8 +14,8 @@ export function create(userId) {
 /**
  * Fetch user settings.
  */
-export function findByUser(userId) {
-  return prisma.userSettings.findUnique({
+export function findByUser(userId, db=prisma) {
+  return db.userSettings.findUnique({
     where: {
       userId,
     },
@@ -25,8 +25,8 @@ export function findByUser(userId) {
 /**
  * Update settings.
  */
-export function update(userId, data) {
-  return prisma.userSettings.update({
+export function update(userId, data, db=prisma) {
+  return db.userSettings.update({
     where: {
       userId,
     },

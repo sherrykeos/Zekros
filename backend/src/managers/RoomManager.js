@@ -175,7 +175,7 @@ class RoomManager {
     return success(nextHost);
   }
 
-  startMatch(roomCode, config, metadata = {}) {
+  async startMatch(roomCode, config, metadata = {}) {
     const room = this.findRoom(roomCode);
 
     if (!room) {
@@ -200,6 +200,8 @@ class RoomManager {
       return failure(ROOM_MANAGER_ERRORS.INVALID_CONFIG, "Unsupported game mode.");
     }
 
+    const roomSnapshot = this.captureRoomSnapshot(room);
+
     room.settings.gameMode = gameMode;
     room.metadata.gameMode = gameMode;
 
@@ -211,9 +213,11 @@ class RoomManager {
 
     if (this.botService.isBotMode(gameMode)) {
       if (playablePlayers.length !== 1 || !this.botService.getBotParticipant(room.players)) {
+        this.restoreRoomSnapshot(room, roomSnapshot);
         return failure(ROOM_MANAGER_ERRORS.NOT_ENOUGH_PLAYERS, "Bot matches require one human player and one bot.");
       }
     } else if (room.players.length < 2) {
+      this.restoreRoomSnapshot(room, roomSnapshot);
       return failure(ROOM_MANAGER_ERRORS.NOT_ENOUGH_PLAYERS, "Human matches require two players.");
     }
 
@@ -226,12 +230,20 @@ class RoomManager {
       participants: room.players.map((player) => player.toJSON()),
     };
 
-    const matchResponse = this.matchManager.createMatch({
-      config: { ...config, gameMode },
-      metadata: matchMetadata,
-    });
+    let matchResponse;
+
+    try {
+      matchResponse = await this.matchManager.createMatch({
+        config: { ...config, gameMode },
+        metadata: matchMetadata,
+      });
+    } catch (error) {
+      this.restoreRoomSnapshot(room, roomSnapshot);
+      throw error;
+    }
 
     if (!matchResponse.success) {
+      this.restoreRoomSnapshot(room, roomSnapshot);
       return matchResponse;
     }
 
@@ -245,7 +257,7 @@ class RoomManager {
     return success(match);
   }
 
-  makeMove({ roomCode = null, matchId, playerId, move } = {}) {
+  async makeMove({ roomCode = null, matchId, playerId, move } = {}) {
     let room = roomCode ? this.findRoom(roomCode) : this.findRoomByMatchId(matchId);
 
     if (!room) {
@@ -281,7 +293,7 @@ class RoomManager {
     });
   }
 
-  endMatch(roomCode, winner = null) {
+  async endMatch(roomCode, winner = null) {
     const room = this.findRoom(roomCode);
 
     if (!room) {
@@ -292,7 +304,7 @@ class RoomManager {
       return failure(ROOM_MANAGER_ERRORS.MATCH_NOT_RUNNING, "Room does not have an active match.");
     }
 
-    const matchResponse = this.matchManager.finishMatch(room.currentMatch.id, winner);
+    const matchResponse = await this.matchManager.finishMatch(room.currentMatch.id, winner);
 
     if (!matchResponse.success) {
       return matchResponse;
@@ -337,6 +349,43 @@ class RoomManager {
     });
   }
 
+  captureRoomSnapshot(room) {
+    return {
+      host: room.host,
+      players: [...room.players],
+      spectators: [...room.spectators],
+      currentMatch: room.currentMatch,
+      matches: [...room.matches],
+      status: room.status,
+      settings: room.clone(room.settings),
+      metadata: room.clone(room.metadata),
+      playerStates: new Map(
+        room.players.map((player) => [
+          player,
+          {
+            symbol: player.symbol,
+            status: player.status,
+          },
+        ]),
+      ),
+    };
+  }
+
+  restoreRoomSnapshot(room, snapshot) {
+    room.host = snapshot.host;
+    room.players = [...snapshot.players];
+    room.spectators = [...snapshot.spectators];
+    room.currentMatch = snapshot.currentMatch;
+    room.matches = [...snapshot.matches];
+    room.status = snapshot.status;
+    room.settings = room.clone(snapshot.settings);
+    room.metadata = room.clone(snapshot.metadata);
+
+    for (const [player, state] of snapshot.playerStates.entries()) {
+      player.setSymbol(state.symbol);
+      player.setStatus(state.status);
+    }
+  }
   deleteRoomMatches(room) {
     const matchIds = new Set(room.matches.map((match) => match.id).filter(Boolean));
 
