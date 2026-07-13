@@ -2,6 +2,7 @@ import prisma from "../lib/prisma.js";
 import * as matchRepository from "../repositories/match.repository.js";
 import * as moveRepository from "../repositories/move.repository.js";
 import * as participantRepository from "../repositories/participant.repository.js";
+import * as EloService from "./elo.service.js";
 
 const MATCH_STATUS_TO_DB = Object.freeze({
   WAITING: "WAITING",
@@ -21,6 +22,17 @@ const GAME_MODE_TO_DB = Object.freeze({
 const GAME_TYPE_TO_DB = new Set(["CLASSIC", "CUSTOM", "RANKED", "CASUAL"]);
 const PLAYER_SYMBOL_TO_RESULT = Object.freeze({ X: "PLAYER_X", O: "PLAYER_O" });
 const RESULT_TO_PLAYER_SYMBOL = Object.freeze({ PLAYER_X: "X", PLAYER_O: "O" });
+
+
+function shouldUpdateRatings(match) {
+  const metadata = match.metadata ?? {};
+
+  return (
+    metadata.isRated === true &&
+    toGameMode(metadata.gameMode ?? match.game.config.gameMode, metadata) === "ONLINE" &&
+    toGameType(metadata.gameType ?? match.game.config.gameType, metadata) === "RANKED"
+  );
+}
 
 export async function persistMatch(match) {
   return prisma.$transaction(async (tx) => {
@@ -85,7 +97,14 @@ export async function getReplay(matchId) {
 }
 
 async function completeMatchInTransaction(match, tx) {
-  const persistedMatch = await matchRepository.update(match.id, toMatchCompletionData(match), tx);
+  // Update the match
+  const persistedMatch = await matchRepository.update(
+    match.id,
+    toMatchCompletionData(match),
+    tx,
+  );
+
+  // Update participant winner flags
   const participants = await participantRepository.findByMatch(match.id, tx);
 
   for (const participant of participants) {
@@ -98,8 +117,30 @@ async function completeMatchInTransaction(match, tx) {
     );
   }
 
+  // Only ranked online matches affect Elo
+  if (shouldUpdateRatings(match)) {
+    const winner = participants.find(
+      (participant) => participant.symbol === toWinnerSymbol(match.winner),
+    );
+
+    const loser = participants.find(
+      (participant) => participant.symbol !== toWinnerSymbol(match.winner),
+    );
+
+    // Skip guests and bots
+    if (winner?.userId && loser?.userId) {
+      await EloService.updateRatings({
+        winnerUserId: winner.userId,
+        loserUserId: loser.userId,
+        boardSize: match.game.config.boardSize,
+        db: tx,
+      });
+    }
+  }
+
   return persistedMatch;
 }
+
 function toMatchCreateData(match) {
   const config = match.game.config;
   const metadata = match.metadata ?? {};

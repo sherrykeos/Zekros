@@ -51,6 +51,13 @@ enum GameType {
   CASUAL
 }
 
+enum RatingType {
+  RANKED_3X3
+  RANKED_4X4
+  RANKED_5X5
+  RANKED_6X6
+}
+
 model User {
   id                String   @id @default(cuid())
 
@@ -80,6 +87,7 @@ model User {
   Participants      Participant[]
   settings          UserSettings?
   stats             UserStats?
+  ratings           UserRating[]
 
   verificationTokens VerificationToken[]
   passwordResetTokens PasswordResetToken[]
@@ -277,10 +285,6 @@ model UserStats {
   totalMoves         Int @default(0)
   totalPlayTimeMs    BigInt @default(0)
 
-  // Rating
-  rating             Int @default(1000)
-  highestRating      Int @default(1000)
-
   // Activity
   lastPlayedAt       DateTime?
 
@@ -289,4 +293,30 @@ model UserStats {
 
   userId             String @unique
   user               User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserRating {
+  id            String   @id @default(cuid())
+
+  type          RatingType
+
+  rating        Int      @default(1000)
+  peakRating    Int      @default(1000)
+
+  gamesPlayed   Int      @default(0)
+  wins          Int      @default(0)
+  losses        Int      @default(0)
+
+  lastPlayedAt  DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId        String
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+
+  @@index([type])
+  @@index([rating])
 }
