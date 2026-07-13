@@ -1,13 +1,8 @@
 import * as ratingRepository from "../repositories/rating.repository.js";
 import { getRatingType } from "../utils/rating.js";
 
-const DEFAULT_RATING = 1000;
+// const DEFAULT_RATING = 1000;
 const K_FACTOR = 32;
-
-/**
- * Converts board size into the corresponding RatingType.
- */
-const ratingType = getRatingType(boardSize);
 
 /**
  * Returns the expected probability of winning.

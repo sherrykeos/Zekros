@@ -1,4 +1,4 @@
-import prisma from "../config/prisma.js";
+import prisma from "../lib/prisma.js";
 
 /**
  * Finds a rating entry for a user and rating type.
