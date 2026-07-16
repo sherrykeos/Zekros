@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { api, setApiAuthToken } from "@/services/api/client";
+import { api, setApiAuthToken } from "@/services/client";
 
 export type AuthUser = {
   id: string;

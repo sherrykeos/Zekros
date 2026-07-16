@@ -8,10 +8,11 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import AuthProvider  from "@/providers/AuthProvider"
 
 import appCss from "../../styles.css?url";
 import { reportLovableError } from "../../lib/lovable-error-reporting";
-import { AuthProvider } from "@/contexts/auth";
+// import { AuthProvider } from "@/contexts/auth";
 import { PlayEntryProvider } from "@/contexts/play-entry";
 import { PlayEntryModal } from "@/components/auth/play-entry-modal";
 import { AccountRequiredModal } from "@/components/auth/account-required-modal";

@@ -7,7 +7,8 @@ import {
   TextInput,
   PrimaryButton,
 } from "@/components/auth/auth-shell";
-import { useAuth } from "@/contexts/auth";
+// import { useAuth } from "@/contexts/auth";
+import { useLogin } from "@/hooks/useLogin";
 
 export const Route = createFileRoute("/auth/sign-in")({
   head: () => ({ meta: [{ title: "Sign in - ZEKROS" }] }),
@@ -18,30 +19,22 @@ function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { signIn } = useAuth();
-  const navigate = useNavigate();
+  const login = useLogin();
+  // const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState<string | null>(null);
+  // const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     if (!email || !password) {
-      setError("Enter your email and password to continue.");
       return;
     }
 
-    setLoading(true);
-
-    try {
-      await signIn(email.trim().toLowerCase(), password);
-      void navigate({ to: "/app/play" });
-    } catch (error: any) {
-      setError(error.response?.data?.message ?? "Sign in failed.");
-    } finally {
-      setLoading(false);
-    }
+    login.mutate({
+      email: email.trim().toLowerCase(),
+      password,
+    });
   };
 
   return (
@@ -52,13 +45,15 @@ function SignInPage() {
       footer={
         <>
           New to ZEKROS?{" "}
-          <Link to="/auth/sign-up" className="text-foreground underline-offset-4 hover:underline">
+          <Link
+            to="/auth/sign-up"
+            className="text-foreground underline-offset-4 hover:underline"
+          >
             Create an account
           </Link>
         </>
       }
     >
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormField label="Email">
           <TextInput
@@ -72,7 +67,10 @@ function SignInPage() {
         <FormField
           label="Password"
           hint={
-            <Link to="/auth/forgot-password" className="text-muted-foreground hover:text-foreground">
+            <Link
+              to="/auth/forgot-password"
+              className="text-muted-foreground hover:text-foreground"
+            >
               Forgot?
             </Link>
           }
@@ -91,21 +89,23 @@ function SignInPage() {
               className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
               aria-label="Toggle password"
             >
-              {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              {showPw ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
+              )}
             </button>
           </div>
         </FormField>
 
-        {error && (
+        {login.error && (
           <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive-foreground">
-            {error}
+            {(login.error as any)?.response?.data?.message ?? "Sign in failed."}
           </div>
         )}
 
-        <PrimaryButton loading={loading}>Sign in</PrimaryButton>
+        <PrimaryButton loading={login.isPending}>Sign in</PrimaryButton>
       </form>
     </AuthShell>
   );
 }
-
-

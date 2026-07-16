@@ -1,4 +1,22 @@
-﻿export interface CreateRoomPayload {
+﻿export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+
+
+export interface CreateRoomPayload {
   roomOptions: {
     host: {
       id: string;
@@ -45,3 +63,17 @@ export interface PlayMovePayload {
   roomCode: string;
 }
 
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  avatar: string | null;
+  provider: "LOCAL" | "GOOGLE";
+  isEmailVerified: boolean;
+  createdAt: string;
+}
+
+export interface CurrentUserResponse {
+  success: boolean;
+  user: User;
+}

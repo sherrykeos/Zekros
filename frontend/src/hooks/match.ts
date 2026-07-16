@@ -3,7 +3,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 
-import matchService from "../services/matchService";
+import matchService from "../services/api/matchService";
 
 export function useMatchHistory(matchId: string) {
   return useQuery({

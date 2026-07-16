@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Check, Loader2, XCircle } from "lucide-react";
 import { AuthShell, PrimaryButton } from "@/components/auth/auth-shell";
-import { api } from "@/services/api/client";
+import { api } from "@/services/client";
 
 type VerificationResponse = {
   success: boolean;

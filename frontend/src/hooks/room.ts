@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import roomService from "../services/roomService";
+import roomService from "../services/api/roomService";
 
 export function useCreateRoom() {
   return useMutation({

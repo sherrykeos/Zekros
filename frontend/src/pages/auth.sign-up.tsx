@@ -7,7 +7,7 @@ import {
   TextInput,
   PrimaryButton,
 } from "@/components/auth/auth-shell";
-import { api } from "@/services/api/client";
+import { api } from "@/services/client";
 
 export const Route = createFileRoute("/auth/sign-up")({
   head: () => ({ meta: [{ title: "Create account - ZEKROS" }] }),

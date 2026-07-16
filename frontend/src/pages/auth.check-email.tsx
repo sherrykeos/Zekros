@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Mail, RefreshCcw, Pencil } from "lucide-react";
 import { AuthShell, FormField, TextInput, PrimaryButton } from "@/components/auth/auth-shell";
-import { api } from "@/services/api/client";
+import { api } from "@/services/client";
 
 export const Route = createFileRoute("/auth/check-email")({
   validateSearch: (search) => ({

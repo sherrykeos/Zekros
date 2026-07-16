@@ -1,4 +1,4 @@
-import { api } from "./api/api/client";
+import { api } from "../client";
 
 
 class GameService {

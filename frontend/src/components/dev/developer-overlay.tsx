@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { RefreshCcw, Terminal, X } from "lucide-react";
 
 import { useAuth } from "@/contexts/auth";
-import { api, type DevRestLog } from "@/services/api/client";
+import { api, type DevRestLog } from "@/services/client";
 
 /**
  * Hidden developer overlay. Toggled with Ctrl+Shift+D.
