@@ -12,12 +12,19 @@ import errorHandler from "../middleware/errorHandler.js";
 
 
 const app = express();
+
+// Enable CORS
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 
 app.use(passport.initialize());
 
 
-app.use(cors());
 
 // Parse incoming JSON requests
 app.use(express.json());
