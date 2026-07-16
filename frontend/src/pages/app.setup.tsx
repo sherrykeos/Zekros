@@ -14,7 +14,7 @@ import {
   type MatchConfig,
   type GameMode,
 } from "@/components/game/types";
-import { useAuth } from "@/contexts/auth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCreateRoom, useJoinRoom, useStartRoom } from "@/hooks/room";
 
 export const Route = createFileRoute("/app/setup")({
@@ -43,7 +43,7 @@ function backendConfig(config: MatchConfig) {
 function SetupPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { data: user } = useCurrentUser();
   const { mutateAsync: createRoom, isPending: isCreatingRoom } = useCreateRoom();
   const { mutateAsync: joinRoom, isPending: isJoiningRoom } = useJoinRoom();
   const { mutateAsync: startRoom, isPending: isStartingRoom } = useStartRoom();
@@ -69,7 +69,7 @@ function SetupPage() {
     try {
       const gameMode = backendMode(normalizedConfig.mode);
       const hostId = user?.id ?? `player_${Date.now()}`;
-      const hostName = user?.name ?? "Player";
+      const hostName = user?.username ?? "Local Player";
       const secondPlayerId = `player_local_o_${Date.now()}`;
       const isBotMode = gameMode !== "HUMAN_VS_HUMAN";
 
@@ -162,3 +162,4 @@ function SetupPage() {
     </motion.div>
   );
 }
+

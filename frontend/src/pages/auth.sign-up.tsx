@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+﻿import { useMemo, useState } from "react";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import {
   AuthShell,
@@ -7,7 +7,7 @@ import {
   TextInput,
   PrimaryButton,
 } from "@/components/auth/auth-shell";
-import { api } from "@/services/client";
+import { useRegister } from "@/hooks/useRegister";
 
 export const Route = createFileRoute("/auth/sign-up")({
   head: () => ({ meta: [{ title: "Create account - ZEKROS" }] }),
@@ -27,55 +27,42 @@ function SignUpPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const register = useRegister();
 
   const strength = useMemo(() => score(password), [password]);
   const strengthLabel = ["Too weak", "Weak", "Okay", "Strong", "Excellent"][strength];
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setValidationError(null);
 
     const normalizedEmail = email.trim().toLowerCase();
+    const username = name.trim();
 
-    if (!name.trim()) {
-      setError("Display name is required.");
+    if (!username) {
+      setValidationError("Display name is required.");
       return;
     }
 
     if (!normalizedEmail) {
-      setError("Email is required.");
+      setValidationError("Email is required.");
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setValidationError("Password must be at least 8 characters.");
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await api.post("/auth/register", {
-        username: name.trim(),
-        email: normalizedEmail,
-        password,
-      });
-
-      const registeredEmail = response.data?.data?.email ?? normalizedEmail;
-
-      void navigate({
-        to: "/auth/check-email",
-        search: { email: registeredEmail } as never,
-      });
-    } catch (error: any) {
-      setError(error.response?.data?.message ?? "Registration failed.");
-    } finally {
-      setLoading(false);
-    }
+    register.mutate({
+      username,
+      email: normalizedEmail,
+      password,
+    });
   };
+
+  const error = validationError ?? register.errorMessage;
 
   return (
     <AuthShell
@@ -91,7 +78,6 @@ function SignUpPage() {
         </>
       }
     >
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormField label="Display name" hint="Shown on leaderboards">
           <TextInput
@@ -144,7 +130,7 @@ function SignUpPage() {
           </div>
         )}
 
-        <PrimaryButton loading={loading}>Create account</PrimaryButton>
+        <PrimaryButton loading={register.isPending}>Create account</PrimaryButton>
         <p className="text-center text-[11px] text-muted-foreground">
           By continuing you agree to our Terms and Privacy Policy.
         </p>
@@ -152,5 +138,3 @@ function SignUpPage() {
     </AuthShell>
   );
 }
-
-

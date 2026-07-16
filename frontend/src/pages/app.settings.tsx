@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Palette,
@@ -12,11 +12,20 @@ import {
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { GlassPanel } from "@/components/app/primitives";
+import { RequireAuth } from "@/components/auth/require-auth";
 
 export const Route = createFileRoute("/app/settings")({
-  head: () => ({ meta: [{ title: "Settings — ZEKROS" }] }),
-  component: SettingsPage,
+  head: () => ({ meta: [{ title: "Settings â€” ZEKROS" }] }),
+  component: SettingsRoute,
 });
+
+function SettingsRoute() {
+  return (
+    <RequireAuth>
+      <SettingsPage />
+    </RequireAuth>
+  );
+}
 
 function SettingsPage() {
   return (
@@ -24,7 +33,7 @@ function SettingsPage() {
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Tune ZEKROS to your preferences. Changes are local — sync arrives with accounts.
+          Tune ZEKROS to your preferences. Changes are local â€” sync arrives with accounts.
         </p>
       </div>
 
@@ -68,7 +77,7 @@ function SettingsPage() {
         <Row label="Match starts" hint="Notify when a multiplayer match starts.">
           <Toggle defaultOn />
         </Row>
-        <Row label="Friend activity" hint="Coming soon — requires social.">
+        <Row label="Friend activity" hint="Coming soon â€” requires social.">
           <Toggle />
         </Row>
       </SettingsGroup>
@@ -86,8 +95,8 @@ function SettingsPage() {
       </SettingsGroup>
 
       <SettingsGroup title="Keyboard shortcuts" icon={Keyboard}>
-        <Shortcut keys={["⌘", "K"]} label="Open command bar" />
-        <Shortcut keys={["⌘", "/"]} label="Focus search" />
+        <Shortcut keys={["âŒ˜", "K"]} label="Open command bar" />
+        <Shortcut keys={["âŒ˜", "/"]} label="Focus search" />
         <Shortcut keys={["G", "P"]} label="Go to Play" />
         <Shortcut keys={["G", "H"]} label="Go to History" />
         <Shortcut keys={["?"]} label="Show shortcuts" />
@@ -98,7 +107,7 @@ function SettingsPage() {
           <span className="font-mono text-xs text-muted-foreground">0.1.0-preview.3</span>
         </Row>
         <Row label="Engine" hint="Backend system in development.">
-          <span className="font-mono text-xs text-muted-foreground">D3T · pre-alpha</span>
+          <span className="font-mono text-xs text-muted-foreground">D3T Â· pre-alpha</span>
         </Row>
         <Row label="Company" hint="Crafted by ZEROTH Labs.">
           <span className="text-xs text-muted-foreground">ZEROTH Labs</span>
@@ -239,3 +248,4 @@ function Badge({ children }: { children: React.ReactNode }) {
     </span>
   );
 }
+

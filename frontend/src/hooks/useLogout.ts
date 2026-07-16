@@ -1,36 +1,27 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+﻿import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
-import { authApi } from "../services/api/auth.api";
-import { CURRENT_USER_QUERY_KEY } from "./useCurrentUser";
+import { authApi } from "@/api/auth.api";
+import { getApiErrorMessage } from "@/lib/api-error";
+import { setAccessToken } from "@/services/client";
+import { authKeys } from "./auth.keys";
 
-/**
- * Handles user logout.
- *
- * Responsibilities:
- * - Call the backend logout endpoint.
- * - Remove the cached authenticated user.
- * - Redirect the user.
- *
- * The backend remains the source of truth.
- */
 export function useLogout() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: authApi.logout,
-
-    onSuccess: async () => {
-      /**
-       * Remove the cached authenticated user.
-       *
-       * We know after logout there is no valid user,
-       * so there's no need to refetch `/auth/me`.
-       */
-      queryClient.clear();
-
-      navigate({ to: "/" });
+    onSettled: () => {
+      setAccessToken(null);
+      queryClient.setQueryData(authKeys.currentUser, null);
+      queryClient.removeQueries({ queryKey: authKeys.all });
+      void navigate({ to: "/" });
     },
   });
+
+  return {
+    ...mutation,
+    errorMessage: mutation.error ? getApiErrorMessage(mutation.error, "Sign out failed.") : null,
+  };
 }

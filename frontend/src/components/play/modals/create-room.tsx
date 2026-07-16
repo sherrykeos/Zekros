@@ -1,9 +1,9 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Copy, RefreshCcw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useCreateRoom } from "@/hooks/room";
-import { useAuth } from "@/contexts/auth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 function genCode() {
   const s = Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
@@ -20,15 +20,15 @@ export function CreateRoomModal({
   const [code, setCode] = useState(genCode());
   const [visibility, setVisibility] = useState<"private" | "unlisted">("private");
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { data: user } = useCurrentUser();
   const { mutateAsync: createRoom, isPending: isCreatingRoom } = useCreateRoom();
 
   const handleCreate = async () => {
     try {
       const result = await createRoom({
         host: {
-          id: user?.id ?? "guest",
-          name: user?.name ?? "Player",
+          id: user?.id ?? `local_${Date.now()}`,
+          name: user?.username ?? "Local Player",
         },
         settings: {
           gameMode: "HUMAN_VS_HUMAN",
@@ -126,7 +126,7 @@ export function CreateRoomModal({
               disabled={isCreatingRoom}
               className="rounded-lg bg-primary px-3.5 py-2 text-xs font-medium text-primary-foreground disabled:opacity-40"
             >
-              {isCreatingRoom ? "Creating…" : "Create room"}
+              {isCreatingRoom ? "Creatingâ€¦" : "Create room"}
             </button>
           </div>
         </div>
@@ -134,3 +134,4 @@ export function CreateRoomModal({
     </Dialog>
   );
 }
+

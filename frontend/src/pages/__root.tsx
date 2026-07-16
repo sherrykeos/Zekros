@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -8,11 +8,9 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import AuthProvider  from "@/providers/AuthProvider"
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-// import { AuthProvider } from "@/contexts/auth";
 import { PlayEntryProvider } from "@/contexts/play-entry";
 import { PlayEntryModal } from "@/components/auth/play-entry-modal";
 import { AccountRequiredModal } from "@/components/auth/account-required-modal";
@@ -83,10 +81,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ZEKROS — Strategy, evolved." },
+      { title: "ZEKROS â€” Strategy, evolved." },
       { name: "description", content: "ZEKROS by ZEROTH Labs. A premium real-time strategy game built on adaptive boards, vanishing pieces, and decisions that compound." },
       { name: "author", content: "ZEROTH Labs" },
-      { property: "og:title", content: "ZEKROS — Strategy, evolved." },
+      { property: "og:title", content: "ZEKROS â€” Strategy, evolved." },
       { property: "og:description", content: "A premium real-time strategy game built on adaptive boards and decisions that compound." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -126,15 +124,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <PlayEntryProvider>
-          <Outlet />
-          <PlayEntryModal />
-          <AccountRequiredModal />
-          <DeveloperOverlay />
-        </PlayEntryProvider>
-      </AuthProvider>
+      <PlayEntryProvider>
+        <Outlet />
+        <PlayEntryModal />
+        <AccountRequiredModal />
+        <DeveloperOverlay />
+      </PlayEntryProvider>
     </QueryClientProvider>
   );
 }
+
+
 

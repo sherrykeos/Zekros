@@ -1,42 +1,57 @@
-import { useState } from "react";
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+﻿import { useState } from "react";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { AuthShell, FormField, TextInput, PrimaryButton } from "@/components/auth/auth-shell";
+import { useResetPassword } from "@/hooks/useResetPassword";
 
 export const Route = createFileRoute("/auth/reset-password")({
-  head: () => ({ meta: [{ title: "Set new password — ZEKROS" }] }),
+  validateSearch: (search) => ({
+    token: typeof search.token === "string" ? search.token : "",
+  }),
+  head: () => ({ meta: [{ title: "Set new password - ZEKROS" }] }),
   component: ResetPasswordPage,
 });
 
 function ResetPasswordPage() {
+  const { token } = Route.useSearch();
   const [pw, setPw] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const resetPassword = useResetPassword();
+  const done = resetPassword.isSuccess;
 
-  // TODO: wire to `supabase.auth.updateUser({ password })` in Phase 5.
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    if (pw.length < 8) return setError("Use at least 8 characters.");
-    if (pw !== confirm) return setError("Passwords don't match.");
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setLoading(false);
-    setDone(true);
-    setTimeout(() => navigate({ to: "/auth/sign-in" }), 1200);
+    setValidationError(null);
+
+    if (!token) {
+      setValidationError("Password reset token is missing.");
+      return;
+    }
+
+    if (pw.length < 8) {
+      setValidationError("Use at least 8 characters.");
+      return;
+    }
+
+    if (pw !== confirm) {
+      setValidationError("Passwords don't match.");
+      return;
+    }
+
+    resetPassword.mutate({ token, password: pw });
   };
+
+  const error = validationError ?? resetPassword.errorMessage;
 
   return (
     <AuthShell
       eyebrow="Reset password"
       title={done ? "Password updated." : "Set a new password."}
-      description={done ? "Redirecting to sign in…" : "Pick something memorable but hard to guess."}
+      description={done ? "Redirecting to sign in..." : "Pick something memorable but hard to guess."}
       footer={
         <Link to="/auth/sign-in" className="hover:text-foreground">
-          ← Back to sign in
+          Back to sign in
         </Link>
       }
     >
@@ -45,7 +60,9 @@ function ResetPasswordPage() {
           <div className="grid size-12 place-items-center rounded-2xl border border-white/10 bg-white/[0.04]">
             <ShieldCheck className="size-5" />
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">You can now sign in.</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            {resetPassword.data?.message ?? "You can now sign in."}
+          </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,7 +70,7 @@ function ResetPasswordPage() {
             <TextInput
               type="password"
               autoComplete="new-password"
-              placeholder="••••••••"
+              placeholder="********"
               value={pw}
               onChange={(e) => setPw(e.target.value)}
             />
@@ -62,7 +79,7 @@ function ResetPasswordPage() {
             <TextInput
               type="password"
               autoComplete="new-password"
-              placeholder="••••••••"
+              placeholder="********"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
             />
@@ -72,7 +89,7 @@ function ResetPasswordPage() {
               {error}
             </div>
           )}
-          <PrimaryButton loading={loading}>Update password</PrimaryButton>
+          <PrimaryButton loading={resetPassword.isPending}>Update password</PrimaryButton>
         </form>
       )}
     </AuthShell>

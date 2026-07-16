@@ -1,22 +1,29 @@
-import { createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { MultiplayerLobby } from "@/components/game/multiplayer-lobby";
-import { useAuth } from "@/contexts/auth";
-import { usePlayEntry } from "@/contexts/play-entry";
 import { useEffect, useState } from "react";
+import { MultiplayerLobby } from "@/components/game/multiplayer-lobby";
+import { RequireAuth } from "@/components/auth/require-auth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCreateRoom, useStartRoom } from "@/hooks/room";
 import type { MatchConfig } from "@/components/game/types";
 
 export const Route = createFileRoute("/app/lobby")({
-  head: () => ({ meta: [{ title: "Lobby — ZEKROS" }] }),
-  component: LobbyPage,
+  head: () => ({ meta: [{ title: "Lobby - ZEKROS" }] }),
+  component: LobbyRoute,
 });
+
+function LobbyRoute() {
+  return (
+    <RequireAuth>
+      <LobbyPage />
+    </RequireAuth>
+  );
+}
 
 function LobbyPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { status, user } = useAuth();
-  const { openAccountRequired } = usePlayEntry();
+  const { data: user } = useCurrentUser();
   const launchState = (location.state as {
     roomCode?: string;
     room?: any;
@@ -30,26 +37,15 @@ function LobbyPage() {
   const { mutateAsync: createRoom, isPending: isCreatingRoom } = useCreateRoom();
   const { mutateAsync: startRoom, isPending: isStartingRoom } = useStartRoom();
 
-  // Guests can't access multiplayer — prompt the upgrade dialog and
-  // bounce them back to the Play hub.
   useEffect(() => {
-    if (status === "guest" || status === "anonymous") {
-      openAccountRequired();
-      void navigate({ to: "/app/play" });
-    }
-  }, [status, openAccountRequired, navigate]);
-
-  useEffect(() => {
-    if (status === "guest" || status === "anonymous" || roomCode || !launchState.config) {
-      return;
-    }
+    if (roomCode || !launchState.config || !user) return;
 
     void (async () => {
       try {
         const result = await createRoom({
           host: {
-            id: user?.id ?? "guest",
-            name: user?.name ?? "Player",
+            id: user.id,
+            name: user.username,
           },
           settings: {
             gameMode: "HUMAN_VS_HUMAN",
@@ -65,18 +61,16 @@ function LobbyPage() {
           const nextCode = result.data?.code ?? "";
           setRoomCode(nextCode);
           setRoom(result.data);
-          setPlayerId(result.data?.host?.id ?? user?.id ?? "");
+          setPlayerId(result.data?.host?.id ?? user.id);
         }
       } catch (error) {
         console.error(error);
       }
     })();
-  }, [createRoom, launchState.config, roomCode, status, user?.id, user?.name]);
+  }, [createRoom, launchState.config, roomCode, user]);
 
   const handleStart = async () => {
-    if (!roomCode || !launchState.config) {
-      return;
-    }
+    if (!roomCode || !launchState.config || !user) return;
 
     try {
       const result = await startRoom({
@@ -84,7 +78,7 @@ function LobbyPage() {
         config: launchState.config,
         metadata: {
           source: "frontend",
-          playerId: playerId || user?.id || "guest",
+          playerId: playerId || user.id,
         },
       });
 
@@ -95,7 +89,7 @@ function LobbyPage() {
             matchId: result.data?.id,
             roomCode,
             room,
-            playerId: playerId || room?.host?.id || user?.id || "guest",
+            playerId: playerId || room?.host?.id || user.id,
             config: launchState.config,
             mode: launchState.mode ?? launchState.config.mode,
           },

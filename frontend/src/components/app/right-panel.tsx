@@ -1,9 +1,11 @@
-import { AnimatePresence, motion } from "motion/react";
+﻿import { AnimatePresence, motion } from "motion/react";
 import { Activity, Trophy, Megaphone, Lightbulb, Calendar, Code2 } from "lucide-react";
 import { useAppShell } from "@/contexts/app-shell";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export function RightPanel() {
   const { rightOpen } = useAppShell();
+  const { data: user } = useCurrentUser();
 
   return (
     <AnimatePresence initial={false}>
@@ -25,43 +27,35 @@ export function RightPanel() {
             </div>
             <div className="hairline mx-3" />
             <div className="custom-scroll flex-1 space-y-4 overflow-y-auto p-4">
-              <Section title="Quick Stats" icon={Trophy}>
-                <div className="grid grid-cols-2 gap-2">
-                  <MiniStat label="Rating" value="1,842" trend="+24" />
-                  <MiniStat label="Streak" value="7" trend="W" />
-                  <MiniStat label="Today" value="3" trend="games" />
-                  <MiniStat label="Rank" value="#231" trend="-12" />
+              <Section title="Account" icon={Trophy}>
+                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                  <div className="text-xs font-medium">{user?.username ?? "Not signed in"}</div>
+                  <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                    Account stats will appear here after the stats API is connected.
+                  </p>
                 </div>
               </Section>
 
               <Section title="Recent Matches" icon={Activity}>
-                <div className="space-y-1.5">
-                  {recent.map((m) => (
-                    <div key={m.id} className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] px-2.5 py-1.5">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className={`size-1.5 shrink-0 rounded-full ${m.win ? "bg-emerald-400" : "bg-rose-400"}`} />
-                        <span className="truncate text-xs">{m.opponent}</span>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground">{m.time}</span>
-                    </div>
-                  ))}
+                <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-3 text-[11px] leading-snug text-muted-foreground">
+                  Match activity will render from the match history API.
                 </div>
               </Section>
 
               <Section title="Announcement" icon={Megaphone}>
                 <div className="rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.01] p-3">
-                  <div className="text-xs font-medium">Season 01 begins July 14</div>
+                  <div className="text-xs font-medium">Season system pending</div>
                   <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                    Climb the global ladder. Cosmetic rewards every 100 ELO.
+                    Leaderboards and rewards should be connected through their own feature API.
                   </p>
                 </div>
               </Section>
 
               <Section title="Upcoming Tournament" icon={Calendar}>
                 <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-transparent p-3">
-                  <div className="text-xs font-medium">ZEROTH Open · Qualifiers</div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">Aug 02 · 256 slots</div>
-                  <button className="mt-2 w-full rounded-md bg-primary px-2 py-1.5 text-[11px] font-medium text-primary-foreground">
+                  <div className="text-xs font-medium">Tournament module unavailable</div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">Connect a tournament API before enabling registration.</div>
+                  <button disabled className="mt-2 w-full rounded-md bg-primary px-2 py-1.5 text-[11px] font-medium text-primary-foreground opacity-40">
                     Reserve seat
                   </button>
                 </div>
@@ -75,9 +69,9 @@ export function RightPanel() {
 
               <Section title="Developer Notes" icon={Code2}>
                 <div className="space-y-1 font-mono text-[10px] text-muted-foreground">
-                  <div>build · 0.1.0-preview</div>
-                  <div>region · eu-west-2</div>
-                  <div>latency · 24ms (p99 42ms)</div>
+                  <div>build - 0.1.0-preview</div>
+                  <div>auth - TanStack Query</div>
+                  <div>api - typed feature modules</div>
                 </div>
               </Section>
             </div>
@@ -87,13 +81,6 @@ export function RightPanel() {
     </AnimatePresence>
   );
 }
-
-const recent = [
-  { id: 1, opponent: "Vector_91", win: true, time: "2m" },
-  { id: 2, opponent: "Smart AI", win: true, time: "14m" },
-  { id: 3, opponent: "neon.fox", win: false, time: "1h" },
-  { id: 4, opponent: "Perfect AI", win: false, time: "3h" },
-];
 
 function Section({
   title,
@@ -111,18 +98,6 @@ function Section({
         {title}
       </div>
       {children}
-    </div>
-  );
-}
-
-function MiniStat({ label, value, trend }: { label: string; value: string; trend: string }) {
-  return (
-    <div className="rounded-lg border border-white/5 bg-white/[0.02] px-2.5 py-2">
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="mt-0.5 flex items-baseline gap-1.5">
-        <span className="font-display text-base font-semibold">{value}</span>
-        <span className="text-[10px] text-muted-foreground">{trend}</span>
-      </div>
     </div>
   );
 }

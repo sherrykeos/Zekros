@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useJoinRoom } from "@/hooks/room";
-import { useAuth } from "@/contexts/auth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export function JoinRoomModal({
   open,
@@ -15,7 +15,7 @@ export function JoinRoomModal({
 }) {
   const [code, setCode] = useState(initialCode);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { data: user } = useCurrentUser();
   const { mutateAsync: joinRoom, isPending: isJoiningRoom } = useJoinRoom();
   useEffect(() => setCode(initialCode), [initialCode, open]);
 
@@ -25,7 +25,7 @@ export function JoinRoomModal({
     try {
       const result = await joinRoom({
         roomCode: normalizedCode,
-        playerName: user?.name ?? "Player",
+        playerName: user?.username ?? "Local Player",
       });
 
       if (result?.success) {
@@ -78,7 +78,7 @@ export function JoinRoomModal({
               disabled={code.length < 4 || isJoiningRoom}
               className="rounded-lg bg-primary px-3.5 py-2 text-xs font-medium text-primary-foreground disabled:opacity-40"
             >
-              {isJoiningRoom ? "Joining…" : "Join match"}
+              {isJoiningRoom ? "Joiningâ€¦" : "Join match"}
             </button>
           </div>
         </div>
@@ -86,3 +86,4 @@ export function JoinRoomModal({
     </Dialog>
   );
 }
+

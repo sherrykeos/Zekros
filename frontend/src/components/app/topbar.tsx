@@ -1,4 +1,4 @@
-import { useRouterState, Link, useNavigate } from "@tanstack/react-router";
+﻿import { useRouterState, Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Bell,
@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAppShell } from "@/contexts/app-shell";
-import { useAuth } from "@/contexts/auth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useLogout } from "@/hooks/useLogout";
 
 const titleMap: Record<string, { title: string; crumb: string[] }> = {
   "/app": { title: "Dashboard", crumb: ["ZEKROS", "Dashboard"] },
@@ -29,25 +30,29 @@ const titleMap: Record<string, { title: string; crumb: string[] }> = {
 function initials(name?: string | null) {
   if (!name) return "ZK";
 
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "ZK";
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "ZK"
+  );
 }
 
 export function TopBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const meta = titleMap[pathname] ?? { title: "ZEKROS", crumb: ["ZEKROS"] };
   const { setMobileNavOpen } = useAppShell();
-  const { status, user, signOut } = useAuth();
+  const currentUser = useCurrentUser();
+  const logout = useLogout();
+  const user = currentUser.data;
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const displayName = user?.name ?? (status === "guest" ? "Guest Player" : "Anonymous");
-  const displayEmail = user?.email ?? (status === "guest" ? "Guest session" : "Not signed in");
+  const displayName = user?.username ?? "Not signed in";
+  const displayEmail = user?.email ?? "Account required for cloud features";
   const displayInitials = initials(displayName);
 
   useEffect(() => {
@@ -61,9 +66,13 @@ export function TopBar() {
   }, []);
 
   const handleSignOut = () => {
-    signOut();
+    logout.mutate();
     setProfileOpen(false);
-    void navigate({ to: "/" });
+  };
+
+  const closeAndNavigate = (to: "/app/profile" | "/app/settings") => {
+    setProfileOpen(false);
+    void navigate({ to });
   };
 
   return (
@@ -78,7 +87,7 @@ export function TopBar() {
 
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <div className="min-w-0">
-          <h1 className="truncate ml-4 font-display opacity-55 text-sm font-semibold tracking-wide sm:text-[15px]">
+          <h1 className="ml-4 truncate font-display text-sm font-semibold tracking-wide opacity-55 sm:text-[15px]">
             {meta.title}
           </h1>
         </div>
@@ -114,7 +123,7 @@ export function TopBar() {
             className="grid size-9 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-white/30 to-white/5 text-xs font-semibold ring-1 ring-white/10"
             aria-label="Profile"
           >
-            {displayInitials}
+            {user?.avatar ? <img src={user.avatar} alt="" className="size-full object-cover" /> : displayInitials}
           </button>
           <AnimatePresence>
             {profileOpen && (
@@ -126,8 +135,8 @@ export function TopBar() {
                 className="glass-strong absolute right-0 top-11 z-50 w-64 rounded-xl p-2"
               >
                 <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
-                  <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-white/30 to-white/5 text-xs font-semibold ring-1 ring-white/10">
-                    {displayInitials}
+                  <div className="grid size-9 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-white/30 to-white/5 text-xs font-semibold ring-1 ring-white/10">
+                    {user?.avatar ? <img src={user.avatar} alt="" className="size-full object-cover" /> : displayInitials}
                   </div>
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium">{displayName}</div>
@@ -135,7 +144,7 @@ export function TopBar() {
                   </div>
                 </div>
                 <div className="hairline my-1" />
-                {status === "anonymous" ? (
+                {!user ? (
                   <Link
                     to="/auth/sign-in"
                     onClick={() => setProfileOpen(false)}
@@ -146,12 +155,12 @@ export function TopBar() {
                   </Link>
                 ) : (
                   <>
-                    <DropdownItem icon={User} label="Profile" />
-                    <DropdownItem icon={SlidersHorizontal} label="Preferences" />
+                    <DropdownItem icon={User} label="Profile" onClick={() => closeAndNavigate("/app/profile")} />
+                    <DropdownItem icon={SlidersHorizontal} label="Preferences" onClick={() => closeAndNavigate("/app/settings")} />
                     <DropdownItem icon={Palette} label="Theme" rightSlot={<span className="text-[10px] text-muted-foreground">Dark</span>} />
-                    <DropdownItem icon={Settings} label="Settings" />
+                    <DropdownItem icon={Settings} label="Settings" onClick={() => closeAndNavigate("/app/settings")} />
                     <div className="hairline my-1" />
-                    <DropdownItem icon={LogOut} label="Log out" onClick={handleSignOut} />
+                    <DropdownItem icon={LogOut} label={logout.isPending ? "Logging out" : "Log out"} onClick={handleSignOut} />
                   </>
                 )}
               </motion.div>

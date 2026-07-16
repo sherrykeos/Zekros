@@ -4,7 +4,8 @@ import { useLocation } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { RefreshCcw, Terminal, X } from "lucide-react";
 
-import { useAuth } from "@/contexts/auth";
+import { devApi } from "@/api/dev.api";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api, type DevRestLog } from "@/services/client";
 
 /**
@@ -15,7 +16,7 @@ export function DeveloperOverlay() {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<TabId>("app");
   const location = useLocation();
-  const auth = useAuth();
+  const currentUser = useCurrentUser();
   const queryClient = useQueryClient();
   const routeState = (location.state ?? {}) as DevRouteState;
   const routeMatchId = typeof routeState.matchId === "string" ? routeState.matchId : "";
@@ -53,7 +54,7 @@ export function DeveloperOverlay() {
 
   const health = useQuery({
     queryKey: ["dev", "health"],
-    queryFn: async () => (await api.get("/health")).data,
+    queryFn: devApi.health,
     enabled: open,
     refetchInterval: open ? 5000 : false,
     retry: false,
@@ -61,7 +62,7 @@ export function DeveloperOverlay() {
 
   const room = useQuery({
     queryKey: ["dev", "room", roomCode],
-    queryFn: async () => (await api.get(`/rooms/${roomCode}`)).data,
+    queryFn: () => devApi.room(roomCode),
     enabled: open && !!roomCode,
     refetchInterval: open && roomCode ? 2500 : false,
     retry: false,
@@ -69,7 +70,7 @@ export function DeveloperOverlay() {
 
   const game = useQuery({
     queryKey: ["dev", "game", matchId],
-    queryFn: async () => (await api.get(`/games/${matchId}/state`)).data,
+    queryFn: () => devApi.gameState(matchId),
     enabled: open && !!matchId,
     refetchInterval: open && matchId ? 1500 : false,
     retry: false,
@@ -77,7 +78,7 @@ export function DeveloperOverlay() {
 
   const match = useQuery({
     queryKey: ["dev", "match", matchId],
-    queryFn: async () => (await api.get(`/matches/${matchId}`)).data,
+    queryFn: () => devApi.match(matchId),
     enabled: open && !!matchId,
     refetchInterval: open && matchId ? 2500 : false,
     retry: false,
@@ -85,7 +86,7 @@ export function DeveloperOverlay() {
 
   const history = useQuery({
     queryKey: ["dev", "history", matchId],
-    queryFn: async () => (await api.get(`/matches/${matchId}/history`)).data,
+    queryFn: () => devApi.matchHistory(matchId),
     enabled: open && !!matchId,
     refetchInterval: open && matchId ? 2500 : false,
     retry: false,
@@ -93,7 +94,7 @@ export function DeveloperOverlay() {
 
   const replay = useQuery({
     queryKey: ["dev", "replay", matchId],
-    queryFn: async () => (await api.get(`/matches/${matchId}/replay`)).data,
+    queryFn: () => devApi.replay(matchId),
     enabled: open && !!matchId,
     retry: false,
   });
@@ -106,8 +107,8 @@ export function DeveloperOverlay() {
         state: routeState,
       },
       auth: {
-        status: auth.status,
-        user: auth.user,
+        status: currentUser.isPending ? "loading" : currentUser.data ? "authenticated" : "anonymous",
+        user: currentUser.data ?? null,
       },
       backend: {
         baseURL: api.defaults.baseURL,
@@ -125,7 +126,7 @@ export function DeveloperOverlay() {
       },
       viewport,
     }),
-    [auth.status, auth.user, health.data, health.error, health.fetchStatus, health.status, location.pathname, location.search, matchId, roomCode, routeState, viewport],
+    [currentUser.data, currentUser.isPending, health.data, health.error, health.fetchStatus, health.status, location.pathname, location.search, matchId, roomCode, routeState, viewport],
   );
 
   const gameState = useMemo(
@@ -605,6 +606,8 @@ function formatConsoleArg(value: unknown) {
     return String(value);
   }
 }
+
+
 
 
 

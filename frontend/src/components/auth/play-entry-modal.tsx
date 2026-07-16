@@ -1,17 +1,14 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+﻿import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { User2, LogIn, UserPlus, ArrowRight, ShieldCheck } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useAuth } from "@/contexts/auth";
 import { usePlayEntry } from "@/contexts/play-entry";
 
 export function PlayEntryModal() {
   const { open, closeEntry, intent } = usePlayEntry();
-  const { continueAsGuest } = useAuth();
   const navigate = useNavigate();
 
   const handleGuest = () => {
-    continueAsGuest();
     closeEntry();
     void navigate({ to: "/app/play" });
   };
@@ -53,7 +50,7 @@ export function PlayEntryModal() {
                   </span>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Start playing in one click. Progress is stored on this device.
+                  Start playing in one click. Local and bot modes do not require an account.
                 </p>
               </div>
               <ArrowRight className="size-4 -translate-x-1 text-muted-foreground transition-all group-hover:translate-x-0 group-hover:text-foreground" />

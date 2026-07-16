@@ -1,41 +1,28 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+﻿import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
-import { authApi } from "../services/api/auth.api";
-import { CURRENT_USER_QUERY_KEY } from "./useCurrentUser";
-import type { LoginRequest } from "../types/api";
+import { authApi } from "@/api/auth.api";
+import { getApiErrorMessage } from "@/lib/api-error";
+import { setAccessToken } from "@/services/client";
+import type { LoginRequest } from "@/types/auth";
+import { authKeys } from "./auth.keys";
 
-/**
- * Handles user login.
- *
- * Responsibilities:
- * - Send login request.
- * - Refresh the current-user query.
- * - Redirect after successful login.
- *
- * Does NOT:
- * - Store user manually.
- * - Manage tokens.
- * - Update global state.
- */
 export function useLogin() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
-
-    onSuccess: async () => {
-      /**
-       * Refresh the authenticated user.
-       *
-       * This calls GET /auth/me and updates the cache.
-       */
-      await queryClient.invalidateQueries({
-        queryKey: CURRENT_USER_QUERY_KEY,
-      });
-
-      navigate({ to: "/app/play" });
+    onSuccess: async (session) => {
+      setAccessToken(session.accessToken);
+      queryClient.setQueryData(authKeys.currentUser, session.user);
+      await queryClient.invalidateQueries({ queryKey: authKeys.currentUser });
+      void navigate({ to: "/app/play" });
     },
   });
+
+  return {
+    ...mutation,
+    errorMessage: mutation.error ? getApiErrorMessage(mutation.error, "Sign in failed.") : null,
+  };
 }

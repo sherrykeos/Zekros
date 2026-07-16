@@ -1,8 +1,8 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Mail, RefreshCcw, Pencil } from "lucide-react";
 import { AuthShell, FormField, TextInput, PrimaryButton } from "@/components/auth/auth-shell";
-import { api } from "@/services/client";
+import { useResendVerification } from "@/hooks/useResendVerification";
 
 export const Route = createFileRoute("/auth/check-email")({
   validateSearch: (search) => ({
@@ -15,33 +15,24 @@ export const Route = createFileRoute("/auth/check-email")({
 function CheckEmailPage() {
   const { email } = Route.useSearch();
   const [emailInput, setEmailInput] = useState(email);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const resendVerification = useResendVerification();
   const navigate = useNavigate();
 
   const targetEmail = emailInput.trim().toLowerCase();
 
-  const handleResend = async () => {
-    setMessage(null);
-    setError(null);
+  const handleResend = () => {
+    setValidationError(null);
 
     if (!targetEmail) {
-      setError("Enter the email address you used to create your account.");
+      setValidationError("Enter the email address you used to create your account.");
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await api.post("/auth/resend-verification", { email: targetEmail });
-      setMessage(response.data?.message ?? "Verification email sent successfully.");
-    } catch (error: any) {
-      setError(error.response?.data?.message ?? "Could not resend the verification email.");
-    } finally {
-      setLoading(false);
-    }
+    resendVerification.mutate(targetEmail);
   };
+
+  const error = validationError ?? resendVerification.errorMessage;
 
   return (
     <AuthShell
@@ -78,9 +69,9 @@ function CheckEmailPage() {
           </div>
         )}
 
-        {message && (
+        {resendVerification.data?.message && (
           <div className="mt-4 w-full rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs text-emerald-200">
-            {message}
+            {resendVerification.data.message}
           </div>
         )}
 
@@ -91,7 +82,7 @@ function CheckEmailPage() {
         )}
 
         <div className="mt-6 w-full space-y-3">
-          <PrimaryButton type="button" loading={loading} onClick={handleResend}>
+          <PrimaryButton type="button" loading={resendVerification.isPending} onClick={handleResend}>
             <RefreshCcw className="size-4" /> Resend email
           </PrimaryButton>
           <button

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
@@ -13,13 +13,13 @@ import { Featured } from "@/components/play/featured";
 import { CreateRoomModal } from "@/components/play/modals/create-room";
 import { JoinRoomModal } from "@/components/play/modals/join-room";
 import { CustomMatchModal } from "@/components/play/modals/custom-match";
-import { useAuth } from "@/contexts/auth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { usePlayEntry } from "@/contexts/play-entry";
 
 export const Route = createFileRoute("/app/play")({
   head: () => ({
     meta: [
-      { title: "Play — ZEKROS" },
+      { title: "Play â€” ZEKROS" },
       { name: "description", content: "The ZEKROS Play Hub. Pick a mode, match an opponent, or jump back into a game." },
     ],
   }),
@@ -34,10 +34,10 @@ function PlayPage() {
   const [openCustom, setOpenCustom] = useState(false);
   const [joinCode, setJoinCode] = useState("");
   const navigate = useNavigate();
-  const { status } = useAuth();
+  const currentUser = useCurrentUser();
   const { openAccountRequired } = usePlayEntry();
 
-  const isGuest = status === "guest" || status === "anonymous";
+  const isGuest = !currentUser.data;
 
   // TODO: in Phase 5 hand off the chosen mode/config to a match-launch service.
   const handleQuickAction = (id: string) => {
@@ -112,3 +112,4 @@ function PlayPage() {
     </motion.div>
   );
 }
+

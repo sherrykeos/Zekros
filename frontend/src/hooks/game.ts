@@ -1,9 +1,9 @@
-import {
+﻿import {
   useMutation,
   useQuery,
 } from "@tanstack/react-query";
 
-import gameService from "../services/api/auth.gameService";
+import gameService from "../services/api/gameService";
 
 export function useGameState(matchId: string) {
   return useQuery({
