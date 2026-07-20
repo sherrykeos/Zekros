@@ -1,4 +1,4 @@
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 @source "../src";
 @import "tw-animate-css";
 
@@ -48,8 +48,11 @@
   --color-smoke: var(--smoke);
   --color-bone: var(--bone);
 
-  --shadow-glass: 0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 0 0 1px rgb(255 255 255 / 0.04), 0 20px 60px -20px rgb(0 0 0 / 0.6);
-  --shadow-elevated: 0 1px 0 0 rgb(255 255 255 / 0.05) inset, 0 30px 80px -30px rgb(0 0 0 / 0.8);
+  --shadow-glass:
+    0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 0 0 1px rgb(255 255 255 / 0.04),
+    0 20px 60px -20px rgb(0 0 0 / 0.6);
+  --shadow-elevated:
+    0 1px 0 0 rgb(255 255 255 / 0.05) inset, 0 30px 80px -30px rgb(0 0 0 / 0.8);
   --shadow-glow: 0 0 60px -10px rgb(255 255 255 / 0.08);
 }
 
@@ -77,7 +80,7 @@
   --secondary: oklch(0.22 0 0);
   --secondary-foreground: oklch(0.98 0 0);
 
-  --muted: oklch(0.20 0 0);
+  --muted: oklch(0.2 0 0);
   --muted-foreground: oklch(0.62 0 0);
 
   --accent: oklch(0.24 0 0);
@@ -100,6 +103,7 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    scrollbar-color: #504b49 #1a1a1a;
   }
 
   body {
@@ -108,12 +112,23 @@
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "cv11";
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -10%, oklch(1 0 0 / 0.06), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 100%, oklch(1 0 0 / 0.03), transparent 60%);
+      radial-gradient(
+        ellipse 80% 50% at 50% -10%,
+        oklch(1 0 0 / 0.06),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 60% 40% at 80% 100%,
+        oklch(1 0 0 / 0.03),
+        transparent 60%
+      );
     background-attachment: fixed;
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     letter-spacing: -0.025em;
     font-weight: 600;
@@ -134,7 +149,7 @@
 @utility glass-strong {
   background: linear-gradient(180deg, oklch(1 0 0 / 0.08), oklch(1 0 0 / 0.03));
   backdrop-filter: blur(28px) saturate(160%);
-  border: 1px solid oklch(1 0 0 / 0.10);
+  border: 1px solid oklch(1 0 0 / 0.1);
   box-shadow: var(--shadow-glass);
 }
 
@@ -146,7 +161,12 @@
 }
 
 @utility hairline {
-  background-image: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.12), transparent);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.12),
+    transparent
+  );
   height: 1px;
 }
 
@@ -164,18 +184,33 @@
 }
 
 @keyframes float-piece {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes pulse-ring {
-  0% { transform: scale(0.95); opacity: 0.7; }
-  100% { transform: scale(1.4); opacity: 0; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }
 
 @utility animate-float {
