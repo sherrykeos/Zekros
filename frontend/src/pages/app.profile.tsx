@@ -84,7 +84,15 @@ function ProfilePage() {
             transition={{ type: "spring", stiffness: 280, damping: 22 }}
             className="relative grid size-20 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-white/30 to-white/5 font-display text-xl font-semibold ring-1 ring-white/15"
           >
-            {user.avatar ? <img src={user.avatar} alt="" className="size-full object-cover" /> : initials(user.username)}
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt=""
+                className="size-full object-cover"
+              />
+            ) : (
+              initials(user.username)
+            )}
           </motion.div>
 
           <div className="min-w-0 flex-1">
@@ -92,16 +100,22 @@ function ProfilePage() {
               <h1 className="font-display text-2xl font-semibold tracking-tight">
                 {user.username}
               </h1>
-              <Badge tone="solid">{user.isEmailVerified ? "Verified" : "Unverified"}</Badge>
+              <Badge tone="solid">
+                {user.isEmailVerified ? "Verified" : "Unverified"}
+              </Badge>
             </div>
-            <div className="mt-1 text-sm text-muted-foreground">{user.email}</div>
+            <div className="mt-1 text-sm text-muted-foreground">
+              {user.email}
+            </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                <Calendar className="size-3.5" /> Joined {formatDate(user.createdAt)}
+                <Calendar className="size-3.5" /> Joined{" "}
+                {formatDate(user.createdAt)}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Crown className="size-3.5" /> Provider: {user.provider ?? "LOCAL"}
+                <Crown className="size-3.5" /> Provider:{" "}
+                {user.provider ?? "LOCAL"}
               </span>
             </div>
           </div>
@@ -113,7 +127,10 @@ function ProfilePage() {
       </GlassPanel>
 
       <section>
-        <SectionHeader title="Lifetime statistics" description="Stats will populate from the stats feature API." />
+        <SectionHeader
+          title="Lifetime statistics"
+          description="Stats will populate from the stats feature API."
+        />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {emptyStats.map((s) => (
             <StatCard key={s.label} {...s} />

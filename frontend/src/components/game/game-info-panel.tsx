@@ -2,11 +2,16 @@ import { motion } from "motion/react";
 import { User, Brain, Sparkles, Users, Settings2 } from "lucide-react";
 import type { MatchConfig, Player } from "./types";
 
-const modeMeta: Record<MatchConfig["mode"], { label: string; icon: typeof User }> = {
+const modeMeta: Record<
+  MatchConfig["mode"],
+  { label: string; icon: typeof User }
+> = {
   local: { label: "Local PvP", icon: Users },
   smart: { label: "Smart AI", icon: Brain },
   perfect: { label: "Perfect AI", icon: Sparkles },
   multiplayer: { label: "Multiplayer", icon: Users },
+  quick: { label: "Quick Play", icon: Sparkles },
+  custom: { label: "Custom Match", icon: Settings2 },
 };
 
 export function GameInfoPanel({
@@ -34,7 +39,12 @@ export function GameInfoPanel({
       </header>
 
       <div className="space-y-2">
-        <PlayerRow name={playerName} symbol={config.playerSymbol} active={turn === config.playerSymbol} you />
+        <PlayerRow
+          name={playerName}
+          symbol={config.playerSymbol}
+          active={turn === config.playerSymbol}
+          you
+        />
         <PlayerRow
           name={opponentName}
           symbol={config.playerSymbol === "x" ? "o" : "x"}
@@ -49,7 +59,10 @@ export function GameInfoPanel({
           <Settings2 className="size-3" /> Configuration
         </div>
         <dl className="grid grid-cols-2 gap-y-1.5 text-xs">
-          <Stat label="Board" value={`${config.boardSize}×${config.boardSize}`} />
+          <Stat
+            label="Board"
+            value={`${config.boardSize}×${config.boardSize}`}
+          />
           <Stat label="Win" value={`${config.winLength} in a row`} />
           <Stat label="Active" value={`${config.maxActivePieces} max`} />
           <Stat label="Reclaim" value={`${config.reclaimTokens} tokens`} />
@@ -76,7 +89,9 @@ function PlayerRow({
     <motion.div
       animate={{ opacity: active ? 1 : 0.55 }}
       className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors ${
-        active ? "border-white/20 bg-white/[0.06]" : "border-white/[0.06] bg-white/[0.02]"
+        active
+          ? "border-white/20 bg-white/[0.06]"
+          : "border-white/[0.06] bg-white/[0.02]"
       }`}
     >
       <div className="grid size-8 place-items-center rounded-lg border border-white/10 bg-white/[0.04] font-mono text-xs">

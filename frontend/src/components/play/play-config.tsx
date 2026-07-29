@@ -15,7 +15,12 @@ import {
 
 import { GlassPanel, SectionHeader } from "@/components/app/primitives";
 import { Slider } from "@/components/ui/slider";
-import { defaultConfig, normalizeMatchConfig, type MatchConfig, type GameMode } from "@/components/game/types";
+import {
+  defaultConfig,
+  normalizeMatchConfig,
+  type MatchConfig,
+  type GameMode,
+} from "@/components/game/types";
 import { Board } from "@/components/game/board";
 import { cn } from "@/lib/utils";
 
@@ -30,16 +35,58 @@ type ModeOption = {
 };
 
 const modeOptions: ModeOption[] = [
-  { id: "quick", label: "Quick Match", description: "Fast setup for a local duel.", icon: Users, badge: "Instant" },
-  { id: "local", label: "Local PvP", description: "Shared device, split-screen feel.", icon: Users, badge: "Same screen" },
-  { id: "smart", label: "Play vs AI", description: "Adaptive AI with a tactical edge.", icon: Brain, badge: "Adaptive" },
-  { id: "perfect", label: "Perfect AI", description: "A ruthless solver for deeper practice.", icon: Sparkles, badge: "Challenging" },
-  { id: "custom", label: "Custom Room", description: "Bring your own rules into the mix.", icon: Settings2, badge: "Flexible" },
-  { id: "multiplayer", label: "Multiplayer", description: "Online match with a live opponent.", icon: Wifi, badge: "Live" },
+  {
+    id: "quick",
+    label: "Quick Match",
+    description: "Fast setup for a local duel.",
+    icon: Users,
+    badge: "Instant",
+  },
+  {
+    id: "local",
+    label: "Local PvP",
+    description: "Shared device, split-screen feel.",
+    icon: Users,
+    badge: "Same screen",
+  },
+  {
+    id: "smart",
+    label: "Play vs AI",
+    description: "Adaptive AI with a tactical edge.",
+    icon: Brain,
+    badge: "Adaptive",
+  },
+  {
+    id: "perfect",
+    label: "Perfect AI",
+    description: "A ruthless solver for deeper practice.",
+    icon: Sparkles,
+    badge: "Challenging",
+  },
+  {
+    id: "custom",
+    label: "Custom Room",
+    description: "Bring your own rules into the mix.",
+    icon: Settings2,
+    badge: "Flexible",
+  },
+  {
+    id: "multiplayer",
+    label: "Multiplayer",
+    description: "Online match with a live opponent.",
+    icon: Wifi,
+    badge: "Live",
+  },
 ];
 
-function clampConfig(initial?: Partial<MatchConfig>, initialMode?: ConfigMode): MatchConfig {
-  const merged = normalizeMatchConfig({ ...initial, mode: initialMode ?? initial?.mode ?? defaultConfig.mode });
+function clampConfig(
+  initial?: Partial<MatchConfig>,
+  initialMode?: ConfigMode,
+): MatchConfig {
+  const merged = normalizeMatchConfig({
+    ...initial,
+    mode: initialMode ?? initial?.mode ?? defaultConfig.mode,
+  });
   if (merged.reclaimTokens > 10) merged.reclaimTokens = 10;
   return merged;
 }
@@ -55,7 +102,9 @@ export function GameConfigurationPage({
   onStart?: (config: MatchConfig) => void | Promise<void>;
   isStarting?: boolean;
 }) {
-  const [config, setConfig] = useState<MatchConfig>(() => clampConfig(initialConfig, initialMode));
+  const [config, setConfig] = useState<MatchConfig>(() =>
+    clampConfig(initialConfig, initialMode),
+  );
 
   useEffect(() => {
     setConfig((current) => {
@@ -84,11 +133,15 @@ export function GameConfigurationPage({
     return cells;
   }, [config.boardSize]);
 
-  const update = <K extends keyof MatchConfig>(key: K, value: MatchConfig[K]) => {
+  const update = <K extends keyof MatchConfig>(
+    key: K,
+    value: MatchConfig[K],
+  ) => {
     setConfig((current) => ({ ...current, [key]: value }));
   };
 
-  const activeMode = modeOptions.find((option) => option.id === config.mode) ?? modeOptions[2];
+  const activeMode =
+    modeOptions.find((option) => option.id === config.mode) ?? modeOptions[2];
 
   return (
     <motion.div
@@ -110,7 +163,8 @@ export function GameConfigurationPage({
           Set the rules before the first move.
         </h1>
         <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-          This single screen now handles quick matches, AI duels, local play, and custom rooms without changing the experience.
+          This single screen now handles quick matches, AI duels, local play,
+          and custom rooms without changing the experience.
         </p>
       </motion.header>
 
@@ -134,7 +188,7 @@ export function GameConfigurationPage({
                       "group flex items-start gap-3 rounded-2xl border p-3.5 text-left transition-all",
                       active
                         ? "border-white/20 bg-white/[0.08] shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
-                        : "border-white/[0.06] bg-white/[0.03] hover:border-white/15 hover:bg-white/[0.05]"
+                        : "border-white/[0.06] bg-white/[0.03] hover:border-white/15 hover:bg-white/[0.05]",
                     )}
                   >
                     <div className="mt-0.5 grid size-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04]">
@@ -142,7 +196,9 @@ export function GameConfigurationPage({
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-medium">{option.label}</span>
+                        <span className="text-sm font-medium">
+                          {option.label}
+                        </span>
                         {active && <Check className="size-4 text-foreground" />}
                       </div>
                       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -171,7 +227,9 @@ export function GameConfigurationPage({
                 max={6}
                 step={1}
                 display={`${config.boardSize}Ã—${config.boardSize}`}
-                onChange={(value) => update("boardSize", value as MatchConfig["boardSize"])}
+                onChange={(value) =>
+                  update("boardSize", value as MatchConfig["boardSize"])
+                }
               />
             </div>
           </GlassPanel>
@@ -202,14 +260,32 @@ export function GameConfigurationPage({
             </div>
 
             <div className="mt-5 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-3">
-              <Board size={config.boardSize} cells={previewCells} currentPlayer={config.startingPlayer} disabled />
+              <Board
+                size={config.boardSize}
+                cells={previewCells}
+                currentPlayer={config.startingPlayer}
+                disabled
+              />
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <InfoPill label="Mode" value={activeMode.label} />
-              <InfoPill label="Reclaim" value={config.reclaimTokens === 0 ? "Off" : `${config.reclaimTokens} tokens`} />
-              <InfoPill label="Active pieces" value={`${config.maxActivePieces} / side`} />
-              <InfoPill label="Start" value={config.startingPlayer.toUpperCase()} />
+              <InfoPill
+                label="Reclaim"
+                value={
+                  config.reclaimTokens === 0
+                    ? "Off"
+                    : `${config.reclaimTokens} tokens`
+                }
+              />
+              <InfoPill
+                label="Active pieces"
+                value={`${config.maxActivePieces} / side`}
+              />
+              <InfoPill
+                label="Start"
+                value={config.startingPlayer.toUpperCase()}
+              />
             </div>
           </GlassPanel>
 
@@ -228,14 +304,25 @@ export function GameConfigurationPage({
               </div>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              Rules are created on the backend before the match opens, including bot and reclaim behavior.
+              Rules are created on the backend before the match opens, including
+              bot and reclaim behavior.
             </p>
-            <StartButton config={config} isStarting={isStarting} onStart={onStart} className="mt-5 hidden md:inline-flex" />
+            <StartButton
+              config={config}
+              isStarting={isStarting}
+              onStart={onStart}
+              className="mt-5 hidden md:inline-flex"
+            />
           </GlassPanel>
         </div>
       </div>
       <div className="sticky bottom-3 z-20 mt-6 rounded-2xl border border-white/10 bg-background/90 p-2 shadow-2xl backdrop-blur md:hidden">
-        <StartButton config={config} isStarting={isStarting} onStart={onStart} className="w-full justify-center" />
+        <StartButton
+          config={config}
+          isStarting={isStarting}
+          onStart={onStart}
+          className="w-full justify-center"
+        />
       </div>
     </motion.div>
   );
@@ -352,13 +439,10 @@ function SliderField({
 function InfoPill({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3 py-3">
-      <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
+      <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </div>
       <div className="mt-1 text-sm font-medium text-foreground">{value}</div>
     </div>
   );
 }
-
-
-
-
-

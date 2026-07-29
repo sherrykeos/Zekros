@@ -22,6 +22,8 @@ export function useLogout() {
 
   return {
     ...mutation,
-    errorMessage: mutation.error ? getApiErrorMessage(mutation.error, "Sign out failed.") : null,
+    errorMessage: mutation.error
+      ? getApiErrorMessage(mutation.error, "Sign out failed.")
+      : null,
   };
 }

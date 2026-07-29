@@ -40,8 +40,9 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.15, ease }}
             className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg"
           >
-            ZEKROS is a real-time strategy game where boards adapt, pieces vanish,
-            and every move compounds. A minimal surface hiding a deep, evolving lattice of decisions.
+            ZEKROS is a real-time strategy game where boards adapt, pieces
+            vanish, and every move compounds. A minimal surface hiding a deep,
+            evolving lattice of decisions.
           </motion.p>
 
           <motion.div

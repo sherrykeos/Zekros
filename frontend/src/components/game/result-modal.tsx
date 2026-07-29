@@ -68,8 +68,12 @@ export function ResultModal({
           <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
             {m.eyebrow}
           </div>
-          <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight">{m.title}</h2>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{m.description}</p>
+          <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight">
+            {m.title}
+          </h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+            {m.description}
+          </p>
 
           <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             Duration · {mm}:{ss}

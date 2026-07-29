@@ -19,7 +19,10 @@ const mockMatch = {
 export function ContinueMatch({ onResume }: { onResume?: () => void }) {
   return (
     <section>
-      <SectionHeader title="Continue match" description="You have a game in progress." />
+      <SectionHeader
+        title="Continue match"
+        description="You have a game in progress."
+      />
       <motion.div
         whileHover={{ y: -2 }}
         transition={{ type: "spring", stiffness: 300, damping: 24 }}

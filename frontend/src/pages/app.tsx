@@ -9,7 +9,10 @@ export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
       { title: "ZEKROS — Console" },
-      { name: "description", content: "The ZEKROS application shell. Play, analyze, and configure." },
+      {
+        name: "description",
+        content: "The ZEKROS application shell. Play, analyze, and configure.",
+      },
     ],
   }),
   component: AppLayout,
@@ -24,9 +27,7 @@ function AppLayout() {
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <TopBar />
-          <motion.main
-            className="glass flex-1 overflow-y-auto rounded-2xl"
-          >
+          <motion.main className="glass flex-1 overflow-y-auto rounded-2xl">
             <div className="p-5 sm:p-7">
               <Outlet />
             </div>

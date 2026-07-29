@@ -11,7 +11,10 @@ export function useResendVerification() {
   return {
     ...mutation,
     errorMessage: mutation.error
-      ? getApiErrorMessage(mutation.error, "Could not resend the verification email.")
+      ? getApiErrorMessage(
+          mutation.error,
+          "Could not resend the verification email.",
+        )
       : null,
   };
 }

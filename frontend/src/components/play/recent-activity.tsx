@@ -4,10 +4,38 @@ import { SectionHeader } from "@/components/app/primitives";
 
 // TODO: hydrate via `GET /matches/recent` (backend, Phase 4).
 const items = [
-  { id: "m1", result: "win" as const, opponent: "Smart AI", mode: "4×4 · Reclaim", duration: "3m 12s", at: "2h ago" },
-  { id: "m2", result: "loss" as const, opponent: "Perfect AI", mode: "4×4 · Standard", duration: "4m 04s", at: "Yesterday" },
-  { id: "m3", result: "draw" as const, opponent: "Mira K.", mode: "5×5 · Endless", duration: "6m 47s", at: "Yesterday" },
-  { id: "m4", result: "win" as const, opponent: "Theo R.", mode: "4×4 · Reclaim", duration: "2m 51s", at: "2d ago" },
+  {
+    id: "m1",
+    result: "win" as const,
+    opponent: "Smart AI",
+    mode: "4×4 · Reclaim",
+    duration: "3m 12s",
+    at: "2h ago",
+  },
+  {
+    id: "m2",
+    result: "loss" as const,
+    opponent: "Perfect AI",
+    mode: "4×4 · Standard",
+    duration: "4m 04s",
+    at: "Yesterday",
+  },
+  {
+    id: "m3",
+    result: "draw" as const,
+    opponent: "Mira K.",
+    mode: "5×5 · Endless",
+    duration: "6m 47s",
+    at: "Yesterday",
+  },
+  {
+    id: "m4",
+    result: "win" as const,
+    opponent: "Theo R.",
+    mode: "4×4 · Reclaim",
+    duration: "2m 51s",
+    at: "2d ago",
+  },
 ];
 
 const tone = {
@@ -45,12 +73,16 @@ export function RecentActivity() {
               </span>
               <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
                 <div className="flex items-center gap-3">
-                  <div className={`grid size-9 place-items-center rounded-lg border border-white/10 bg-white/[0.04] ${T.cls}`}>
+                  <div
+                    className={`grid size-9 place-items-center rounded-lg border border-white/10 bg-white/[0.04] ${T.cls}`}
+                  >
                     <T.icon className="size-4" strokeWidth={1.6} />
                   </div>
                   <div className="min-w-0">
                     <div className="font-display text-sm font-semibold">
-                      {T.label} <span className="text-muted-foreground">vs</span> {it.opponent}
+                      {T.label}{" "}
+                      <span className="text-muted-foreground">vs</span>{" "}
+                      {it.opponent}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
                       {it.mode} · {it.duration} · {it.at}

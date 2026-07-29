@@ -5,7 +5,8 @@
 export type Player = "x" | "o";
 export type CellState = Player | null;
 
-export type GameMode = "local" | "smart" | "perfect" | "multiplayer" | "quick" | "custom";
+export type GameMode =
+  "local" | "smart" | "perfect" | "multiplayer" | "quick" | "custom";
 
 export type Piece = {
   id: string;
@@ -45,10 +46,36 @@ export const defaultConfig: MatchConfig = {
   startingPlayer: "x",
 };
 
-export function normalizeMatchConfig(config: Partial<MatchConfig> = {}): MatchConfig {
+export function maxActiveFor(size: number): number {
+  if (size === 3) return 3;
+  if (size === 4) return 5;
+  if (size === 5) return 8;
+  return 10;
+}
+
+export function normalizeMatchConfig(
+  config: Partial<MatchConfig> = {},
+): MatchConfig {
   const boardSize = config.boardSize ?? defaultConfig.boardSize;
-  const derivedMaxActivePieces = Math.min(boardSize, Math.max(1, config.maxActivePieces ?? boardSize));
   const derivedWinLength = boardSize as MatchConfig["winLength"];
+
+  const defaultActive = maxActiveFor(boardSize);
+  let minActive: number = boardSize;
+  let maxActive: number = boardSize;
+
+  if (boardSize === 3) {
+    minActive = 3;
+    maxActive = 3;
+  } else {
+    minActive = boardSize;
+    maxActive = 10;
+  }
+
+  const requestedActive = config.maxActivePieces ?? defaultActive;
+  const derivedMaxActivePieces = Math.min(
+    maxActive,
+    Math.max(minActive, requestedActive),
+  );
 
   return {
     ...defaultConfig,
@@ -56,6 +83,6 @@ export function normalizeMatchConfig(config: Partial<MatchConfig> = {}): MatchCo
     boardSize,
     winLength: derivedWinLength,
     maxActivePieces: derivedMaxActivePieces,
-    reclaimTokens: config.reclaimTokens ?? defaultConfig.reclaimTokens,
+    reclaimTokens: config.reclaimTokens ?? derivedMaxActivePieces,
   };
 }

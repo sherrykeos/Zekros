@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import {
@@ -31,7 +31,9 @@ function SignUpPage() {
   const register = useRegister();
 
   const strength = useMemo(() => score(password), [password]);
-  const strengthLabel = ["Too weak", "Weak", "Okay", "Strong", "Excellent"][strength];
+  const strengthLabel = ["Too weak", "Weak", "Okay", "Strong", "Excellent"][
+    strength
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +74,11 @@ function SignUpPage() {
       footer={
         <>
           Already have one?{" "}
-          <Link to="/auth/sign-in" className="text-foreground underline-offset-4 hover:underline">
+          <Link
+            to="/auth/sign-in"
+            search={{}}
+            className="text-foreground underline-offset-4 hover:underline"
+          >
             Sign in
           </Link>
         </>
@@ -130,7 +136,9 @@ function SignUpPage() {
           </div>
         )}
 
-        <PrimaryButton loading={register.isPending}>Create account</PrimaryButton>
+        <PrimaryButton loading={register.isPending}>
+          Create account
+        </PrimaryButton>
         <p className="text-center text-[11px] text-muted-foreground">
           By continuing you agree to our Terms and Privacy Policy.
         </p>

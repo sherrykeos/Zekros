@@ -16,7 +16,13 @@ const app = express();
 // Enable CORS
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      if (process.env.NODE_ENV === "development" || !origin) {
+        callback(null, true);
+      } else {
+        callback(null, process.env.FRONTEND_URL);
+      }
+    },
     credentials: true,
   }),
 );

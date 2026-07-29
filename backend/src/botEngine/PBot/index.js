@@ -12,13 +12,36 @@ class PBot {
       return null;
     }
 
-    const orderedMoves = planMoves(game, botSymbol);
+    const legalMoves = game.getValidMoves();
 
-    if (orderedMoves.length === 0) {
+    if (legalMoves.length === 0) {
       return null;
     }
 
-    let bestMove = null;
+    const opponentSymbol = botSymbol === "X" ? "O" : "X";
+
+    // 1. Immediate Win check: If bot can win right now, ALWAYS take it!
+    for (const move of legalMoves) {
+      const sim = game.clone();
+      const res = sim.makeMove(move.id);
+      if (res.success && (sim.getWinner() === botSymbol || sim.winner === botSymbol)) {
+        return move.id;
+      }
+    }
+
+    // 2. Immediate Block check: If opponent can win next turn, ALWAYS block it!
+    for (const move of legalMoves) {
+      const sim = game.clone();
+      sim.currentTurn = opponentSymbol;
+      const res = sim.makeMove(move.id);
+      if (res.success && (sim.getWinner() === opponentSymbol || sim.winner === opponentSymbol)) {
+        return move.id;
+      }
+    }
+
+    // 3. Minimax search with ordered moves and heuristic evaluation
+    const orderedMoves = planMoves(game, botSymbol);
+    let bestMove = orderedMoves[0]?.id ?? legalMoves[0].id;
     let bestScore = Number.NEGATIVE_INFINITY;
     let alpha = config.INITIAL_ALPHA;
     const beta = config.INITIAL_BETA;
@@ -31,6 +54,10 @@ class PBot {
         continue;
       }
 
+      if (simulatedGame.getWinner() === botSymbol) {
+        return move.id;
+      }
+
       const score = brain({
         game: simulatedGame,
         depth: this.depth - 1,
@@ -40,7 +67,7 @@ class PBot {
         botSymbol,
       });
 
-      if (bestMove === null || score > bestScore) {
+      if (score > bestScore) {
         bestScore = score;
         bestMove = move.id;
       }

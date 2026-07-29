@@ -1,4 +1,4 @@
-﻿import { useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth.api";
@@ -12,13 +12,15 @@ export function useResetPassword() {
     mutationFn: (data: ResetPasswordRequest) => authApi.resetPassword(data),
     onSuccess: () => {
       window.setTimeout(() => {
-        void navigate({ to: "/auth/sign-in" });
+        void navigate({ to: "/auth/sign-in", search: {} });
       }, 1200);
     },
   });
 
   return {
     ...mutation,
-    errorMessage: mutation.error ? getApiErrorMessage(mutation.error, "Could not reset password.") : null,
+    errorMessage: mutation.error
+      ? getApiErrorMessage(mutation.error, "Could not reset password.")
+      : null,
   };
 }

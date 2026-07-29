@@ -30,14 +30,15 @@ export function PlayHero({ onQuickPlay }: { onQuickPlay?: () => void }) {
       <div className="relative flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-bone" /> Welcome back, Player
+            <span className="size-1.5 rounded-full bg-bone" /> Welcome back,
+            Player
           </div>
           <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-5xl">
             Ready to play.
           </h1>
           <p className="mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
-            Pick a mode, summon an opponent, or jump into a quick match. Every game evolves —
-            no two boards play the same.
+            Pick a mode, summon an opponent, or jump into a quick match. Every
+            game evolves — no two boards play the same.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <motion.button

@@ -1,4 +1,6 @@
 import RoomManager from "../managers/RoomManager.js";
+import connectionEvents from "../socket/events/connectionEvents.js";
+import { createRoomResponse } from "../utils/socket.utils.js";
 
 /**
  * Handles room-related requests.
@@ -12,7 +14,7 @@ class RoomController {
      */
     static async createRoom(req, res, next) {
         try {
-            const { roomOptions } = req.body;
+            const roomOptions = req.body?.roomOptions ?? req.body;
             const result = await RoomManager.createRoom(roomOptions);
 
             if (result.success) {
@@ -48,6 +50,36 @@ class RoomController {
     }
 
     /**
+     * Regenerates the room code.
+     * @param {import('express').Request} req - The Express request object.
+     * @param {import('express').Response} res - The Express response object.
+     * @param {import('express').NextFunction} next - The Express next middleware function.
+     */
+    static async regenerateCode(req, res, next) {
+        try {
+            const { roomId } = req.params;
+            const result = await RoomManager.regenerateRoomCode(roomId);
+
+            if (result.success) {
+                const newRoom = result.data;
+                const newCode = newRoom.code;
+                const io = req.app.get("io");
+                if (io) {
+                    connectionEvents.migrateRoomSockets(io, roomId, newCode);
+                    const roomResponse = createRoomResponse(result);
+                    io.to(newCode).emit("room:update", roomResponse);
+                    io.to(newCode).emit("room-updated", roomResponse);
+                }
+                res.status(200).json(result);
+            } else {
+                res.status(404).json(result);
+            }
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
      * Joins a player to a room.
      * @param {import('express').Request} req - The Express request object.
      * @param {import('express').Response} res - The Express response object.
@@ -60,7 +92,13 @@ class RoomController {
             const result = await RoomManager.joinRoom(roomId, playerInfo);
 
             if (result.success) {
-                res.status(200).json(result);
+                const roomRes = RoomManager.getRoom(roomId);
+                const roomData = roomRes.success ? roomRes.data.getState() : result.data;
+                const io = req.app.get("io");
+                if (io && roomRes.success) {
+                    io.to(roomRes.data.code).emit("room:update", { success: true, data: roomData });
+                }
+                res.status(200).json({ success: true, data: roomData });
             } else {
                 const statusCode = result.error.code === 'ROOM_FULL' || result.error.code === 'PLAYER_ALREADY_JOINED'
                     ? 409

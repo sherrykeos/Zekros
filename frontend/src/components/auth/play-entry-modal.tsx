@@ -23,13 +23,16 @@ export function PlayEntryModal() {
           <div className="pointer-events-none absolute -top-24 left-1/2 size-56 -translate-x-1/2 rounded-full bg-white/[0.06] blur-3xl" />
           <div className="text-center">
             <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-              {intent === "multiplayer" ? "Multiplayer access" : "Welcome to ZEKROS"}
+              {intent === "multiplayer"
+                ? "Multiplayer access"
+                : "Welcome to ZEKROS"}
             </div>
             <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight">
               How would you like to continue?
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Jump straight in as a guest, or sign in to unlock multiplayer and cloud history.
+              Jump straight in as a guest, or sign in to unlock multiplayer and
+              cloud history.
             </p>
           </div>
 
@@ -44,13 +47,16 @@ export function PlayEntryModal() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <div className="font-display text-sm font-semibold">Continue as guest</div>
+                  <div className="font-display text-sm font-semibold">
+                    Continue as guest
+                  </div>
                   <span className="rounded-md border border-white/15 bg-white/[0.06] px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-bone">
                     Fastest
                   </span>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Start playing in one click. Local and bot modes do not require an account.
+                  Start playing in one click. Local and bot modes do not require
+                  an account.
                 </p>
               </div>
               <ArrowRight className="size-4 -translate-x-1 text-muted-foreground transition-all group-hover:translate-x-0 group-hover:text-foreground" />
@@ -77,8 +83,9 @@ export function PlayEntryModal() {
           <div className="mt-6 flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
             <ShieldCheck className="size-3.5 shrink-0 text-muted-foreground" />
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              Guest mode supports Local PvP, Smart AI and Perfect AI. Multiplayer and cross-device
-              history require a free ZEKROS account.
+              Guest mode supports Local PvP, Smart AI and Perfect AI.
+              Multiplayer and cross-device history require a free ZEKROS
+              account.
             </p>
           </div>
         </div>
@@ -111,7 +118,9 @@ function EntryOption({
       </div>
       <div className="min-w-0">
         <div className="font-display text-sm font-semibold">{title}</div>
-        <div className="mt-0.5 text-xs text-muted-foreground">{description}</div>
+        <div className="mt-0.5 text-xs text-muted-foreground">
+          {description}
+        </div>
       </div>
     </Link>
   );

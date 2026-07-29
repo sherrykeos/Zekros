@@ -1,12 +1,22 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Copy, RefreshCcw } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useCreateRoom } from "@/hooks/room";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useCreateRoom } from "@/hooks/room.hooks";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 function genCode() {
-  const s = Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+  const s = Math.random()
+    .toString(36)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 4);
   return `ZK-${s.padEnd(4, "X")}`;
 }
 
@@ -18,36 +28,44 @@ export function CreateRoomModal({
   onOpenChange: (v: boolean) => void;
 }) {
   const [code, setCode] = useState(genCode());
-  const [visibility, setVisibility] = useState<"private" | "unlisted">("private");
+  const [visibility, setVisibility] = useState<"private" | "unlisted">(
+    "private",
+  );
   const navigate = useNavigate();
   const { data: user } = useCurrentUser();
-  const { mutateAsync: createRoom, isPending: isCreatingRoom } = useCreateRoom();
+  const { mutateAsync: createRoom, isPending: isCreatingRoom } =
+    useCreateRoom();
 
   const handleCreate = async () => {
     try {
       const result = await createRoom({
-        host: {
-          id: user?.id ?? `local_${Date.now()}`,
-          name: user?.username ?? "Local Player",
-        },
-        settings: {
-          gameMode: "HUMAN_VS_HUMAN",
-          isPrivate: visibility === "private",
-        },
-        metadata: {
-          source: "frontend",
+        roomOptions: {
+          host: {
+            id: user?.id ?? `local_${Date.now()}`,
+            name: user?.username ?? "Local Player",
+          },
+          settings: {
+            gameMode: "HUMAN_VS_HUMAN",
+            isPrivate: visibility === "private",
+          },
+          metadata: {
+            source: "frontend",
+          },
         },
       });
 
-      if (result?.success) {
-        const roomCode = result.data?.code ?? code;
+      if (result) {
+        const roomCode = result.code ?? code;
         setCode(roomCode);
         onOpenChange(false);
-        void navigate({ to: "/app/lobby", state: { roomCode, room: result.data } });
+        void navigate({
+          to: "/app/lobby",
+          state: { roomCode, room: result } as any,
+        });
         return;
       }
 
-      console.error(result?.error?.message ?? "Unable to create room.");
+      console.error("Unable to create room.");
     } catch (error) {
       console.error(error);
     }
@@ -134,4 +152,3 @@ export function CreateRoomModal({
     </Dialog>
   );
 }
-

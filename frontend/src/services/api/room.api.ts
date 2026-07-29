@@ -26,6 +26,20 @@ export const roomApi = {
 
   /**
    * ----------------------------------------------------------
+   * Regenerate Room Code
+   * POST /rooms/:roomId/regenerate
+   * ----------------------------------------------------------
+   */
+  async regenerateRoomCode(roomId: string) {
+    const response = await api.post<RoomResponse>(
+      `/rooms/${roomId}/regenerate`,
+    );
+
+    return response.data.data;
+  },
+
+  /**
+   * ----------------------------------------------------------
    * Get Room
    * GET /rooms/:roomId
    * ----------------------------------------------------------
@@ -67,8 +81,9 @@ export const roomApi = {
    * POST /rooms/:roomId/start
    * ----------------------------------------------------------
    */
-  async startMatch(data: StartMatchRequest): Promise<void> {
-    await api.post(`/rooms/${data.roomId}/start`, data);
+  async startMatch(data: StartMatchRequest) {
+    const response = await api.post(`/rooms/${data.roomId}/start`, data);
+    return response.data.data;
   },
 
   /**

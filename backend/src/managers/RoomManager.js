@@ -26,7 +26,9 @@ class RoomManager {
     this.rooms = new Map();
   }
 
-  createRoom({ host = null, settings = {}, metadata = {}, codeLength } = {}) {
+  createRoom(options = {}) {
+    const { settings = {}, metadata = {}, codeLength } = options;
+    const host = options.host ?? options.hostOptions ?? options.playerInfo ?? null;
     const gameMode = this.botService.resolveMode({ config: settings, metadata });
 
     if (!gameMode) {
@@ -62,6 +64,30 @@ class RoomManager {
     if (!room) {
       return failure(ROOM_MANAGER_ERRORS.ROOM_NOT_FOUND, "Room not found.");
     }
+
+    return success(room);
+  }
+
+  regenerateRoomCode(roomCode, codeLength = 6) {
+    const code = this.normalizeRoomCode(roomCode);
+    const room = this.findRoom(code);
+
+    if (!room) {
+      return failure(ROOM_MANAGER_ERRORS.ROOM_NOT_FOUND, "Room not found.");
+    }
+
+    if (room.status === Room.STATUS.CLOSED) {
+      return failure(ROOM_MANAGER_ERRORS.ROOM_CLOSED, "Room is closed.");
+    }
+
+    let newCode = generateRoomCode(codeLength);
+    while (this.rooms.has(newCode)) {
+      newCode = generateRoomCode(codeLength);
+    }
+
+    this.rooms.delete(code);
+    room.code = newCode;
+    this.rooms.set(newCode, room);
 
     return success(room);
   }
@@ -120,7 +146,7 @@ class RoomManager {
     return success(room.addPlayer(participant));
   }
 
-  leaveRoom(roomCode, participant) {
+  async leaveRoom(roomCode, participant) {
     const room = this.findRoom(roomCode);
 
     if (!room) {
@@ -132,6 +158,13 @@ class RoomManager {
 
     if (!removedParticipant) {
       return failure(ROOM_MANAGER_ERRORS.PLAYER_NOT_FOUND, "Participant not found in room.");
+    }
+
+    if (removedPlayer && room.currentMatch && !room.currentMatch.game.isGameOver()) {
+      const remainingPlayer = room.players.find((p) => p.id !== removedPlayer.id);
+      const winnerSymbol = remainingPlayer ? remainingPlayer.symbol : null;
+      await this.matchManager.finishMatch(room.currentMatch.id, winnerSymbol);
+      room.clearMatch();
     }
 
     if (room.players.length === 0 && room.spectators.length === 0) {
@@ -187,7 +220,11 @@ class RoomManager {
     }
 
     if (room.currentMatch) {
-      return failure(ROOM_MANAGER_ERRORS.MATCH_ALREADY_RUNNING, "Room already has an active match.");
+      if (room.currentMatch.status === Room.STATUS.FINISHED || room.currentMatch.game?.isGameOver?.()) {
+        room.clearMatch();
+      } else {
+        return failure(ROOM_MANAGER_ERRORS.MATCH_ALREADY_RUNNING, "Room already has an active match.");
+      }
     }
 
     if (!config) {
@@ -286,10 +323,34 @@ class RoomManager {
     return this.matchManager.makeMove(matchId, {
       playerId,
       move,
+      allowBot: false,
       metadata: {
         roomCode: room.code,
         playerName: player.name,
       },
+    });
+  }
+
+  async executeBotTurn(roomCode, matchId) {
+    const room = this.findRoom(roomCode);
+
+    if (!room) {
+      return failure(ROOM_MANAGER_ERRORS.ROOM_NOT_FOUND, "Room not found.");
+    }
+
+    if (!room.currentMatch || room.currentMatch.id !== matchId) {
+      return failure(ROOM_MANAGER_ERRORS.MATCH_NOT_RUNNING, "Match is not active.");
+    }
+
+    const botResponse = await this.matchManager.executeBotTurns(room.currentMatch);
+
+    if (!botResponse.success || !botResponse.data?.length) {
+      return botResponse;
+    }
+
+    return success({
+      match: room.currentMatch,
+      appliedMoves: botResponse.data,
     });
   }
 
@@ -337,6 +398,8 @@ class RoomManager {
     if (!this.canCreateRematch(previousMatch)) {
       return failure(ROOM_MANAGER_ERRORS.MATCH_ALREADY_RUNNING, "Cannot create a rematch while the match is still in progress.");
     }
+
+    this.assignSymbolsForMatch(room, room.settings.gameMode || previousMatch.config.gameMode);
 
     const roomSnapshot = this.captureRoomSnapshot(room);
     const metadata = this.createRematchMetadata(room, previousMatch);

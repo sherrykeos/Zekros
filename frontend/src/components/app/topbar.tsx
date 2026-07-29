@@ -1,4 +1,4 @@
-﻿import { useRouterState, Link, useNavigate } from "@tanstack/react-router";
+import { useRouterState, Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Bell,
@@ -19,12 +19,21 @@ import { useLogout } from "@/hooks/useLogout";
 const titleMap: Record<string, { title: string; crumb: string[] }> = {
   "/app": { title: "Dashboard", crumb: ["ZEKROS", "Dashboard"] },
   "/app/play": { title: "Play", crumb: ["ZEKROS", "Play"] },
-  "/app/multiplayer": { title: "Multiplayer", crumb: ["ZEKROS", "Multiplayer"] },
+  "/app/multiplayer": {
+    title: "Multiplayer",
+    crumb: ["ZEKROS", "Multiplayer"],
+  },
   "/app/history": { title: "Match History", crumb: ["ZEKROS", "History"] },
   "/app/profile": { title: "Profile", crumb: ["ZEKROS", "Profile"] },
   "/app/settings": { title: "Settings", crumb: ["ZEKROS", "Settings"] },
-  "/app/developer": { title: "Developer Console", crumb: ["ZEKROS", "Developer"] },
-  "/app/leaderboard": { title: "Leaderboard", crumb: ["ZEKROS", "Leaderboard"] },
+  "/app/developer": {
+    title: "Developer Console",
+    crumb: ["ZEKROS", "Developer"],
+  },
+  "/app/leaderboard": {
+    title: "Leaderboard",
+    crumb: ["ZEKROS", "Leaderboard"],
+  },
 };
 
 function initials(name?: string | null) {
@@ -57,7 +66,10 @@ export function TopBar() {
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(e.target as Node)
+      ) {
         setProfileOpen(false);
       }
     };
@@ -99,7 +111,9 @@ export function TopBar() {
             <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/50" />
             <span className="relative size-1.5 rounded-full bg-emerald-400" />
           </span>
-          <span className="text-[11px] font-medium text-muted-foreground">Online</span>
+          <span className="text-[11px] font-medium text-muted-foreground">
+            Online
+          </span>
         </div>
 
         <Link
@@ -123,7 +137,15 @@ export function TopBar() {
             className="grid size-9 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-white/30 to-white/5 text-xs font-semibold ring-1 ring-white/10"
             aria-label="Profile"
           >
-            {user?.avatar ? <img src={user.avatar} alt="" className="size-full object-cover" /> : displayInitials}
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt=""
+                className="size-full object-cover"
+              />
+            ) : (
+              displayInitials
+            )}
           </button>
           <AnimatePresence>
             {profileOpen && (
@@ -136,17 +158,30 @@ export function TopBar() {
               >
                 <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
                   <div className="grid size-9 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-white/30 to-white/5 text-xs font-semibold ring-1 ring-white/10">
-                    {user?.avatar ? <img src={user.avatar} alt="" className="size-full object-cover" /> : displayInitials}
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt=""
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      displayInitials
+                    )}
                   </div>
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">{displayName}</div>
-                    <div className="truncate text-xs text-muted-foreground">{displayEmail}</div>
+                    <div className="truncate text-sm font-medium">
+                      {displayName}
+                    </div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {displayEmail}
+                    </div>
                   </div>
                 </div>
                 <div className="hairline my-1" />
                 {!user ? (
                   <Link
                     to="/auth/sign-in"
+                    search={{}}
                     onClick={() => setProfileOpen(false)}
                     className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground"
                   >
@@ -155,12 +190,36 @@ export function TopBar() {
                   </Link>
                 ) : (
                   <>
-                    <DropdownItem icon={User} label="Profile" onClick={() => closeAndNavigate("/app/profile")} />
-                    <DropdownItem icon={SlidersHorizontal} label="Preferences" onClick={() => closeAndNavigate("/app/settings")} />
-                    <DropdownItem icon={Palette} label="Theme" rightSlot={<span className="text-[10px] text-muted-foreground">Dark</span>} />
-                    <DropdownItem icon={Settings} label="Settings" onClick={() => closeAndNavigate("/app/settings")} />
+                    <DropdownItem
+                      icon={User}
+                      label="Profile"
+                      onClick={() => closeAndNavigate("/app/profile")}
+                    />
+                    <DropdownItem
+                      icon={SlidersHorizontal}
+                      label="Preferences"
+                      onClick={() => closeAndNavigate("/app/settings")}
+                    />
+                    <DropdownItem
+                      icon={Palette}
+                      label="Theme"
+                      rightSlot={
+                        <span className="text-[10px] text-muted-foreground">
+                          Dark
+                        </span>
+                      }
+                    />
+                    <DropdownItem
+                      icon={Settings}
+                      label="Settings"
+                      onClick={() => closeAndNavigate("/app/settings")}
+                    />
                     <div className="hairline my-1" />
-                    <DropdownItem icon={LogOut} label={logout.isPending ? "Logging out" : "Log out"} onClick={handleSignOut} />
+                    <DropdownItem
+                      icon={LogOut}
+                      label={logout.isPending ? "Logging out" : "Log out"}
+                      onClick={handleSignOut}
+                    />
                   </>
                 )}
               </motion.div>

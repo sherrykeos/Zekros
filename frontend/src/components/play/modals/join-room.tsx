@@ -1,7 +1,13 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useJoinRoom } from "@/hooks/room";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useJoinRoom } from "@/hooks/room.hooks";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export function JoinRoomModal({
@@ -23,18 +29,29 @@ export function JoinRoomModal({
     const normalizedCode = code.replace(/[^A-Z0-9]/g, "").toUpperCase();
 
     try {
+      const pId = user?.id ?? `local_${Date.now()}`;
       const result = await joinRoom({
-        roomCode: normalizedCode,
-        playerName: user?.username ?? "Local Player",
+        roomId: normalizedCode,
+        playerInfo: {
+          id: pId,
+          name: user?.username ?? "Local Player",
+        },
       });
 
-      if (result?.success) {
+      if (result) {
         onOpenChange(false);
-        void navigate({ to: "/app/lobby", state: { roomCode: normalizedCode, room: result.data } });
+        void navigate({
+          to: "/app/lobby",
+          state: {
+            roomCode: normalizedCode,
+            room: result,
+            playerId: pId,
+          } as any,
+        });
         return;
       }
 
-      console.error(result?.error?.message ?? "Unable to join room.");
+      console.error("Unable to join room.");
     } catch (error) {
       console.error(error);
     }
@@ -60,7 +77,9 @@ export function JoinRoomModal({
             <input
               autoFocus
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 7))}
+              onChange={(e) =>
+                setCode(e.target.value.toUpperCase().slice(0, 7))
+              }
               placeholder="ZK-XXXX"
               className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center font-mono text-lg tracking-[0.32em] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-white/20"
             />
@@ -86,4 +105,3 @@ export function JoinRoomModal({
     </Dialog>
   );
 }
-

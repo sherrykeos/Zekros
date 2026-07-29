@@ -10,6 +10,8 @@ export function useForgotPassword() {
 
   return {
     ...mutation,
-    errorMessage: mutation.error ? getApiErrorMessage(mutation.error, "Could not send reset link.") : null,
+    errorMessage: mutation.error
+      ? getApiErrorMessage(mutation.error, "Could not send reset link.")
+      : null,
   };
 }

@@ -30,7 +30,9 @@ export function PlayNowButton({
       className={`${base} ${styles} ${className}`}
     >
       {label}
-      {withArrow && <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />}
+      {withArrow && (
+        <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+      )}
     </button>
   );
 }

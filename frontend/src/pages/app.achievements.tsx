@@ -31,15 +31,74 @@ type Achievement = {
 
 // TODO: replace with achievements API
 const list: Achievement[] = [
-  { title: "First Victory", description: "Win your first match.", icon: Trophy, unlocked: false, progress: { current: 0, goal: 1 }, rarity: "Common" },
-  { title: "100 Wins", description: "Reach one hundred total wins.", icon: Flame, unlocked: false, progress: { current: 24, goal: 100 }, rarity: "Rare" },
-  { title: "Perfect Match", description: "Win without losing a single piece.", icon: Sparkles, unlocked: false, rarity: "Epic" },
-  { title: "AI Master", description: "Defeat the Perfect AI five times.", icon: Bot, unlocked: false, progress: { current: 1, goal: 5 }, rarity: "Epic" },
-  { title: "Champion", description: "Finish a season in the global top 10.", icon: Crown, unlocked: false, rarity: "Legendary" },
-  { title: "Combo Strategist", description: "Reclaim three pieces in one match.", icon: Zap, unlocked: false, rarity: "Rare" },
-  { title: "Untouchable", description: "Win 10 matches in a row.", icon: Shield, unlocked: false, progress: { current: 2, goal: 10 }, rarity: "Epic" },
-  { title: "Adaptive Mind", description: "Win on every board size 3×3 through 6×6.", icon: Target, unlocked: false, progress: { current: 1, goal: 4 }, rarity: "Rare" },
-  { title: "Rival", description: "Beat the same opponent five times.", icon: Swords, unlocked: false, rarity: "Common" },
+  {
+    title: "First Victory",
+    description: "Win your first match.",
+    icon: Trophy,
+    unlocked: false,
+    progress: { current: 0, goal: 1 },
+    rarity: "Common",
+  },
+  {
+    title: "100 Wins",
+    description: "Reach one hundred total wins.",
+    icon: Flame,
+    unlocked: false,
+    progress: { current: 24, goal: 100 },
+    rarity: "Rare",
+  },
+  {
+    title: "Perfect Match",
+    description: "Win without losing a single piece.",
+    icon: Sparkles,
+    unlocked: false,
+    rarity: "Epic",
+  },
+  {
+    title: "AI Master",
+    description: "Defeat the Perfect AI five times.",
+    icon: Bot,
+    unlocked: false,
+    progress: { current: 1, goal: 5 },
+    rarity: "Epic",
+  },
+  {
+    title: "Champion",
+    description: "Finish a season in the global top 10.",
+    icon: Crown,
+    unlocked: false,
+    rarity: "Legendary",
+  },
+  {
+    title: "Combo Strategist",
+    description: "Reclaim three pieces in one match.",
+    icon: Zap,
+    unlocked: false,
+    rarity: "Rare",
+  },
+  {
+    title: "Untouchable",
+    description: "Win 10 matches in a row.",
+    icon: Shield,
+    unlocked: false,
+    progress: { current: 2, goal: 10 },
+    rarity: "Epic",
+  },
+  {
+    title: "Adaptive Mind",
+    description: "Win on every board size 3×3 through 6×6.",
+    icon: Target,
+    unlocked: false,
+    progress: { current: 1, goal: 4 },
+    rarity: "Rare",
+  },
+  {
+    title: "Rival",
+    description: "Beat the same opponent five times.",
+    icon: Swords,
+    unlocked: false,
+    rarity: "Common",
+  },
 ];
 
 const rarityTone: Record<Achievement["rarity"], string> = {
@@ -72,7 +131,8 @@ function AchievementsPage() {
 
       <GlassPanel className="flex items-center justify-between gap-3 p-4">
         <div className="text-xs text-muted-foreground">
-          All achievements are <span className="text-foreground">Coming Soon</span>. Progress shown
+          All achievements are{" "}
+          <span className="text-foreground">Coming Soon</span>. Progress shown
           is illustrative.
         </div>
         <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -85,7 +145,9 @@ function AchievementsPage() {
 
 function Card({ a }: { a: Achievement }) {
   const Icon = a.icon;
-  const pct = a.progress ? Math.min(100, Math.round((a.progress.current / a.progress.goal) * 100)) : 0;
+  const pct = a.progress
+    ? Math.min(100, Math.round((a.progress.current / a.progress.goal) * 100))
+    : 0;
 
   return (
     <div className="glass relative overflow-hidden rounded-2xl p-5">
@@ -93,7 +155,11 @@ function Card({ a }: { a: Achievement }) {
         <div
           className={`grid size-11 place-items-center rounded-xl border bg-white/[0.03] ${a.unlocked ? "border-white/20 text-foreground" : "border-white/10 text-muted-foreground"}`}
         >
-          {a.unlocked ? <Icon className="size-5" /> : <Lock className="size-4" />}
+          {a.unlocked ? (
+            <Icon className="size-5" />
+          ) : (
+            <Lock className="size-4" />
+          )}
         </div>
         <span
           className={`rounded-md border px-2 py-0.5 text-[10px] uppercase tracking-wider ${rarityTone[a.rarity]}`}
@@ -102,8 +168,12 @@ function Card({ a }: { a: Achievement }) {
         </span>
       </div>
 
-      <div className="mt-4 font-display text-base font-semibold tracking-tight">{a.title}</div>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>
+      <div className="mt-4 font-display text-base font-semibold tracking-tight">
+        {a.title}
+      </div>
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+        {a.description}
+      </p>
 
       {a.progress ? (
         <div className="mt-4">

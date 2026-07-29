@@ -38,7 +38,9 @@ export function StatCard({
       <div className="mt-2 font-display text-2xl font-semibold tracking-tight text-gradient">
         {value}
       </div>
-      {hint && <div className="mt-1 text-[11px] text-muted-foreground">{hint}</div>}
+      {hint && (
+        <div className="mt-1 text-[11px] text-muted-foreground">{hint}</div>
+      )}
       <div className="pointer-events-none absolute -right-12 -top-12 size-32 rounded-full bg-white/[0.04] opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
     </motion.div>
   );
@@ -73,13 +75,19 @@ export function DashboardCard({
       }`}
     >
       <div className="flex w-full items-start justify-between">
-        <div className={`grid size-10 place-items-center rounded-xl ${accent ? "bg-white text-black" : "border border-white/10 bg-white/[0.04] text-foreground"}`}>
+        <div
+          className={`grid size-10 place-items-center rounded-xl ${accent ? "bg-white text-black" : "border border-white/10 bg-white/[0.04] text-foreground"}`}
+        >
           <Icon className="size-4" />
         </div>
         <ArrowUpRight className="size-4 -translate-x-1 translate-y-1 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" />
       </div>
-      <div className="mt-5 font-display text-base font-semibold tracking-tight">{title}</div>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
+      <div className="mt-5 font-display text-base font-semibold tracking-tight">
+        {title}
+      </div>
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+        {description}
+      </p>
       {cta && (
         <span className="mt-4 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
           {cta} →
@@ -109,8 +117,12 @@ export function EmptyState({
         <Icon className="size-5 text-muted-foreground" />
         <span className="absolute inset-0 animate-pulse rounded-2xl ring-1 ring-white/5" />
       </div>
-      <h3 className="mt-5 font-display text-base font-semibold tracking-tight">{title}</h3>
-      <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">{description}</p>
+      <h3 className="mt-5 font-display text-base font-semibold tracking-tight">
+        {title}
+      </h3>
+      <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
+        {description}
+      </p>
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -118,7 +130,9 @@ export function EmptyState({
 
 export function Skeleton({ className = "" }: { className?: string }) {
   return (
-    <div className={`relative overflow-hidden rounded-md bg-white/[0.04] ${className}`}>
+    <div
+      className={`relative overflow-hidden rounded-md bg-white/[0.04] ${className}`}
+    >
       <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
     </div>
   );
@@ -147,7 +161,9 @@ export function SectionHeader({
   return (
     <div className="mb-4 flex items-end justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="font-display text-lg font-semibold tracking-tight">{title}</h2>
+        <h2 className="font-display text-lg font-semibold tracking-tight">
+          {title}
+        </h2>
         {description && (
           <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
         )}

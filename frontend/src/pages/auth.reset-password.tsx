@@ -1,12 +1,17 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
-import { AuthShell, FormField, TextInput, PrimaryButton } from "@/components/auth/auth-shell";
+import {
+  AuthShell,
+  FormField,
+  TextInput,
+  PrimaryButton,
+} from "@/components/auth/auth-shell";
 import { useResetPassword } from "@/hooks/useResetPassword";
 
 export const Route = createFileRoute("/auth/reset-password")({
-  validateSearch: (search) => ({
-    token: typeof search.token === "string" ? search.token : "",
+  validateSearch: (search: Record<string, unknown>): { token?: string } => ({
+    token: (search.token as string) || undefined,
   }),
   head: () => ({ meta: [{ title: "Set new password - ZEKROS" }] }),
   component: ResetPasswordPage,
@@ -48,9 +53,13 @@ function ResetPasswordPage() {
     <AuthShell
       eyebrow="Reset password"
       title={done ? "Password updated." : "Set a new password."}
-      description={done ? "Redirecting to sign in..." : "Pick something memorable but hard to guess."}
+      description={
+        done
+          ? "Redirecting to sign in..."
+          : "Pick something memorable but hard to guess."
+      }
       footer={
-        <Link to="/auth/sign-in" className="hover:text-foreground">
+        <Link to="/auth/sign-in" search={{}} className="hover:text-foreground">
           Back to sign in
         </Link>
       }
@@ -89,7 +98,9 @@ function ResetPasswordPage() {
               {error}
             </div>
           )}
-          <PrimaryButton loading={resetPassword.isPending}>Update password</PrimaryButton>
+          <PrimaryButton loading={resetPassword.isPending}>
+            Update password
+          </PrimaryButton>
         </form>
       )}
     </AuthShell>

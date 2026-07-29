@@ -37,12 +37,29 @@ const items: NavItem[] = [
 ];
 
 const upitems: NavItem[] = [
-  { to: "/app/achievements", label: "Achievements", icon: Award, badge: "Soon", disabled: true },
-  { to: "/app/leaderboard", label: "Leaderboard", icon: Trophy, badge: "Soon", disabled: true },
+  {
+    to: "/app/achievements",
+    label: "Achievements",
+    icon: Award,
+    badge: "Soon",
+    disabled: true,
+  },
+  {
+    to: "/app/leaderboard",
+    label: "Leaderboard",
+    icon: Trophy,
+    badge: "Soon",
+    disabled: true,
+  },
 ];
 
-
-function SidebarInner({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
+function SidebarInner({
+  collapsed,
+  onNavigate,
+}: {
+  collapsed: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -52,7 +69,10 @@ function SidebarInner({ collapsed, onNavigate }: { collapsed: boolean; onNavigat
           Z
         </div>
         {!collapsed && (
-          <a href="/" className="font-display text-sm font-semibold tracking-[0.18em]">
+          <a
+            href="/"
+            className="font-display text-sm font-semibold tracking-[0.18em]"
+          >
             ZEKROS
           </a>
         )}
@@ -62,7 +82,10 @@ function SidebarInner({ collapsed, onNavigate }: { collapsed: boolean; onNavigat
 
       <nav className="flex-1 space-y-0.5 p-3">
         {items.map((item) => {
-          const active = item.to === "/app" ? pathname === "/app" : pathname.startsWith(item.to);
+          const active =
+            item.to === "/app"
+              ? pathname === "/app"
+              : pathname.startsWith(item.to);
           const Icon = item.icon;
           const content = (
             <motion.span
@@ -95,19 +118,21 @@ function SidebarInner({ collapsed, onNavigate }: { collapsed: boolean; onNavigat
             </motion.span>
           );
 
-
           if (item.disabled) {
             return (
-              <div>
               <div key={item.to} title={item.label}>
                 {content}
               </div>
-            </div>
             );
           }
 
           return (
-            <Link key={item.to} to={item.to} onClick={onNavigate} title={collapsed ? item.label : undefined}>
+            <Link
+              key={item.to}
+              to={item.to}
+              onClick={onNavigate}
+              title={collapsed ? item.label : undefined}
+            >
               {content}
             </Link>
           );
@@ -116,7 +141,10 @@ function SidebarInner({ collapsed, onNavigate }: { collapsed: boolean; onNavigat
 
       <nav className="flex-1 space-y-0.5 p-3">
         {upitems.map((item) => {
-          const active = item.to === "/app" ? pathname === "/app" : pathname.startsWith(item.to);
+          const active =
+            item.to === "/app"
+              ? pathname === "/app"
+              : pathname.startsWith(item.to);
           const Icon = item.icon;
           const content = (
             <motion.span
@@ -149,19 +177,21 @@ function SidebarInner({ collapsed, onNavigate }: { collapsed: boolean; onNavigat
             </motion.span>
           );
 
-
           if (item.disabled) {
             return (
-              <div>
               <div key={item.to} title={item.label}>
                 {content}
               </div>
-            </div>
             );
           }
 
           return (
-            <Link key={item.to} to={item.to} onClick={onNavigate} title={collapsed ? item.label : undefined}>
+            <Link
+              key={item.to}
+              to={item.to}
+              onClick={onNavigate}
+              title={collapsed ? item.label : undefined}
+            >
               {content}
             </Link>
           );
@@ -192,7 +222,6 @@ function SidebarInner({ collapsed, onNavigate }: { collapsed: boolean; onNavigat
         </div>
       </div>
     </div>
-    
   );
 }
 
@@ -200,22 +229,19 @@ export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useAppShell();
 
   return (
-
     <motion.aside
       initial={false}
       animate={{ width: sidebarCollapsed ? 72 : 240 }}
       transition={{ type: "spring", stiffness: 300, damping: 34 }}
-      className="glass hidden h-[calc(100vh-1rem)] shrink-0 rounded-2xl lg:block">
-
-
+      className="glass hidden h-[calc(100vh-1rem)] shrink-0 rounded-2xl lg:block"
+    >
       <SidebarInner collapsed={sidebarCollapsed} />
-
 
       <button
         onClick={toggleSidebar}
         aria-label="Collapse sidebar"
-        className="absolute -right-3 top-16 grid size-6 place-items-center rounded-full border border-white/10 bg-background text-muted-foreground transition-colors hover:text-foreground">
-
+        className="absolute -right-3 top-16 grid size-6 place-items-center rounded-full border border-white/10 bg-background text-muted-foreground transition-colors hover:text-foreground"
+      >
         <motion.span animate={{ rotate: sidebarCollapsed ? 180 : 0 }}>
           <ChevronLeft className="size-3.5" />
         </motion.span>
@@ -251,7 +277,10 @@ export function MobileSidebar() {
             >
               <X className="size-3.5" />
             </button>
-            <SidebarInner collapsed={false} onNavigate={() => setMobileNavOpen(false)} />
+            <SidebarInner
+              collapsed={false}
+              onNavigate={() => setMobileNavOpen(false)}
+            />
           </motion.aside>
         </>
       )}

@@ -1,23 +1,51 @@
 import { motion } from "motion/react";
 import { SectionHeader } from "./features";
-import { Swords, User, Users, Trophy, Infinity as InfinityIcon } from "lucide-react";
+import {
+  Swords,
+  User,
+  Users,
+  Trophy,
+  Infinity as InfinityIcon,
+} from "lucide-react";
 
 const modes = [
-  { icon: User, name: "Solo", tag: "Practice", desc: "Train against scaled AI. Quiet, focused, endless." },
-  { icon: Swords, name: "Duel", tag: "1v1 Live", desc: "Direct head-to-head over real-time sockets." },
-  { icon: Trophy, name: "Ranked", tag: "Competitive", desc: "Climb a tuned ladder of adaptive players." },
-  { icon: Users, name: "Lobby", tag: "Private", desc: "Custom rooms, custom rules, your circle." },
-  { icon: InfinityIcon, name: "Endless", tag: "Survival", desc: "Decaying board, scaling pressure, single life." },
+  {
+    icon: User,
+    name: "Solo",
+    tag: "Practice",
+    desc: "Train against scaled AI. Quiet, focused, endless.",
+  },
+  {
+    icon: Swords,
+    name: "Duel",
+    tag: "1v1 Live",
+    desc: "Direct head-to-head over real-time sockets.",
+  },
+  {
+    icon: Trophy,
+    name: "Ranked",
+    tag: "Competitive",
+    desc: "Climb a tuned ladder of adaptive players.",
+  },
+  {
+    icon: Users,
+    name: "Lobby",
+    tag: "Private",
+    desc: "Custom rooms, custom rules, your circle.",
+  },
+  {
+    icon: InfinityIcon,
+    name: "Endless",
+    tag: "Survival",
+    desc: "Decaying board, scaling pressure, single life.",
+  },
 ];
 
 export function Modes() {
   return (
     <section id="modes" className="relative px-4 py-24 md:py-32">
       <div className="mx-auto max-w-6xl">
-        <SectionHeader
-          eyebrow="Game modes"
-          title="Five surfaces. One core."
-        />
+        <SectionHeader eyebrow="Game modes" title="Five surfaces. One core." />
         <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {modes.map((m, i) => (
             <motion.div
@@ -36,8 +64,12 @@ export function Modes() {
                   {m.tag}
                 </span>
               </div>
-              <div className="mt-8 font-display text-lg font-semibold">{m.name}</div>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{m.desc}</p>
+              <div className="mt-8 font-display text-lg font-semibold">
+                {m.name}
+              </div>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                {m.desc}
+              </p>
             </motion.div>
           ))}
         </div>

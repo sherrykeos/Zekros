@@ -34,7 +34,9 @@ export function Navigation() {
       >
         <Link to="/" className="flex items-center gap-2.5">
           <Logo />
-          <span className="font-display text-sm font-semibold tracking-[0.18em]">ZEKROS</span>
+          <span className="font-display text-sm font-semibold tracking-[0.18em]">
+            ZEKROS
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">

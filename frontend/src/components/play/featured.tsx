@@ -22,8 +22,9 @@ export function Featured() {
             The first ranked season starts soon.
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Climb a tuned ladder, earn placement, and shape the founding leaderboard. Sign up
-            and we'll notify you the moment matchmaking opens.
+            Climb a tuned ladder, earn placement, and shape the founding
+            leaderboard. Sign up and we'll notify you the moment matchmaking
+            opens.
           </p>
         </div>
         <button className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground">

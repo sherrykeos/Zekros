@@ -3,19 +3,13 @@ import { motion } from "motion/react";
 import { Users, Brain, Sparkles, Wifi, Play, Lock, Clock } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Board } from "./board";
-import { defaultConfig, type MatchConfig, type Player, type CellState } from "./types";
-
-/**
- * Auto-derived rules. These are presentation-side mirrors of the engine
- * rules — the future backend will compute them authoritatively, but the
- * UI must keep them in lockstep so the live preview is honest.
- *
- * - Max active pieces is always equal to the board size.
- * - Win length defaults to the board size and can never exceed it.
- */
-function maxActiveFor(size: MatchConfig["boardSize"]): number {
-  return size;
-}
+import {
+  defaultConfig,
+  type MatchConfig,
+  type Player,
+  type CellState,
+  maxActiveFor,
+} from "./types";
 
 function estimatedMinutes(size: MatchConfig["boardSize"]): [number, number] {
   // Rough heuristic for the live preview — purely cosmetic.
@@ -53,14 +47,16 @@ export function MatchSetup({
   useEffect(() => {
     setConfig((c) => {
       const nextMax = maxActiveFor(c.boardSize);
-      const nextWin = (Math.min(c.winLength, c.boardSize) as 3 | 4 | 5);
+      const nextWin = Math.min(c.winLength, c.boardSize) as 3 | 4 | 5;
       if (c.maxActivePieces === nextMax && c.winLength === nextWin) return c;
-      return { ...c, maxActivePieces: nextMax, winLength: nextWin };
+      return { ...c, maxActivePieces: nextMax, winLength: nextWin, reclaimTokens: nextMax };
     });
   }, [config.boardSize]);
 
   const previewCells = useMemo<CellState[]>(() => {
-    const arr: CellState[] = Array(config.boardSize * config.boardSize).fill(null);
+    const arr: CellState[] = Array(config.boardSize * config.boardSize).fill(
+      null,
+    );
     const seeds: Array<[number, Player]> = [
       [0, "x"],
       [config.boardSize + 1, "o"],
@@ -148,11 +144,23 @@ export function MatchSetup({
             display={`${config.winLength} in a row`}
             onChange={(v) => update("winLength", v as 3 | 4 | 5)}
           />
-          <ReadOnlyField
-            label="Max active pieces"
-            value={`${config.maxActivePieces} per side`}
-            hint="Auto · matches board size"
-          />
+          {config.boardSize === 3 ? (
+            <ReadOnlyField
+              label="Max active pieces"
+              value={`${config.maxActivePieces} per side`}
+              hint="Fixed for 3x3"
+            />
+          ) : (
+            <SliderField
+              label="Max active pieces"
+              value={config.maxActivePieces}
+              min={config.boardSize}
+              max={10}
+              step={1}
+              display={`${config.maxActivePieces} / side`}
+              onChange={(v) => update("maxActivePieces", v)}
+            />
+          )}
           <SliderField
             label="Reclaim tokens"
             value={config.reclaimTokens}
@@ -229,10 +237,19 @@ export function MatchSetup({
 
         <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-3">
           <SummaryStat label="Mode" value={config.mode} />
-          <SummaryStat label="Board" value={`${config.boardSize}×${config.boardSize}`} />
+          <SummaryStat
+            label="Board"
+            value={`${config.boardSize}×${config.boardSize}`}
+          />
           <SummaryStat label="Win" value={`${config.winLength} in a row`} />
-          <SummaryStat label="Max active" value={`${config.maxActivePieces} / side`} />
-          <SummaryStat label="Reclaim" value={`${config.reclaimTokens} tokens`} />
+          <SummaryStat
+            label="Max active"
+            value={`${config.maxActivePieces} / side`}
+          />
+          <SummaryStat
+            label="Reclaim"
+            value={`${config.reclaimTokens} tokens`}
+          />
           <SummaryStat
             label="Est. length"
             value={`~${estMin}–${estMax} min`}
@@ -244,7 +261,13 @@ export function MatchSetup({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">

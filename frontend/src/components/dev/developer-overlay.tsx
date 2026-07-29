@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,9 +18,11 @@ export function DeveloperOverlay() {
   const location = useLocation();
   const currentUser = useCurrentUser();
   const queryClient = useQueryClient();
-  const routeState = (location.state ?? {}) as DevRouteState;
-  const routeMatchId = typeof routeState.matchId === "string" ? routeState.matchId : "";
-  const routeRoomCode = typeof routeState.roomCode === "string" ? routeState.roomCode : "";
+  const routeState = (location.state ?? {}) as unknown as DevRouteState;
+  const routeMatchId =
+    typeof routeState.matchId === "string" ? routeState.matchId : "";
+  const routeRoomCode =
+    typeof routeState.roomCode === "string" ? routeState.roomCode : "";
   const [manualMatchId, setManualMatchId] = useState("");
   const [manualRoomCode, setManualRoomCode] = useState("");
   const matchId = manualMatchId.trim() || routeMatchId;
@@ -49,7 +51,8 @@ export function DeveloperOverlay() {
       setRestLogs((current) => [detail, ...current].slice(0, 80));
     };
     window.addEventListener("zekros:rest-log", onRestLog as EventListener);
-    return () => window.removeEventListener("zekros:rest-log", onRestLog as EventListener);
+    return () =>
+      window.removeEventListener("zekros:rest-log", onRestLog as EventListener);
   }, []);
 
   const health = useQuery({
@@ -107,7 +110,11 @@ export function DeveloperOverlay() {
         state: routeState,
       },
       auth: {
-        status: currentUser.isPending ? "loading" : currentUser.data ? "authenticated" : "anonymous",
+        status: currentUser.isPending
+          ? "loading"
+          : currentUser.data
+            ? "authenticated"
+            : "anonymous",
         user: currentUser.data ?? null,
       },
       backend: {
@@ -126,7 +133,20 @@ export function DeveloperOverlay() {
       },
       viewport,
     }),
-    [currentUser.data, currentUser.isPending, health.data, health.error, health.fetchStatus, health.status, location.pathname, location.search, matchId, roomCode, routeState, viewport],
+    [
+      currentUser.data,
+      currentUser.isPending,
+      health.data,
+      health.error,
+      health.fetchStatus,
+      health.status,
+      location.pathname,
+      location.search,
+      matchId,
+      roomCode,
+      routeState,
+      viewport,
+    ],
   );
 
   const gameState = useMemo(
@@ -152,7 +172,9 @@ export function DeveloperOverlay() {
       activeMatchId: matchId || null,
       match: {
         query: querySnapshot(match),
-        state: match.data?.data?.getState ? "Match instance returned non-serializable method shape" : match.data?.data ?? null,
+        state: match.data?.data?.getState
+          ? "Match instance returned non-serializable method shape"
+          : (match.data?.data ?? null),
       },
       history: {
         query: querySnapshot(history),
@@ -163,7 +185,21 @@ export function DeveloperOverlay() {
         data: replay.data?.data ?? null,
       },
     }),
-    [history.data, history.error, history.fetchStatus, history.status, match.data, match.error, match.fetchStatus, match.status, matchId, replay.data, replay.error, replay.fetchStatus, replay.status],
+    [
+      history.data,
+      history.error,
+      history.fetchStatus,
+      history.status,
+      match.data,
+      match.error,
+      match.fetchStatus,
+      match.status,
+      matchId,
+      replay.data,
+      replay.error,
+      replay.fetchStatus,
+      replay.status,
+    ],
   );
 
   const flags = useMemo(
@@ -254,7 +290,9 @@ export function DeveloperOverlay() {
               />
               <input
                 value={manualRoomCode}
-                onChange={(event) => setManualRoomCode(event.target.value.toUpperCase())}
+                onChange={(event) =>
+                  setManualRoomCode(event.target.value.toUpperCase())
+                }
                 placeholder={routeRoomCode || "room code override"}
                 className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1.5 font-mono text-[11px] uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/20"
                 aria-label="Developer room code override"
@@ -263,36 +301,67 @@ export function DeveloperOverlay() {
 
             <div className="flex-1 overflow-y-auto p-4">
               {tab === "app" && (
-                <Pane title="Application state" hint="Auth, route, viewport, backend health.">
+                <Pane
+                  title="Application state"
+                  hint="Auth, route, viewport, backend health."
+                >
                   <Pre data={appState} />
                 </Pane>
               )}
               {tab === "game" && (
-                <Pane title="Game state" hint="Live /api/games/:matchId/state snapshot.">
-                  {matchId ? <Pre data={gameState} /> : <EmptyHint text="No active matchId from route state or manual override." />}
+                <Pane
+                  title="Game state"
+                  hint="Live /api/games/:matchId/state snapshot."
+                >
+                  {matchId ? (
+                    <Pre data={gameState} />
+                  ) : (
+                    <EmptyHint text="No active matchId from route state or manual override." />
+                  )}
                 </Pane>
               )}
               {tab === "room" && (
-                <Pane title="Room state" hint="Live /api/rooms/:roomCode snapshot.">
-                  {roomCode ? <Pre data={roomState} /> : <EmptyHint text="No active roomCode from route state or manual override." />}
+                <Pane
+                  title="Room state"
+                  hint="Live /api/rooms/:roomCode snapshot."
+                >
+                  {roomCode ? (
+                    <Pre data={roomState} />
+                  ) : (
+                    <EmptyHint text="No active roomCode from route state or manual override." />
+                  )}
                 </Pane>
               )}
               {tab === "match" && (
-                <Pane title="Match state" hint="Match, history, and replay endpoint data.">
-                  {matchId ? <Pre data={matchState} /> : <EmptyHint text="No active matchId from route state or manual override." />}
+                <Pane
+                  title="Match state"
+                  hint="Match, history, and replay endpoint data."
+                >
+                  {matchId ? (
+                    <Pre data={matchState} />
+                  ) : (
+                    <EmptyHint text="No active matchId from route state or manual override." />
+                  )}
                 </Pane>
               )}
               {tab === "rest" && (
-                <Pane title="REST logs" hint="Actual Axios calls from the frontend API client.">
+                <Pane
+                  title="REST logs"
+                  hint="Actual Axios calls from the frontend API client."
+                >
                   <RestLogList rows={restLogs} />
                 </Pane>
               )}
               {tab === "socket" && (
-                <Pane title="Socket events" hint="Socket.IO client is not configured in the frontend yet.">
+                <Pane
+                  title="Socket events"
+                  hint="Socket.IO client is not configured in the frontend yet."
+                >
                   <Pre
                     data={{
                       configured: false,
-                      reason: "No socket.io-client dependency or frontend socket service is present.",
+                      reason:
+                        "No socket.io-client dependency or frontend socket service is present.",
                       backendSocketFiles: [
                         "backend/socket/index.socket.js",
                         "backend/socket/events/roomEvents.js",
@@ -303,17 +372,26 @@ export function DeveloperOverlay() {
                 </Pane>
               )}
               {tab === "perf" && (
-                <Pane title="Performance" hint="Browser frame and memory diagnostics.">
+                <Pane
+                  title="Performance"
+                  hint="Browser frame and memory diagnostics."
+                >
                   <PerfGrid stats={perf} />
                 </Pane>
               )}
               {tab === "logs" && (
-                <Pane title="Logs" hint="Console stream captured while this overlay is mounted.">
+                <Pane
+                  title="Logs"
+                  hint="Console stream captured while this overlay is mounted."
+                >
                   <LogList rows={consoleLogs} mono />
                 </Pane>
               )}
               {tab === "flags" && (
-                <Pane title="Feature flags" hint="Runtime diagnostic toggles and detected capabilities.">
+                <Pane
+                  title="Feature flags"
+                  hint="Runtime diagnostic toggles and detected capabilities."
+                >
                   <FlagList rows={flags} />
                 </Pane>
               )}
@@ -325,7 +403,16 @@ export function DeveloperOverlay() {
   );
 }
 
-type TabId = "app" | "game" | "room" | "match" | "rest" | "socket" | "perf" | "logs" | "flags";
+type TabId =
+  | "app"
+  | "game"
+  | "room"
+  | "match"
+  | "rest"
+  | "socket"
+  | "perf"
+  | "logs"
+  | "flags";
 
 type DevRouteState = {
   config?: { mode?: string } & Record<string, unknown>;
@@ -364,7 +451,9 @@ function Pane({
         <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           {title}
         </div>
-        {hint && <div className="mt-0.5 text-[11px] text-muted-foreground">{hint}</div>}
+        {hint && (
+          <div className="mt-0.5 text-[11px] text-muted-foreground">{hint}</div>
+        )}
       </div>
       {children}
     </section>
@@ -407,22 +496,39 @@ function LogList({ rows, mono }: { rows: string[]; mono?: boolean }) {
 }
 
 function RestLogList({ rows }: { rows: DevRestLog[] }) {
-  if (rows.length === 0) return <EmptyHint text="No REST calls captured yet. Open a match or press refresh." />;
+  if (rows.length === 0)
+    return (
+      <EmptyHint text="No REST calls captured yet. Open a match or press refresh." />
+    );
 
   return (
     <ul className="space-y-2">
       {rows.map((row) => (
-        <li key={row.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <li
+          key={row.id}
+          className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
+        >
           <div className="flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.12em]">
             <span className={row.ok ? "text-foreground" : "text-red-300"}>
               {row.method} {row.status}
             </span>
             <span className="text-muted-foreground">{row.durationMs}ms</span>
           </div>
-          <div className="mt-1 break-all font-mono text-[11px] text-bone">{row.url}</div>
+          <div className="mt-1 break-all font-mono text-[11px] text-bone">
+            {row.url}
+          </div>
           <details className="mt-2">
-            <summary className="cursor-pointer text-[11px] text-muted-foreground">payload</summary>
-            <Pre data={{ request: row.request, response: row.response, error: row.error, at: row.at }} />
+            <summary className="cursor-pointer text-[11px] text-muted-foreground">
+              payload
+            </summary>
+            <Pre
+              data={{
+                request: row.request,
+                response: row.response,
+                error: row.error,
+                at: row.at,
+              }}
+            />
           </details>
         </li>
       ))}
@@ -434,18 +540,26 @@ function PerfGrid({ stats }: { stats: PerfStats }) {
   const rows = [
     { label: "FPS", value: String(stats.fps) },
     { label: "Frame", value: `${stats.frameMs.toFixed(1)} ms` },
-    { label: "Heap", value: stats.heapMb == null ? "n/a" : `${stats.heapMb.toFixed(1)} MB` },
+    {
+      label: "Heap",
+      value: stats.heapMb == null ? "n/a" : `${stats.heapMb.toFixed(1)} MB`,
+    },
     { label: "Renders", value: String(stats.renders) },
   ];
 
   return (
     <div className="grid grid-cols-2 gap-2">
       {rows.map((s) => (
-        <div key={s.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <div
+          key={s.label}
+          className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
+        >
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
             {s.label}
           </div>
-          <div className="mt-1 font-display text-lg font-semibold">{s.value}</div>
+          <div className="mt-1 font-display text-lg font-semibold">
+            {s.value}
+          </div>
         </div>
       ))}
     </div>
@@ -463,7 +577,9 @@ function FlagList({ rows }: { rows: { key: string; on: boolean }[] }) {
           <span className="font-mono text-bone">{f.key}</span>
           <span
             className={`rounded px-1.5 py-0.5 font-mono text-[10px] ${
-              f.on ? "bg-white/[0.10] text-foreground" : "bg-white/[0.03] text-muted-foreground"
+              f.on
+                ? "bg-white/[0.10] text-foreground"
+                : "bg-white/[0.03] text-muted-foreground"
             }`}
           >
             {f.on ? "on" : "off"}
@@ -474,7 +590,11 @@ function FlagList({ rows }: { rows: { key: string; on: boolean }[] }) {
   );
 }
 
-function querySnapshot(query: { status: string; fetchStatus: string; error: unknown }) {
+function querySnapshot(query: {
+  status: string;
+  fetchStatus: string;
+  error: unknown;
+}) {
   return {
     status: query.status,
     fetchStatus: query.fetchStatus,
@@ -492,7 +612,12 @@ type PerfStats = {
 function usePerformanceStats(enabled: boolean): PerfStats {
   const renders = useRef(0);
   renders.current += 1;
-  const [stats, setStats] = useState<PerfStats>({ fps: 0, frameMs: 0, heapMb: null, renders: 0 });
+  const [stats, setStats] = useState<PerfStats>({
+    fps: 0,
+    frameMs: 0,
+    heapMb: null,
+    renders: 0,
+  });
 
   useEffect(() => {
     if (!enabled) return;
@@ -508,11 +633,15 @@ function usePerformanceStats(enabled: boolean): PerfStats {
       lastFrame = now;
 
       if (now - last >= 1000) {
-        const memory = (performance as Performance & { memory?: { usedJSHeapSize?: number } }).memory;
+        const memory = (
+          performance as Performance & { memory?: { usedJSHeapSize?: number } }
+        ).memory;
         setStats({
           fps: Math.round((frames * 1000) / (now - last)),
           frameMs,
-          heapMb: memory?.usedJSHeapSize ? memory.usedJSHeapSize / 1024 / 1024 : null,
+          heapMb: memory?.usedJSHeapSize
+            ? memory.usedJSHeapSize / 1024 / 1024
+            : null,
           renders: renders.current,
         });
         frames = 0;
@@ -545,7 +674,11 @@ function useViewport(enabled: boolean) {
 
 function readViewport() {
   if (typeof window === "undefined") return { w: 0, h: 0, dpr: 1 };
-  return { w: window.innerWidth, h: window.innerHeight, dpr: window.devicePixelRatio };
+  return {
+    w: window.innerWidth,
+    h: window.innerHeight,
+    dpr: window.devicePixelRatio,
+  };
 }
 
 function useConsoleLogs() {
@@ -606,11 +739,3 @@ function formatConsoleArg(value: unknown) {
     return String(value);
   }
 }
-
-
-
-
-
-
-
-

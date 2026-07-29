@@ -1,7 +1,12 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { Mail, Check } from "lucide-react";
-import { AuthShell, FormField, TextInput, PrimaryButton } from "@/components/auth/auth-shell";
+import {
+  AuthShell,
+  FormField,
+  TextInput,
+  PrimaryButton,
+} from "@/components/auth/auth-shell";
 import { useForgotPassword } from "@/hooks/useForgotPassword";
 
 export const Route = createFileRoute("/auth/forgot-password")({
@@ -36,11 +41,12 @@ function ForgotPasswordPage() {
       title={sent ? "Check your inbox." : "Reset your password."}
       description={
         sent
-          ? forgotPassword.data?.message ?? "We've sent a reset link if an account exists for that email."
+          ? (forgotPassword.data?.message ??
+            "We've sent a reset link if an account exists for that email.")
           : "Enter your email and we'll send a reset link."
       }
       footer={
-        <Link to="/auth/sign-in" className="hover:text-foreground">
+        <Link to="/auth/sign-in" search={{}} className="hover:text-foreground">
           Back to sign in
         </Link>
       }
@@ -79,7 +85,9 @@ function ForgotPasswordPage() {
               {error}
             </div>
           )}
-          <PrimaryButton loading={forgotPassword.isPending}>Send reset link</PrimaryButton>
+          <PrimaryButton loading={forgotPassword.isPending}>
+            Send reset link
+          </PrimaryButton>
         </form>
       )}
     </AuthShell>

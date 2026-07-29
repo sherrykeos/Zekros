@@ -7,7 +7,10 @@ export function AccountRequiredModal() {
   const { accountRequiredOpen, closeAccountRequired } = usePlayEntry();
 
   return (
-    <Dialog open={accountRequiredOpen} onOpenChange={(v) => (v ? null : closeAccountRequired())}>
+    <Dialog
+      open={accountRequiredOpen}
+      onOpenChange={(v) => (v ? null : closeAccountRequired())}
+    >
       <DialogContent
         className="glass-strong max-w-md overflow-hidden rounded-3xl border-white/10 bg-background/80 p-0"
         aria-describedby={undefined}
@@ -21,13 +24,14 @@ export function AccountRequiredModal() {
             Multiplayer needs an account
           </h2>
           <p className="mx-auto mt-2 max-w-sm text-center text-sm text-muted-foreground">
-            Real-time matches use your ZEKROS profile for ranking, replay history and friend
-            invites. Creating one takes about ten seconds.
+            Real-time matches use your ZEKROS profile for ranking, replay
+            history and friend invites. Creating one takes about ten seconds.
           </p>
 
           <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2">
             <Link
               to="/auth/sign-up"
+              search={{}}
               onClick={closeAccountRequired}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-3.5 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.01]"
             >
@@ -35,6 +39,7 @@ export function AccountRequiredModal() {
             </Link>
             <Link
               to="/auth/sign-in"
+              search={{}}
               onClick={closeAccountRequired}
               className="glass inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium text-foreground hover:bg-white/[0.06]"
             >

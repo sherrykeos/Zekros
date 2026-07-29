@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Users, Brain, Sparkles, Wifi, Check, type LucideIcon } from "lucide-react";
+import {
+  Users,
+  Brain,
+  Sparkles,
+  Wifi,
+  Check,
+  type LucideIcon,
+} from "lucide-react";
 import { SectionHeader } from "@/components/app/primitives";
 import { MiniBoard } from "./mini-board";
 
@@ -25,7 +32,9 @@ const modes: Mode[] = [
     duration: "5–10 min",
     skill: "Any level",
     pieces: [
-      { i: 0, player: "x" }, { i: 4, player: "o" }, { i: 5, player: "x" },
+      { i: 0, player: "x" },
+      { i: 4, player: "o" },
+      { i: 5, player: "x" },
       { i: 8, player: "o", fading: true },
     ],
   },
@@ -38,8 +47,11 @@ const modes: Mode[] = [
     duration: "3–6 min",
     skill: "Beginner → Pro",
     pieces: [
-      { i: 1, player: "x" }, { i: 5, player: "o" }, { i: 6, player: "x" },
-      { i: 10, player: "o", fading: true }, { i: 15, player: "x" },
+      { i: 1, player: "x" },
+      { i: 5, player: "o" },
+      { i: 6, player: "x" },
+      { i: 10, player: "o", fading: true },
+      { i: 15, player: "x" },
     ],
   },
   {
@@ -51,8 +63,12 @@ const modes: Mode[] = [
     duration: "2–5 min",
     skill: "Advanced",
     pieces: [
-      { i: 0, player: "o" }, { i: 3, player: "x" }, { i: 5, player: "o" },
-      { i: 9, player: "x" }, { i: 10, player: "o" }, { i: 12, player: "x", fading: true },
+      { i: 0, player: "o" },
+      { i: 3, player: "x" },
+      { i: 5, player: "o" },
+      { i: 9, player: "x" },
+      { i: 10, player: "o" },
+      { i: 12, player: "x", fading: true },
     ],
   },
   {
@@ -64,8 +80,12 @@ const modes: Mode[] = [
     duration: "4–8 min",
     skill: "All ranks",
     pieces: [
-      { i: 2, player: "x" }, { i: 5, player: "o" }, { i: 6, player: "x", fading: true },
-      { i: 9, player: "o" }, { i: 11, player: "x" }, { i: 14, player: "o" },
+      { i: 2, player: "x" },
+      { i: 5, player: "o" },
+      { i: 6, player: "x", fading: true },
+      { i: 9, player: "o" },
+      { i: 11, player: "x" },
+      { i: 14, player: "o" },
     ],
   },
 ];
@@ -77,11 +97,7 @@ const difficultyTone: Record<Mode["difficulty"], string> = {
   Live: "border-white/15 bg-gradient-to-br from-white/[0.14] to-transparent text-foreground",
 };
 
-export function GameModes({
-  onLaunch,
-}: {
-  onLaunch?: (id: string) => void;
-}) {
+export function GameModes({ onLaunch }: { onLaunch?: (id: string) => void }) {
   const [selected, setSelected] = useState<string>("smart");
 
   return (
@@ -131,7 +147,11 @@ export function GameModes({
               </div>
 
               <div className="mt-4">
-                <MiniBoard size={4} pieces={m.pieces} className="max-w-[180px]" />
+                <MiniBoard
+                  size={4}
+                  pieces={m.pieces}
+                  className="max-w-[180px]"
+                />
               </div>
 
               <div className="mt-4 font-display text-base font-semibold tracking-tight">

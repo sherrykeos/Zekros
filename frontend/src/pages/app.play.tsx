@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
@@ -20,7 +20,11 @@ export const Route = createFileRoute("/app/play")({
   head: () => ({
     meta: [
       { title: "Play â€” ZEKROS" },
-      { name: "description", content: "The ZEKROS Play Hub. Pick a mode, match an opponent, or jump back into a game." },
+      {
+        name: "description",
+        content:
+          "The ZEKROS Play Hub. Pick a mode, match an opponent, or jump back into a game.",
+      },
     ],
   }),
   component: PlayPage,
@@ -53,14 +57,17 @@ function PlayPage() {
         setOpenJoin(true);
         break;
       case "custom":
-        void navigate({ to: "/app/setup", state: { mode: "custom" } });
+        void navigate({
+          to: "/app/setup" as any,
+          state: { mode: "custom" } as any,
+        });
         break;
       case "smart":
       case "perfect":
       case "local":
       case "quick":
       case "multiplayer":
-        void navigate({ to: "/app/setup", state: { mode: id } });
+        void navigate({ to: "/app/setup" as any, state: { mode: id } as any });
         break;
       default:
         void navigate({ to: "/app/setup" });
@@ -77,7 +84,6 @@ function PlayPage() {
     setOpenJoin(true);
   };
 
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
@@ -90,9 +96,8 @@ function PlayPage() {
       {/* <ContinueMatch /> */}
 
       <GameModes onLaunch={handleQuickAction} />
-      
-      <QuickActions onSelect={handleQuickAction} />
 
+      <QuickActions onSelect={handleQuickAction} />
 
       <MultiplayerPanel
         onCreate={() => handleQuickAction("create")}
@@ -107,9 +112,12 @@ function PlayPage() {
       <Featured />
 
       <CreateRoomModal open={openCreate} onOpenChange={setOpenCreate} />
-      <JoinRoomModal open={openJoin} onOpenChange={setOpenJoin} initialCode={joinCode} />
+      <JoinRoomModal
+        open={openJoin}
+        onOpenChange={setOpenJoin}
+        initialCode={joinCode}
+      />
       <CustomMatchModal open={openCustom} onOpenChange={setOpenCustom} />
     </motion.div>
   );
 }
-

@@ -13,9 +13,17 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "ZEKROS — Strategy, evolved. By ZEROTH Labs" },
-      { name: "description", content: "ZEKROS is a real-time strategy game built on adaptive boards, vanishing pieces, and decisions that compound. A premium experience by ZEROTH Labs." },
+      {
+        name: "description",
+        content:
+          "ZEKROS is a real-time strategy game built on adaptive boards, vanishing pieces, and decisions that compound. A premium experience by ZEROTH Labs.",
+      },
       { property: "og:title", content: "ZEKROS — Strategy, evolved." },
-      { property: "og:description", content: "A real-time strategy game built on adaptive boards and decisions that compound." },
+      {
+        property: "og:description",
+        content:
+          "A real-time strategy game built on adaptive boards and decisions that compound.",
+      },
     ],
   }),
   component: Index,

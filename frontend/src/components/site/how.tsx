@@ -41,12 +41,22 @@ export function HowItWorks() {
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                duration: 0.5,
+                delay: i * 0.08,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               className="glass relative overflow-hidden rounded-2xl p-6"
             >
-              <div className="font-mono text-xs text-muted-foreground">{s.n}</div>
-              <h3 className="mt-6 font-display text-xl font-semibold">{s.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+              <div className="font-mono text-xs text-muted-foreground">
+                {s.n}
+              </div>
+              <h3 className="mt-6 font-display text-xl font-semibold">
+                {s.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {s.desc}
+              </p>
               <div className="pointer-events-none absolute right-4 top-4 size-1.5 rounded-full bg-white/40" />
             </motion.div>
           ))}

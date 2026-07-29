@@ -1,7 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import matchService from "../services/api/matchService";
 

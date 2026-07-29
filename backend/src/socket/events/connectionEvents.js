@@ -25,6 +25,55 @@ const cleanupGraceMs = Number(process.env.SOCKET_CLEANUP_GRACE_MS ?? DEFAULT_CLE
 const connections = new Map();
 const playerSessions = new Map();
 const cleanupTimers = new Map();
+const forfeitTimers = new Map();
+
+function scheduleForfeitTimer(io, roomCode, playerId) {
+  const key = `${roomCode}:${playerId}`;
+  if (forfeitTimers.has(key)) {
+    clearTimeout(forfeitTimers.get(key));
+  }
+
+  const timer = setTimeout(async () => {
+    const room = getRoom(roomCode);
+    if (!room || !room.currentMatch || room.currentMatch.game.isGameOver()) {
+      forfeitTimers.delete(key);
+      return;
+    }
+
+    const participant = room.getPlayer(playerId);
+    if (participant && participant.status === Player.STATUS.DISCONNECTED) {
+      const resigningSymbol = participant.symbol;
+      const winnerSymbol = resigningSymbol === "X" ? "O" : "X";
+
+      const endResult = await RoomManager.endMatch(room.code, winnerSymbol);
+      if (endResult.success) {
+        const response = createMatchResponse({ match: endResult.data, roomCode: room.code });
+        io.to(room.code).emit(MATCH_UPDATE_EVENT, response);
+        io.to(room.code).emit(LEGACY_GAME_STATE_EVENT, response);
+        io.to(room.code).emit("match:finished", response);
+        io.to(room.code).emit("game-over", response);
+
+        const roomResponse = createRoomResponse(success(room));
+        io.to(room.code).emit(ROOM_UPDATE_EVENT, roomResponse);
+        io.to(room.code).emit(LEGACY_ROOM_UPDATE_EVENT, roomResponse);
+      }
+    }
+    forfeitTimers.delete(key);
+  }, 10000); // 10 seconds grace period
+
+  if (typeof timer.unref === "function") {
+    timer.unref();
+  }
+  forfeitTimers.set(key, timer);
+}
+
+function cancelForfeitTimer(roomCode, playerId) {
+  const key = `${roomCode}:${playerId}`;
+  if (forfeitTimers.has(key)) {
+    clearTimeout(forfeitTimers.get(key));
+    forfeitTimers.delete(key);
+  }
+}
 
 function getSessionKey(roomCode, playerId) {
   return `${String(roomCode).toUpperCase()}:${playerId}`;
@@ -184,7 +233,11 @@ function bindPlayer(socket, { roomCode, playerId } = {}) {
   socket.join(normalizedRoomCode);
 
   participant.setSocketId(socket.id);
-  participant.setStatus(room.currentMatch ? Player.STATUS.PLAYING : Player.STATUS.ONLINE);
+  if (room.currentMatch) {
+    participant.setStatus(Player.STATUS.PLAYING);
+  } else if (participant.status !== Player.STATUS.READY) {
+    participant.setStatus(Player.STATUS.ONLINE);
+  }
 
   playerSessions.set(sessionKey, {
     roomCode: normalizedRoomCode,
@@ -273,6 +326,11 @@ function emitCurrentMatchState(socket, room) {
 function handleReconnect(io, socket, payload = {}, acknowledgeCallback) {
   const roomCode = getRoomCode(payload);
   const playerId = payload.playerId ?? payload.participantId;
+
+  if (roomCode && playerId) {
+    cancelForfeitTimer(roomCode, playerId);
+  }
+
   const bindingResult = bindPlayer(socket, { roomCode, playerId });
 
   if (!bindingResult.success) {
@@ -335,10 +393,75 @@ function registerConnectionEvents(io, socket) {
       const roomResponse = createRoomResponse(success(disconnectState.room));
       io.to(disconnectState.roomCode).emit(ROOM_UPDATE_EVENT, roomResponse);
       io.to(disconnectState.roomCode).emit(LEGACY_ROOM_UPDATE_EVENT, roomResponse);
+
+      const room = disconnectState.room;
+      if (room.currentMatch && !room.currentMatch.game.isGameOver()) {
+        scheduleForfeitTimer(io, room.code, disconnectState.playerId);
+      }
     }
 
     console.log(`Socket disconnected: ${socket.id}. Reason: ${reason}`);
   });
+}
+
+function migrateRoomSockets(io, oldCode, newCode) {
+  if (!oldCode || !newCode) return;
+  const normOld = String(oldCode).toUpperCase();
+  const normNew = String(newCode).toUpperCase();
+
+  for (const connection of connections.values()) {
+    if (connection.roomCode === normOld) {
+      connection.roomCode = normNew;
+      if (io && connection.socketId) {
+        const socket = io.sockets?.sockets?.get?.(connection.socketId);
+        if (socket) {
+          socket.leave(normOld);
+          socket.join(normNew);
+          if (socket.data) {
+            socket.data.roomCode = normNew;
+          }
+        }
+      }
+    }
+  }
+
+  for (const [key, session] of Array.from(playerSessions.entries())) {
+    if (session.roomCode === normOld) {
+      playerSessions.delete(key);
+      session.roomCode = normNew;
+      playerSessions.set(getSessionKey(normNew, session.playerId), session);
+    }
+  }
+
+  if (cleanupTimers.has(normOld)) {
+    const timer = cleanupTimers.get(normOld);
+    cleanupTimers.delete(normOld);
+    cleanupTimers.set(normNew, timer);
+  }
+
+  for (const [key, timer] of Array.from(forfeitTimers.entries())) {
+    if (key.startsWith(`${normOld}:`)) {
+      forfeitTimers.delete(key);
+      const playerId = key.split(":")[1];
+      forfeitTimers.set(`${normNew}:${playerId}`, timer);
+    }
+  }
+
+  if (io) {
+    const roomSockets = io.sockets?.adapter?.rooms?.get?.(normOld);
+    if (roomSockets) {
+      for (const socketId of Array.from(roomSockets)) {
+        const socket = io.sockets?.sockets?.get?.(socketId);
+        if (socket) {
+          socket.leave(normOld);
+          socket.join(normNew);
+          if (socket.data) {
+            socket.data.roomCode = normNew;
+          }
+        }
+      }
+    }
+  }
 }
 
 registerConnectionEvents.bindPlayer = bindPlayer;
@@ -351,5 +474,6 @@ registerConnectionEvents.isSocketConnected = isSocketConnected;
 registerConnectionEvents.createSyncState = createSyncState;
 registerConnectionEvents.emitCurrentState = emitCurrentState;
 registerConnectionEvents.emitCurrentMatchState = emitCurrentMatchState;
+registerConnectionEvents.migrateRoomSockets = migrateRoomSockets;
 
 export default registerConnectionEvents;

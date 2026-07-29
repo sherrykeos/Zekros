@@ -40,9 +40,12 @@ const tips = [
     title: "Board dynamics",
     body: "Larger boards reward patience. Smaller boards reward tempo. Pick the surface that fits you.",
     pieces: [
-      { i: 0, player: "x" as const }, { i: 3, player: "o" as const },
-      { i: 5, player: "x" as const }, { i: 10, player: "o" as const },
-      { i: 12, player: "x" as const, fading: true }, { i: 15, player: "o" as const },
+      { i: 0, player: "x" as const },
+      { i: 3, player: "o" as const },
+      { i: 5, player: "x" as const },
+      { i: 10, player: "o" as const },
+      { i: 12, player: "x" as const, fading: true },
+      { i: 15, player: "o" as const },
     ],
   },
 ];
@@ -110,7 +113,9 @@ export function Tips() {
                 <h3 className="mt-2 font-display text-lg font-semibold tracking-tight">
                   {tip.title}
                 </h3>
-                <p className="mt-1.5 max-w-lg text-sm text-muted-foreground">{tip.body}</p>
+                <p className="mt-1.5 max-w-lg text-sm text-muted-foreground">
+                  {tip.body}
+                </p>
               </motion.div>
             </AnimatePresence>
           </div>

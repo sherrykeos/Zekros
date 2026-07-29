@@ -1,7 +1,9 @@
+import MatchManager from "../../managers/MatchManager.js";
 import RoomManager from "../../managers/RoomManager.js";
 import connectionEvents from "./connectionEvents.js";
 import {
   acknowledge,
+  createMatchResponse,
   createRoomResponse,
   emitError,
   failure,
@@ -122,8 +124,9 @@ function handleJoinRoom(io, socket, payload = {}, acknowledgeCallback) {
   const result = RoomManager.joinRoom(roomCode, player, options);
 
   if (!result.success) {
-    if (reconnectPlayerId && roomCode) {
-      handleReconnectRoom(io, socket, { roomCode, playerId: reconnectPlayerId }, acknowledgeCallback);
+    const pid = reconnectPlayerId ?? player?.id ?? player?.userId;
+    if (pid && roomCode) {
+      handleReconnectRoom(io, socket, { roomCode, playerId: pid }, acknowledgeCallback);
       return;
     }
 
@@ -183,10 +186,14 @@ function handleReconnectRoom(io, socket, payload = {}, acknowledgeCallback) {
   emitRoomUpdate(io, room.code, getRoomStateResponse(room.code));
 }
 
-function handleLeaveRoom(io, socket, payload = {}, acknowledgeCallback) {
+async function handleLeaveRoom(io, socket, payload = {}, acknowledgeCallback) {
   const roomCode = getRoomCode(payload) ?? socket.data?.roomCode;
   const participant = payload.playerId ?? payload.participantId ?? payload.player ?? socket.data?.playerId;
-  const result = RoomManager.leaveRoom(roomCode, participant);
+
+  const room = getRoom(roomCode);
+  const activeMatchId = room?.currentMatch?.id;
+
+  const result = await RoomManager.leaveRoom(roomCode, participant);
 
   if (!result.success) {
     emitRoomError(socket, "room:leave", result, acknowledgeCallback);
@@ -199,6 +206,19 @@ function handleLeaveRoom(io, socket, payload = {}, acknowledgeCallback) {
 
   if (roomResponse.success) {
     emitRoomUpdate(io, roomResponse.data.code, roomResponse);
+
+    if (activeMatchId) {
+      const matchResult = MatchManager.getMatch(activeMatchId);
+      if (matchResult.success) {
+        const response = createMatchResponse({ match: matchResult.data, roomCode: roomCode });
+        io.to(roomCode).emit("match:update", response);
+        io.to(roomCode).emit("game-state", response);
+        if (response.data?.gameOver) {
+          io.to(roomCode).emit("match:finished", response);
+          io.to(roomCode).emit("game-over", response);
+        }
+      }
+    }
 
     if (roomResponse.data.status === "CLOSED") {
       RoomManager.deleteRoom(roomResponse.data.code);
@@ -224,6 +244,40 @@ function handleAssignHost(io, socket, payload = {}, acknowledgeCallback) {
   const response = getRoomStateResponse(roomCode);
   acknowledge(acknowledgeCallback, response);
   emitRoomUpdate(io, response.data.code, response);
+}
+
+function handleToggleReady(io, socket, payload = {}, acknowledgeCallback) {
+  const roomCode = getRoomCode(payload) ?? socket.data?.roomCode;
+  const playerId = payload.playerId ?? socket.data?.playerId ?? socket.data?.userId;
+  const isReady = Boolean(payload.ready);
+
+  const roomResult = RoomManager.getRoom(roomCode);
+  if (!roomResult.success) {
+    emitRoomError(socket, "room:ready-toggle", roomResult, acknowledgeCallback);
+    return;
+  }
+
+  const room = roomResult.data;
+  const player =
+    room.getPlayer(playerId) ??
+    room.players.find(
+      (p) =>
+        p.id === playerId ||
+        p.userId === playerId ||
+        p.id === socket.data?.playerId ||
+        p.userId === socket.data?.userId,
+    );
+
+  if (!player) {
+    emitRoomError(socket, "room:ready-toggle", failure("PLAYER_NOT_FOUND", "Player not found in room."), acknowledgeCallback);
+    return;
+  }
+
+  player.setStatus(isReady ? "READY" : "ONLINE");
+
+  const response = getRoomStateResponse(roomCode);
+  acknowledge(acknowledgeCallback, response);
+  emitRoomUpdate(io, roomCode, response);
 }
 
 function handleGetRoom(socket, payload = {}, acknowledgeCallback) {
@@ -269,10 +323,12 @@ function registerRoomEvents(io, socket) {
   on(socket, "room:create", (payload, acknowledgeCallback) => handleCreateRoom(io, socket, payload, acknowledgeCallback));
   on(socket, "room:join", (payload, acknowledgeCallback) => handleJoinRoom(io, socket, payload, acknowledgeCallback));
   on(socket, "room:reconnect", (payload, acknowledgeCallback) => handleReconnectRoom(io, socket, payload, acknowledgeCallback));
+  on(socket, "room:subscribe", (payload, acknowledgeCallback) => handleReconnectRoom(io, socket, payload, acknowledgeCallback));
   on(socket, "room:leave", (payload, acknowledgeCallback) => handleLeaveRoom(io, socket, payload, acknowledgeCallback));
   on(socket, "room:host", (payload, acknowledgeCallback) => handleAssignHost(io, socket, payload, acknowledgeCallback));
   on(socket, "room:get", (payload, acknowledgeCallback) => handleGetRoom(socket, payload, acknowledgeCallback));
   on(socket, "room:close", (payload, acknowledgeCallback) => handleCloseRoom(io, socket, payload, acknowledgeCallback));
+  on(socket, "room:ready-toggle", (payload, acknowledgeCallback) => handleToggleReady(io, socket, payload, acknowledgeCallback));
 
   on(socket, "create-room", (payload, acknowledgeCallback) => handleCreateRoom(io, socket, payload, acknowledgeCallback));
   on(socket, "join-room", (payload, acknowledgeCallback) => handleJoinRoom(io, socket, payload, acknowledgeCallback));

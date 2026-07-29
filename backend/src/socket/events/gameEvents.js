@@ -68,8 +68,36 @@ function acknowledgeAndBroadcastMatch(io, roomCode, response, acknowledgeCallbac
   }
 }
 
+function isHostPlayer(room, player) {
+  if (!room?.host || !player) return false;
+  const hostId = room.host.id ?? room.host;
+  const hostUserId = room.host.userId ?? room.host.id;
+  const playerId = player.id;
+  const playerUserId = player.userId;
+
+  return Boolean(
+    (hostId && playerId === hostId) ||
+      (hostUserId && playerId === hostUserId) ||
+      (hostId && playerUserId && playerUserId === hostId) ||
+      (hostUserId && playerUserId && playerUserId === hostUserId),
+  );
+}
+
 async function handleStartMatch(io, socket, payload = {}, acknowledgeCallback) {
   const roomCode = getRoomCode(payload) ?? socket.data?.roomCode;
+  
+  const roomResult = RoomManager.getRoom(roomCode);
+  if (roomResult.success) {
+    const room = roomResult.data;
+    const allGuestsReady = room.players.every((player) => 
+      isHostPlayer(room, player) || player.type === "BOT" || player.status === "READY"
+    );
+    if (!allGuestsReady) {
+      emitMatchError(socket, "match:start", failure("GUESTS_NOT_READY", "All players must be ready to start."), acknowledgeCallback);
+      return;
+    }
+  }
+
   const result = await RoomManager.startMatch(roomCode, payload.config, payload.metadata);
 
   if (!result.success) {
@@ -102,6 +130,27 @@ async function handleMakeMove(io, socket, payload = {}, acknowledgeCallback) {
   const matchRoomCode = result.data.match?.metadata?.roomCode ?? roomCode;
   const response = createMatchResponse({ moveData: result.data, roomCode: matchRoomCode });
   acknowledgeAndBroadcastMatch(io, matchRoomCode, response, acknowledgeCallback);
+
+  // Trigger bot turn after 300ms so human sees the human move land and bot's expiring piece blink
+  const roomResult = RoomManager.getRoom(matchRoomCode);
+  if (roomResult.success) {
+    const room = roomResult.data;
+    const currentMatch = room.currentMatch;
+    if (currentMatch && !currentMatch.game.isGameOver()) {
+      const nextTurnSymbol = currentMatch.game.currentTurn;
+      const nextPlayer = room.players.find((p) => p.symbol === nextTurnSymbol);
+      if (nextPlayer && nextPlayer.type === "BOT") {
+        setTimeout(async () => {
+          const botResult = await RoomManager.executeBotTurn(matchRoomCode, currentMatch.id);
+          if (botResult.success) {
+            const botResponse = createMatchResponse({ moveData: botResult.data, roomCode: matchRoomCode });
+            emitMatchUpdate(io, matchRoomCode, botResponse);
+            emitRoomUpdate(io, matchRoomCode);
+          }
+        }, 300);
+      }
+    }
+  }
 }
 
 async function handleFinishMatch(io, socket, payload = {}, acknowledgeCallback) {
@@ -136,6 +185,57 @@ async function handleRematch(io, socket, payload = {}, acknowledgeCallback) {
   const response = createMatchResponse({ match: result.data, roomCode });
   acknowledgeAndBroadcastMatch(io, roomCode, response, acknowledgeCallback, MATCH_REMATCHED_EVENT);
   emitRoomUpdate(io, roomCode);
+}
+
+function handleRematchRequest(io, socket, payload = {}, acknowledgeCallback) {
+  const roomCode = getRoomCode(payload) ?? socket.data?.roomCode;
+  const senderId = payload.senderId ?? socket.data?.playerId ?? socket.data?.userId;
+  const senderName = payload.senderName ?? "Opponent";
+
+  if (!roomCode) {
+    emitMatchError(socket, "match:rematch-request", failure("ROOM_NOT_FOUND", "Room not found."), acknowledgeCallback);
+    return;
+  }
+
+  const response = success({ roomCode, matchId: payload.matchId, senderId, senderName });
+  acknowledge(acknowledgeCallback, response);
+  socket.to(roomCode).emit("match:rematch-offered", response);
+}
+
+async function handleRematchAccept(io, socket, payload = {}, acknowledgeCallback) {
+  const roomCode = getRoomCode(payload) ?? socket.data?.roomCode;
+  if (!roomCode) {
+    emitMatchError(socket, "match:rematch-accept", failure("ROOM_NOT_FOUND", "Room not found."), acknowledgeCallback);
+    return;
+  }
+
+  const result = await RoomManager.createRematchForRoom(roomCode);
+
+  if (!result.success) {
+    emitMatchError(socket, "match:rematch-accept", result, acknowledgeCallback);
+    return;
+  }
+
+  const matchRoomCode = result.data.metadata?.roomCode ?? roomCode;
+  socket.join(matchRoomCode);
+
+  const response = createMatchResponse({ match: result.data, roomCode: matchRoomCode });
+  acknowledgeAndBroadcastMatch(io, matchRoomCode, response, acknowledgeCallback, MATCH_REMATCHED_EVENT);
+  io.to(matchRoomCode).emit(MATCH_STARTED_EVENT, response);
+  emitRoomUpdate(io, matchRoomCode);
+}
+
+function handleRematchDecline(io, socket, payload = {}, acknowledgeCallback) {
+  const roomCode = getRoomCode(payload) ?? socket.data?.roomCode;
+  const response = success({
+    roomCode,
+    declinedBy: socket.data?.playerId ?? payload.senderId,
+  });
+
+  if (roomCode) {
+    io.to(roomCode).emit("match:rematch-declined", response);
+  }
+  acknowledge(acknowledgeCallback, response);
 }
 
 function handleGetMatchState(io, socket, payload = {}, acknowledgeCallback) {
@@ -183,6 +283,9 @@ function registerGameEvents(io, socket) {
   on(socket, "match:move", (payload, acknowledgeCallback) => handleMakeMove(io, socket, payload, acknowledgeCallback));
   on(socket, "match:finish", (payload, acknowledgeCallback) => handleFinishMatch(io, socket, payload, acknowledgeCallback));
   on(socket, "match:rematch", (payload, acknowledgeCallback) => handleRematch(io, socket, payload, acknowledgeCallback));
+  on(socket, "match:rematch-request", (payload, acknowledgeCallback) => handleRematchRequest(io, socket, payload, acknowledgeCallback));
+  on(socket, "match:rematch-accept", (payload, acknowledgeCallback) => handleRematchAccept(io, socket, payload, acknowledgeCallback));
+  on(socket, "match:rematch-decline", (payload, acknowledgeCallback) => handleRematchDecline(io, socket, payload, acknowledgeCallback));
   on(socket, "match:get", (payload, acknowledgeCallback) => handleGetMatchState(io, socket, payload, acknowledgeCallback));
 
   on(socket, "start-match", (payload, acknowledgeCallback) => handleStartMatch(io, socket, payload, acknowledgeCallback));

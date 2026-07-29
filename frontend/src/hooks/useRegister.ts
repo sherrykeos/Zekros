@@ -20,6 +20,8 @@ export function useRegister() {
 
   return {
     ...mutation,
-    errorMessage: mutation.error ? getApiErrorMessage(mutation.error, "Registration failed.") : null,
+    errorMessage: mutation.error
+      ? getApiErrorMessage(mutation.error, "Registration failed.")
+      : null,
   };
 }

@@ -1,5 +1,12 @@
 ﻿import { AnimatePresence, motion } from "motion/react";
-import { Activity, Trophy, Megaphone, Lightbulb, Calendar, Code2 } from "lucide-react";
+import {
+  Activity,
+  Trophy,
+  Megaphone,
+  Lightbulb,
+  Calendar,
+  Code2,
+} from "lucide-react";
 import { useAppShell } from "@/contexts/app-shell";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
@@ -20,7 +27,9 @@ export function RightPanel() {
         >
           <div className="glass flex h-full w-[320px] flex-col rounded-2xl">
             <div className="flex items-center justify-between px-4 py-3">
-              <span className="font-display text-sm font-semibold">Activity</span>
+              <span className="font-display text-sm font-semibold">
+                Activity
+              </span>
               <span className="rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                 Live
               </span>
@@ -29,9 +38,12 @@ export function RightPanel() {
             <div className="custom-scroll flex-1 space-y-4 overflow-y-auto p-4">
               <Section title="Account" icon={Trophy}>
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                  <div className="text-xs font-medium">{user?.username ?? "Not signed in"}</div>
+                  <div className="text-xs font-medium">
+                    {user?.username ?? "Not signed in"}
+                  </div>
                   <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                    Account stats will appear here after the stats API is connected.
+                    Account stats will appear here after the stats API is
+                    connected.
                   </p>
                 </div>
               </Section>
@@ -44,18 +56,28 @@ export function RightPanel() {
 
               <Section title="Announcement" icon={Megaphone}>
                 <div className="rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.01] p-3">
-                  <div className="text-xs font-medium">Season system pending</div>
+                  <div className="text-xs font-medium">
+                    Season system pending
+                  </div>
                   <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                    Leaderboards and rewards should be connected through their own feature API.
+                    Leaderboards and rewards should be connected through their
+                    own feature API.
                   </p>
                 </div>
               </Section>
 
               <Section title="Upcoming Tournament" icon={Calendar}>
                 <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-transparent p-3">
-                  <div className="text-xs font-medium">Tournament module unavailable</div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">Connect a tournament API before enabling registration.</div>
-                  <button disabled className="mt-2 w-full rounded-md bg-primary px-2 py-1.5 text-[11px] font-medium text-primary-foreground opacity-40">
+                  <div className="text-xs font-medium">
+                    Tournament module unavailable
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    Connect a tournament API before enabling registration.
+                  </div>
+                  <button
+                    disabled
+                    className="mt-2 w-full rounded-md bg-primary px-2 py-1.5 text-[11px] font-medium text-primary-foreground opacity-40"
+                  >
                     Reserve seat
                   </button>
                 </div>
@@ -63,7 +85,8 @@ export function RightPanel() {
 
               <Section title="Tip" icon={Lightbulb}>
                 <p className="text-[11px] leading-snug text-muted-foreground">
-                  Reclaim Tokens are most valuable on turn 4. Hold one for the late mid-game.
+                  Reclaim Tokens are most valuable on turn 4. Hold one for the
+                  late mid-game.
                 </p>
               </Section>
 

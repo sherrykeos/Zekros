@@ -1,34 +1,23 @@
 import { api } from "../client";
 
-
 class GameService {
   async getGameState(matchId: string) {
     const response = await api.get(`/games/${matchId}/state`);
     return response.data;
   }
 
-  async playMove({
-    matchId,
-    playerId,
-    move,
-    roomCode,
-  }: any) {
-    const response = await api.post(
-      `/games/${matchId}/move`,
-      {
-        playerId,
-        move,
-        roomCode,
-      }
-    );
+  async playMove({ matchId, playerId, move, roomCode }: any) {
+    const response = await api.post(`/games/${matchId}/move`, {
+      playerId,
+      move,
+      roomCode,
+    });
 
     return response.data;
   }
 
   async resetGame(matchId: string) {
-    const response = await api.post(
-      `/games/${matchId}/reset`
-    );
+    const response = await api.post(`/games/${matchId}/reset`);
 
     return response.data;
   }

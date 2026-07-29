@@ -31,7 +31,11 @@ const bots: Bot[] = [
   },
 ];
 
-export function BotModesGrid({ onLaunch }: { onLaunch?: (id: Bot["id"]) => void }) {
+export function BotModesGrid({
+  onLaunch,
+}: {
+  onLaunch?: (id: Bot["id"]) => void;
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {bots.map((b, i) => {
@@ -59,8 +63,12 @@ export function BotModesGrid({ onLaunch }: { onLaunch?: (id: Bot["id"]) => void 
               </span>
             </div>
 
-            <div className="mt-6 font-display text-lg font-semibold tracking-tight">{b.name}</div>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{b.description}</p>
+            <div className="mt-6 font-display text-lg font-semibold tracking-tight">
+              {b.name}
+            </div>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              {b.description}
+            </p>
 
             <div className="mt-5 grid grid-cols-2 gap-2">
               <Meta icon={Clock} label="Thinks in" value={b.thinkingTime} />

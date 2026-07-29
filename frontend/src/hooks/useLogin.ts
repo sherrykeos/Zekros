@@ -23,6 +23,8 @@ export function useLogin() {
 
   return {
     ...mutation,
-    errorMessage: mutation.error ? getApiErrorMessage(mutation.error, "Sign in failed.") : null,
+    errorMessage: mutation.error
+      ? getApiErrorMessage(mutation.error, "Sign in failed.")
+      : null,
   };
 }

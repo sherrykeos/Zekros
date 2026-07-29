@@ -60,7 +60,8 @@
   --radius: 0.75rem;
 
   /* Default to dark — this is a dark-first product */
-  --background: oklch(0.13 0 0);
+  /* --background: oklch(12.856% 0.00001 271.152); */
+  --background: black ;
   --foreground: oklch(0.98 0 0);
 
   --graphite: oklch(0.18 0 0);

@@ -1,11 +1,11 @@
-﻿import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Check, Loader2, XCircle } from "lucide-react";
 import { AuthShell, PrimaryButton } from "@/components/auth/auth-shell";
 import { useVerifyEmail } from "@/hooks/useVerifyEmail";
 
 export const Route = createFileRoute("/auth/verify")({
-  validateSearch: (search) => ({
-    token: typeof search.token === "string" ? search.token : "",
+  validateSearch: (search: Record<string, unknown>): { token?: string } => ({
+    token: (search.token as string) || undefined,
   }),
   head: () => ({ meta: [{ title: "Verify email - ZEKROS" }] }),
   component: VerifyPage,
@@ -14,22 +14,30 @@ export const Route = createFileRoute("/auth/verify")({
 function VerifyPage() {
   const navigate = useNavigate();
   const { token } = Route.useSearch();
-  const verification = useVerifyEmail(token);
+  const verification = useVerifyEmail(token ?? "");
   const missingToken = !token;
   const loading = verification.isPending && !missingToken;
   const success = verification.isSuccess && Boolean(verification.data?.success);
   const error = missingToken || verification.isError;
   const message = missingToken
     ? "Verification token is missing."
-    : verification.message ?? verification.errorMessage ?? "Verifying your email...";
+    : (verification.message ??
+      verification.errorMessage ??
+      "Verifying your email...");
 
   return (
     <AuthShell
       eyebrow="Email verification"
-      title={loading ? "Verifying..." : success ? "Email verified" : "Verification failed"}
+      title={
+        loading
+          ? "Verifying..."
+          : success
+            ? "Email verified"
+            : "Verification failed"
+      }
       description={message}
       footer={
-        <Link to="/auth/sign-in" className="hover:text-foreground">
+        <Link to="/auth/sign-in" search={{}} className="hover:text-foreground">
           Back to sign in
         </Link>
       }
@@ -42,18 +50,26 @@ function VerifyPage() {
         </div>
 
         {success && (
-          <PrimaryButton onClick={() => navigate({ to: "/auth/sign-in" })} className="mt-6">
+          <PrimaryButton
+            onClick={() => navigate({ to: "/auth/sign-in", search: {} })}
+            className="mt-6"
+          >
             Continue to Sign In
           </PrimaryButton>
         )}
 
         {error && (
-          <PrimaryButton onClick={() => navigate({ to: "/auth/check-email" })} className="mt-6">
+          <PrimaryButton
+            onClick={() => navigate({ to: "/auth/check-email", search: {} })}
+            className="mt-6"
+          >
             Request new verification email
           </PrimaryButton>
         )}
 
-        {loading && <p className="mt-6 text-sm text-muted-foreground">Please wait...</p>}
+        {loading && (
+          <p className="mt-6 text-sm text-muted-foreground">Please wait...</p>
+        )}
       </div>
     </AuthShell>
   );

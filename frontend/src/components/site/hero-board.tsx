@@ -3,7 +3,11 @@ import { useEffect, useState } from "react";
 
 type Cell = { id: number; owner: "x" | "o" | null; age: number };
 
-const INITIAL: Cell[] = Array.from({ length: 16 }, (_, i) => ({ id: i, owner: null, age: 0 }));
+const INITIAL: Cell[] = Array.from({ length: 16 }, (_, i) => ({
+  id: i,
+  owner: null,
+  age: 0,
+}));
 
 const SCRIPT: Array<{ idx: number; owner: "x" | "o" }> = [
   { idx: 5, owner: "x" },
@@ -27,9 +31,14 @@ export function HeroBoard() {
       setTurn((t) => {
         const move = SCRIPT[t % SCRIPT.length];
         setCells((prev) => {
-          const next = prev.map((c) => ({ ...c, age: c.owner ? c.age + 1 : 0 }));
+          const next = prev.map((c) => ({
+            ...c,
+            age: c.owner ? c.age + 1 : 0,
+          }));
           // disappearing-piece rule: max 3 per side
-          const sameOwner = next.filter((c) => c.owner === move.owner).sort((a, b) => b.age - a.age);
+          const sameOwner = next
+            .filter((c) => c.owner === move.owner)
+            .sort((a, b) => b.age - a.age);
           if (sameOwner.length >= 3) {
             const oldest = sameOwner[0];
             next[oldest.id] = { ...oldest, owner: null, age: 0 };
@@ -97,7 +106,13 @@ export function HeroBoard() {
 
 function XMark() {
   return (
-    <svg viewBox="0 0 24 24" className="size-full stroke-white" strokeWidth={2.2} strokeLinecap="round" fill="none">
+    <svg
+      viewBox="0 0 24 24"
+      className="size-full stroke-white"
+      strokeWidth={2.2}
+      strokeLinecap="round"
+      fill="none"
+    >
       <path d="M5 5 L19 19" />
       <path d="M19 5 L5 19" />
     </svg>
@@ -106,7 +121,12 @@ function XMark() {
 
 function OMark() {
   return (
-    <svg viewBox="0 0 24 24" className="size-full stroke-white/70" strokeWidth={2.2} fill="none">
+    <svg
+      viewBox="0 0 24 24"
+      className="size-full stroke-white/70"
+      strokeWidth={2.2}
+      fill="none"
+    >
       <circle cx="12" cy="12" r="8" />
     </svg>
   );

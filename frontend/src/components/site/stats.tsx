@@ -25,7 +25,9 @@ export function Stats() {
                 <div className="text-gradient font-display text-4xl font-semibold tracking-tight md:text-5xl">
                   {s.v}
                 </div>
-                <div className="mt-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">{s.k}</div>
+                <div className="mt-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                  {s.k}
+                </div>
               </motion.div>
             ))}
           </div>

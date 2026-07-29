@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   createFileRoute,
   useLocation,
@@ -13,6 +13,7 @@ import { GameInfoPanel } from "@/components/game/game-info-panel";
 import { GameStatusPanel } from "@/components/game/game-status-panel";
 import { MoveHistoryPanel } from "@/components/game/move-history-panel";
 import { ResultModal, type GameOutcome } from "@/components/game/result-modal";
+import { RematchModal } from "@/components/game/rematch-modal";
 import {
   defaultConfig,
   normalizeMatchConfig,
@@ -23,6 +24,8 @@ import {
 } from "@/components/game/types";
 
 import { useGameState, usePlayMove, useResetGame } from "@/hooks/game";
+import { useSocketStore } from "@/store/useSocketStore";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 type BackendSymbol = "X" | "O";
 
@@ -39,11 +42,14 @@ type BackendGameState = {
   winner?: BackendSymbol | null;
   draw?: boolean;
   gameOver?: boolean;
-  players?: Record<BackendSymbol, { activePieces?: string[]; reclaimTokens?: number }>;
+  players?: Record<
+    BackendSymbol,
+    { activePieces?: string[]; reclaimTokens?: number }
+  >;
   expiringPiece?: BackendCell | null;
   validMoves?: BackendCell[];
   appliedMoves?: any[];
-  match?: { moveHistory?: any[] };
+  match?: { moveHistory?: any[]; metadata?: any };
 };
 
 export const Route = createFileRoute("/app/game")({
@@ -65,19 +71,27 @@ function boardCells(state: BackendGameState | null): BackendCell[] {
   return board?.cells ?? [];
 }
 
-function cellsFromState(state: BackendGameState | null, total: number): CellState[] {
+function cellsFromState(
+  state: BackendGameState | null,
+  total: number,
+): CellState[] {
   const source = boardCells(state);
   if (!source.length) return Array(total).fill(null);
 
   const boardSize = Math.sqrt(total);
   const cells = Array<CellState>(total).fill(null);
   for (const cell of source) {
-    cells[cellIndex(cell, boardSize)] = cell.owner ? toPlayer(cell.owner) : null;
+    cells[cellIndex(cell, boardSize)] = cell.owner
+      ? toPlayer(cell.owner)
+      : null;
   }
   return cells;
 }
 
-function movesFromHistory(history: any[] = [], boardSize: number): MoveRecord[] {
+function movesFromHistory(
+  history: any[] = [],
+  boardSize: number,
+): MoveRecord[] {
   return history
     .filter((entry) => entry?.move?.row != null && entry?.move?.col != null)
     .map((entry, index) => ({
@@ -95,7 +109,10 @@ function statusFromState(state: BackendGameState | null, playerSymbol: Player) {
   return toPlayer(state.winner) === playerSymbol ? "won" : "lost";
 }
 
-function outcomeFromState(state: BackendGameState, playerSymbol: Player): GameOutcome {
+function outcomeFromState(
+  state: BackendGameState,
+  playerSymbol: Player,
+): GameOutcome {
   if (state.draw || !state.winner) return "draw";
   return toPlayer(state.winner) === playerSymbol ? "win" : "loss";
 }
@@ -121,23 +138,23 @@ function GamePage() {
       normalizeMatchConfig({
         ...defaultConfig,
         ...launchState.config,
-        mode: launchState.config?.mode ?? launchState.mode ?? defaultConfig.mode,
+        mode:
+          launchState.config?.mode ?? launchState.mode ?? defaultConfig.mode,
       }),
     [launchState.config, launchState.mode],
   );
 
+  const { data: user } = useCurrentUser();
   const total = config.boardSize * config.boardSize;
-  const matchId = typeof launchState.matchId === "string" ? launchState.matchId : "";
-  const roomCode = typeof launchState.roomCode === "string" ? launchState.roomCode : "";
-  const playerIds = useMemo(
-    () => ({
-      x: launchState.playerIds?.x ?? launchState.playerId ?? "",
-      o: launchState.playerIds?.o ?? "",
-    }),
-    [launchState.playerId, launchState.playerIds],
-  );
+  const matchId =
+    typeof launchState.matchId === "string" ? launchState.matchId : "";
+  const roomCode =
+    typeof launchState.roomCode === "string" ? launchState.roomCode : "";
+  const localPlayerId = launchState.playerId ?? user?.id ?? "";
 
-  const [cells, setCells] = useState<CellState[]>(() => Array(total).fill(null));
+  const [cells, setCells] = useState<CellState[]>(() =>
+    Array(total).fill(null),
+  );
   const [turn, setTurn] = useState<Player>(config.startingPlayer);
   const [moves, setMoves] = useState<MoveRecord[]>([]);
   const [lastMove, setLastMove] = useState<number | null>(null);
@@ -146,29 +163,66 @@ function GamePage() {
   const [resultOpen, setResultOpen] = useState(false);
   const [outcome, setOutcome] = useState<GameOutcome>("draw");
 
+  const [rematchPending, setRematchPending] = useState(false);
+  const [incomingRematch, setIncomingRematch] = useState<{
+    senderId: string;
+    senderName: string;
+  } | null>(null);
+  const [rematchDeclined, setRematchDeclined] = useState(false);
+
   const {
     data: gameStateResponse,
     isLoading: isLoadingGameState,
     isFetching: isFetchingGameState,
   } = useGameState(matchId);
-  const { mutateAsync: playMove, isPending: isPlayingMove } = usePlayMove();
-  const { mutateAsync: resetGame, isPending: isResettingGame } = useResetGame();
+  const [isPlayingMove, setIsPlayingMove] = useState(false);
+  const [isResettingGame, setIsResettingGame] = useState(false);
+  const { socket, connect } = useSocketStore();
+
+  useEffect(() => {
+    connect();
+  }, [connect]);
+
+  useEffect(() => {
+    if (!roomCode || !socket || !localPlayerId) return;
+    socket.emit("room:reconnect", { roomCode, playerId: localPlayerId });
+  }, [roomCode, localPlayerId, socket]);
 
   const applyServerState = useCallback(
-    (state: BackendGameState | null) => {
+    (state: any) => {
       if (!state) return;
 
-      setServerState(state);
-      setCells(cellsFromState(state, total));
-      setTurn(toPlayer(state.currentTurn));
-      setMoves(movesFromHistory(state.match?.moveHistory ?? state.appliedMoves, config.boardSize));
+      // Normalize between raw MatchState and flattened SocketState
+      const normalizedState: BackendGameState | null = state.game
+        ? { ...state.game, match: state }
+        : state;
 
-      if (state.gameOver) {
-        setOutcome(outcomeFromState(state, config.playerSymbol));
-        setResultOpen(true);
+      if (!normalizedState) return;
+
+      setServerState(normalizedState);
+      setCells(cellsFromState(normalizedState, total));
+      setTurn(toPlayer(normalizedState.currentTurn));
+      setMoves(
+        movesFromHistory(
+          normalizedState.match?.moveHistory ?? normalizedState.appliedMoves,
+          config.boardSize,
+        ),
+      );
+
+      if (normalizedState.gameOver) {
+        let actualSymbol = config.playerSymbol;
+        const participants = normalizedState.match?.metadata?.participants;
+        if (participants && Array.isArray(participants)) {
+          const p = participants.find((x: any) => x.id === localPlayerId);
+          if (p) actualSymbol = p.symbol.toLowerCase() as Player;
+        }
+
+        setOutcome(outcomeFromState(normalizedState, actualSymbol));
+        // Delay showing the result card so the user can see the win state/animation
+        setTimeout(() => setResultOpen(true), 1500);
       }
     },
-    [config.boardSize, config.playerSymbol, total],
+    [config.boardSize, config.playerSymbol, total, localPlayerId],
   );
 
   useEffect(() => {
@@ -177,9 +231,107 @@ function GamePage() {
   }, [applyServerState, gameStateResponse, matchId]);
 
   useEffect(() => {
+    if (!socket || !matchId) return;
+
+    const onMatchUpdate = (payload: any) => {
+      if (payload?.success && payload.data) {
+        applyServerState(payload.data);
+      }
+    };
+
+    const onMatchRematched = (payload: any) => {
+      const data = payload?.data ?? payload;
+      const newMatchId =
+        data?.id ??
+        data?.matchId ??
+        data?.match?.id ??
+        payload?.id;
+
+      if ((payload?.success || payload?.id || data?.id) && newMatchId) {
+        applyServerState(data);
+        setStartedAt(Date.now());
+        setResultOpen(false);
+        setRematchPending(false);
+        setIncomingRematch(null);
+        setRematchDeclined(false);
+
+        void navigate({
+          to: "/app/game" as any,
+          state: {
+            ...launchState,
+            matchId: newMatchId,
+            roomCode: data?.roomCode ?? roomCode,
+          } as any,
+        });
+      }
+    };
+
+    const onRematchOffered = (payload: any) => {
+      const data = payload?.data ?? payload;
+      if (data && data.senderId !== localPlayerId) {
+        setResultOpen(false);
+        setIncomingRematch({
+          senderId: data.senderId,
+          senderName: data.senderName ?? "Opponent",
+        });
+      }
+    };
+
+    const onRematchDeclined = () => {
+      setRematchPending(false);
+      setIncomingRematch(null);
+      setRematchDeclined(true);
+      setTimeout(() => {
+        setRematchDeclined(false);
+        void navigate({
+          to: "/app/lobby" as any,
+          state: {
+            roomCode,
+            playerId: localPlayerId,
+            config,
+            mode: config.mode,
+          } as any,
+        });
+      }, 2000);
+    };
+
+    socket.on("match:update", onMatchUpdate);
+    socket.on("match:rematched", onMatchRematched);
+    socket.on("match:started", onMatchRematched);
+    socket.on("match:rematch-offered", onRematchOffered);
+    socket.on("match:rematch-declined", onRematchDeclined);
+
+    return () => {
+      socket.off("match:update", onMatchUpdate);
+      socket.off("match:rematched", onMatchRematched);
+      socket.off("match:started", onMatchRematched);
+      socket.off("match:rematch-offered", onRematchOffered);
+      socket.off("match:rematch-declined", onRematchDeclined);
+    };
+  }, [socket, matchId, applyServerState, total, launchState, navigate, roomCode, localPlayerId, config.mode]);
+
+  useEffect(() => {
     setStartedAt(Date.now());
     setResultOpen(false);
   }, [matchId]);
+
+  const actualSymbol: Player = useMemo(() => {
+    if (config.mode === "multiplayer") {
+      const participants = serverState?.match?.metadata?.participants;
+      if (participants && Array.isArray(participants)) {
+        const p = participants.find((x: any) => x.id === localPlayerId);
+        if (p) return p.symbol.toLowerCase() as Player;
+      }
+    }
+    return config.playerSymbol ?? "x";
+  }, [config.mode, config.playerSymbol, localPlayerId, serverState]);
+
+  const status = statusFromState(serverState, actualSymbol);
+  const winner = serverState?.winner ? toPlayer(serverState.winner) : null;
+  const tokensX =
+    serverState?.players?.X?.reclaimTokens ?? config.reclaimTokens;
+  const tokensO =
+    serverState?.players?.O?.reclaimTokens ?? config.reclaimTokens;
 
   const counts = useMemo(() => {
     const players = serverState?.players;
@@ -199,22 +351,188 @@ function GamePage() {
     return { x, o };
   }, [cells, serverState]);
 
-  const playableCells = useMemo(() => {
-    if (serverState?.validMoves?.length) {
-      return serverState.validMoves.map((cell) => cellIndex(cell, config.boardSize));
+  const aboutToVanish = useMemo(() => {
+    const activeSymbol = (turn === "x" ? "X" : "O") as "X" | "O";
+    const indices: number[] = [];
+
+    const players = serverState?.players;
+    if (players) {
+      const active = players[activeSymbol]?.activePieces;
+      if (active && active.length >= config.maxActivePieces) {
+        const oldestCellId = active[0];
+        const [row, col] = oldestCellId.split("-").map(Number);
+        if (Number.isInteger(row) && Number.isInteger(col)) {
+          const idx = row * config.boardSize + col;
+          indices.push(idx);
+        }
+      }
+    } else if (serverState?.expiringPiece) {
+      if (!serverState.expiringPiece.owner || serverState.expiringPiece.owner === activeSymbol) {
+        indices.push(cellIndex(serverState.expiringPiece, config.boardSize));
+      }
+    } else {
+      // Local games fallback for current turn player
+      const playerMoves = moves.filter((m) => m.player === turn);
+      let count = 0;
+      for (const c of cells) {
+        if (c === turn) count++;
+      }
+      if (count >= config.maxActivePieces && playerMoves.length > 0) {
+        const oldest = playerMoves.find((m) => cells[m.cell] === turn);
+        if (oldest) indices.push(oldest.cell);
+      }
     }
 
-    return cells.flatMap((cell, index) => (cell ? [] : [index]));
-  }, [cells, config.boardSize, serverState]);
+    return indices.filter((idx) => cells[idx] === turn);
+  }, [cells, config.boardSize, config.maxActivePieces, serverState, moves, turn]);
 
-  const aboutToVanish = useMemo(() => {
-    if (!serverState?.expiringPiece) return [];
+  const playableCells = useMemo(() => {
+    const valid: number[] = [];
 
-    const index = cellIndex(serverState.expiringPiece, config.boardSize);
-    return cells[index] ? [index] : [];
-  }, [cells, config.boardSize, serverState]);
+    if (serverState?.validMoves?.length) {
+      for (const cell of serverState.validMoves) {
+        valid.push(cellIndex(cell, config.boardSize));
+      }
+    } else {
+      for (let index = 0; index < cells.length; index++) {
+        if (!cells[index]) {
+          valid.push(index);
+        }
+      }
+    }
 
-  const isHumanTurn = !matchId || Boolean(playerIds[turn]);
+    // Always ensure reclaimable expiring cells for the active turn player are playable if tokens > 0
+    const currentTokens = turn === "x" ? tokensX : tokensO;
+    if (currentTokens > 0 && aboutToVanish.length > 0) {
+      for (const idx of aboutToVanish) {
+        if (cells[idx] === turn && !valid.includes(idx)) {
+          valid.push(idx);
+        }
+      }
+    }
+
+    return valid;
+  }, [cells, config.boardSize, serverState, turn, tokensX, tokensO, aboutToVanish]);
+
+  const winningCells = useMemo(() => {
+    if (!serverState?.gameOver || !serverState?.winner) return undefined;
+
+    const boardSize = config.boardSize;
+    const winLength = config.winLength ?? (boardSize > 3 ? 4 : 3);
+    const directions = [
+      [0, 1],
+      [1, 0],
+      [1, 1],
+      [1, -1],
+    ];
+
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i];
+      if (!cell) continue;
+
+      const row = Math.floor(i / boardSize);
+      const col = i % boardSize;
+
+      for (const [rowStep, colStep] of directions) {
+        let count = 1;
+        let r = row;
+        let c = col;
+        const line = [i];
+
+        while (true) {
+          r += rowStep;
+          c += colStep;
+
+          if (r < 0 || r >= boardSize || c < 0 || c >= boardSize) break;
+
+          const nextIndex = r * boardSize + c;
+          if (cells[nextIndex] !== cell) break;
+
+          line.push(nextIndex);
+          count++;
+
+          if (count >= winLength) {
+            return line;
+          }
+        }
+      }
+    }
+    return undefined;
+  }, [cells, config.boardSize, config.winLength, serverState]);
+
+  const dynamicNames = useMemo(() => {
+    if (config.mode === "local") {
+      return { player: "Crosses", opponent: "Circles" };
+    }
+    const participants = serverState?.match?.metadata?.participants;
+    if (Array.isArray(participants)) {
+      const localPlayer = participants.find((p: any) => p.id === localPlayerId);
+      const otherPlayer = participants.find((p: any) => p.id !== localPlayerId);
+      return {
+        player: localPlayer?.name ? `${localPlayer.name} (You)` : "You",
+        opponent: otherPlayer?.name ?? (config.mode === "multiplayer" ? "Opponent" : "Smart AI"),
+      };
+    }
+    return {
+      player: "You",
+      opponent: config.mode === "multiplayer" ? "Opponent" : "Smart AI",
+    };
+  }, [config.mode, serverState, localPlayerId]);
+
+  const turnLabel = useMemo(() => {
+    if (config.mode === "local") {
+      return turn === "x" ? "Crosses" : "Circles";
+    }
+    if (config.mode === "multiplayer") {
+      const participants = serverState?.match?.metadata?.participants;
+      if (Array.isArray(participants)) {
+        const activePlayer = participants.find((p: any) => p.symbol?.toLowerCase() === turn);
+        if (activePlayer?.name) {
+          if (activePlayer.id === localPlayerId) {
+            return `${activePlayer.name} (You)'s Turn`;
+          }
+          return `${activePlayer.name}'s Turn`;
+        }
+      }
+      return turn === actualSymbol ? "Your Turn" : "Opponent's Turn";
+    }
+    if (turn === actualSymbol) {
+      return "Your Turn";
+    }
+    return "AI's Turn";
+  }, [config.mode, turn, actualSymbol, serverState, localPlayerId]);
+
+  // We can determine our valid player symbols from the launchState (for local bots) or the server state (for multiplayer)
+  const activeLocalSymbols = useMemo(() => {
+    if (!matchId) return ["x", "o"]; // Local game
+
+    if (config.mode === "local") {
+      // Local PvP
+      return ["x", "o"];
+    }
+
+    if (config.mode === "smart" || config.mode === "perfect") {
+      // Human vs Bot
+      return ["x"];
+    }
+
+    // Multiplayer: determine from serverState
+    const symbols: Player[] = [];
+    const participants = serverState?.match?.metadata?.participants;
+    if (participants && Array.isArray(participants)) {
+      const p = participants.find((x: any) => x.id === localPlayerId);
+      if (p) {
+        symbols.push(p.symbol.toLowerCase() as Player);
+      }
+    }
+
+    // Fallback just in case
+    if (symbols.length === 0) symbols.push("x");
+
+    return symbols;
+  }, [config.mode, localPlayerId, matchId, serverState]);
+
+  const isHumanTurn = activeLocalSymbols.includes(turn);
 
   const syncGameState = async () => {
     if (!matchId) return;
@@ -227,7 +545,12 @@ function GamePage() {
     if (matchId) {
       const row = Math.floor(i / config.boardSize);
       const col = i % config.boardSize;
-      const activePlayerId = playerIds[turn];
+
+      // Determine which player ID to send
+      let activePlayerId = localPlayerId;
+      if (config.mode === "local" && launchState.playerIds) {
+        activePlayerId = launchState.playerIds[turn] ?? localPlayerId;
+      }
 
       if (!activePlayerId) {
         await syncGameState();
@@ -235,43 +558,54 @@ function GamePage() {
       }
 
       try {
-        const response = await playMove({
-          matchId,
-          playerId: activePlayerId,
-          move: `${row}-${col}`,
-          roomCode,
-        });
+        setIsPlayingMove(true);
+        socket?.emit(
+          "match:move",
+          {
+            matchId,
+            playerId: activePlayerId,
+            move: `${row}-${col}`,
+            roomCode,
+          },
+          async (response: any) => {
+            setIsPlayingMove(false);
+            if (!response?.success) {
+              console.error(response?.error?.message ?? "Unable to play move.");
+              await syncGameState();
+              return;
+            }
 
-        if (!response?.success) {
-          console.error(response?.error?.message ?? "Unable to play move.");
-          await syncGameState();
-          return;
-        }
-
-        const state = response.data as BackendGameState;
-        applyServerState(state);
-        setLastMove(i);
-        await syncGameState();
+            const state = response.data;
+            applyServerState(state);
+            setLastMove(i);
+            await syncGameState();
+          },
+        );
       } catch (error) {
+        setIsPlayingMove(false);
         console.error(error);
         await syncGameState();
       }
       return;
     }
 
-    if (cells[i]) return;
+    const isReclaim = cells[i] === turn && aboutToVanish.includes(i);
+    const currentTokens = turn === "x" ? tokensX : tokensO;
+
+    if (cells[i] && (!isReclaim || currentTokens <= 0)) return;
 
     const next = cells.slice();
     next[i] = turn;
     setCells(next);
     setLastMove(i);
+
     setMoves((current) => [
       ...current,
       {
         index: current.length,
         player: turn,
         cell: i,
-        kind: "place",
+        kind: isReclaim ? "reclaim" : "place",
         at: Date.now(),
       },
     ]);
@@ -282,17 +616,51 @@ function GamePage() {
     const resetStartedAt = Date.now();
 
     if (matchId) {
-      try {
-        const response = await resetGame(matchId);
-        const restartedState = response?.data?.game ?? null;
-        if (restartedState) {
-          applyServerState(restartedState);
-        }
-        await syncGameState();
-      } catch (error) {
-        console.error(error);
-        await syncGameState();
+      if (config.mode === "multiplayer") {
+        setResultOpen(false);
+        setRematchPending(true);
+        socket?.emit("match:rematch-request", {
+          roomCode,
+          matchId,
+          senderId: localPlayerId,
+          senderName: user?.username ?? "Opponent",
+        });
+        return;
       }
+
+      setIsResettingGame(true);
+      socket?.emit(
+        "match:rematch",
+        { roomCode, matchId },
+        (response: any) => {
+          setIsResettingGame(false);
+          const newMatchId =
+            response?.data?.id ??
+            response?.data?.matchId ??
+            response?.data?.match?.id;
+
+          if (response?.success && newMatchId) {
+            setCells(Array(total).fill(null));
+            setMoves([]);
+            setLastMove(null);
+            setServerState(null);
+            setStartedAt(Date.now());
+            setResultOpen(false);
+
+            void navigate({
+              to: "/app/game" as any,
+              state: {
+                ...launchState,
+                matchId: newMatchId,
+                roomCode,
+              } as any,
+            });
+          } else {
+            console.error(response?.error?.message ?? "Unable to restart match.");
+          }
+        },
+      );
+      return;
     } else {
       setCells(Array(total).fill(null));
       setMoves([]);
@@ -305,15 +673,72 @@ function GamePage() {
     setResultOpen(false);
   };
 
-  const finish = (o: GameOutcome) => {
-    setOutcome(o);
-    setResultOpen(true);
+  const handleAcceptRematch = () => {
+    socket?.emit("match:rematch-accept", { roomCode, matchId });
+    setIncomingRematch(null);
   };
 
-  const status = statusFromState(serverState, config.playerSymbol);
-  const winner = serverState?.winner ? toPlayer(serverState.winner) : null;
-  const tokensX = serverState?.players?.X?.reclaimTokens ?? config.reclaimTokens;
-  const tokensO = serverState?.players?.O?.reclaimTokens ?? config.reclaimTokens;
+  const handleDeclineRematch = () => {
+    socket?.emit("match:rematch-decline", {
+      roomCode,
+      matchId,
+      senderId: localPlayerId,
+    });
+    setIncomingRematch(null);
+    void navigate({
+      to: "/app/lobby" as any,
+      state: {
+        roomCode,
+        playerId: localPlayerId,
+        config,
+        mode: config.mode,
+      } as any,
+    });
+  };
+
+  const handleCancelRematchRequest = () => {
+    setRematchPending(false);
+    setRematchDeclined(false);
+    void navigate({
+      to: "/app/lobby" as any,
+      state: {
+        roomCode,
+        playerId: localPlayerId,
+        config,
+        mode: config.mode,
+      } as any,
+    });
+  };
+
+  const handleLeaveMatch = () => {
+    if (matchId && status === "playing") {
+      const winnerSymbol = actualSymbol === "x" ? "O" : "X";
+      socket?.emit("match:finish", {
+        matchId,
+        roomCode,
+        winner: winnerSymbol,
+      });
+    }
+    if (roomCode && localPlayerId) {
+      socket?.emit("room:leave", { roomCode, playerId: localPlayerId });
+    }
+    navigate({ to: "/app/play" });
+  };
+
+  const finish = (o: GameOutcome) => {
+    if (matchId && o === "loss") {
+      const winnerSymbol = actualSymbol === "x" ? "O" : "X";
+      socket?.emit("match:finish", {
+        matchId,
+        roomCode,
+        winner: winnerSymbol,
+      });
+    } else {
+      setOutcome(o);
+      setResultOpen(true);
+    }
+  };
+
   const boardDisabled =
     isPlayingMove ||
     isResettingGame ||
@@ -331,7 +756,7 @@ function GamePage() {
     >
       <div className="glass flex items-center justify-between rounded-2xl px-4 py-2.5">
         <button
-          onClick={() => navigate({ to: "/app/play" })}
+          onClick={handleLeaveMatch}
           className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/4 px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-white/6 hover:text-foreground"
         >
           <ChevronLeft className="size-3.5" /> Leave match
@@ -355,15 +780,9 @@ function GamePage() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[280px_minmax(0,1fr)_280px]">
         <div className="order-2 xl:order-1">
           <GameInfoPanel
-            config={config}
-            playerName={config.mode === "local" ? "Crosses" : "You"}
-            opponentName={
-              config.mode === "multiplayer"
-                ? "Opponent"
-                : config.mode === "local"
-                  ? "Circles"
-                  : "Smart AI"
-            }
+            config={{ ...config, playerSymbol: actualSymbol }}
+            playerName={dynamicNames.player}
+            opponentName={dynamicNames.opponent}
             turn={turn}
           />
         </div>
@@ -374,10 +793,13 @@ function GamePage() {
             cells={cells}
             currentPlayer={turn}
             lastMove={lastMove}
+            winningCells={winningCells}
             aboutToVanish={aboutToVanish}
             playableCells={isHumanTurn ? playableCells : []}
             disabled={boardDisabled}
             onCellClick={handleCell}
+            tokensX={tokensX}
+            tokensO={tokensO}
           />
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             <button
@@ -403,6 +825,7 @@ function GamePage() {
             moveCount={moves.length}
             winner={winner}
             startedAt={startedAt}
+            turnLabel={turnLabel}
           />
         </div>
       </div>
@@ -416,6 +839,32 @@ function GamePage() {
         onPlayAgain={() => void handleReset()}
         onClose={() => setResultOpen(false)}
       />
+
+      {incomingRematch && (
+        <RematchModal
+          open={Boolean(incomingRematch)}
+          type="incoming"
+          senderName={incomingRematch.senderName}
+          onAccept={handleAcceptRematch}
+          onDecline={handleDeclineRematch}
+        />
+      )}
+
+      {rematchPending && (
+        <RematchModal
+          open={rematchPending}
+          type="outgoing"
+          onCancel={handleCancelRematchRequest}
+        />
+      )}
+
+      {rematchDeclined && (
+        <RematchModal
+          open={rematchDeclined}
+          type="declined"
+          onCancel={handleCancelRematchRequest}
+        />
+      )}
     </motion.div>
   );
 }

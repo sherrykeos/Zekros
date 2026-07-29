@@ -1,5 +1,6 @@
 import GameManager from "../managers/GameManager.js";
 import RoomManager from "../managers/RoomManager.js";
+import MatchManager from "../managers/MatchManager.js";
 
 class GameController {
     static async makeMove(req, res, next) {
@@ -22,12 +23,18 @@ class GameController {
     static async getGameState(req, res, next) {
         try {
             const { matchId } = req.params;
-            const result = GameManager.getGame(matchId);
+            const matchResult = MatchManager.getMatch(matchId);
 
-            if (result.success) {
-                res.status(200).json({ ...result, data: result.data.getState() });
+            if (matchResult.success) {
+                const match = matchResult.data;
+                const matchState = match.getState();
+                const responseData = {
+                    ...matchState.game,
+                    match: matchState
+                };
+                res.status(200).json({ success: true, data: responseData });
             } else {
-                res.status(404).json(result);
+                res.status(404).json(matchResult);
             }
         } catch (error) {
             next(error);

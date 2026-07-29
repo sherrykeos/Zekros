@@ -44,7 +44,8 @@ function Dashboard() {
             Account dashboard
           </div>
           <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-            Welcome back, <span className="text-gradient">{user?.username}</span>.
+            Welcome back,{" "}
+            <span className="text-gradient">{user?.username}</span>.
           </h1>
         </div>
         <Link
@@ -107,13 +108,11 @@ function Dashboard() {
           description="Stats will appear when the stats feature API is connected."
         />
         <EmptyState
-            icon={History}
-            title="No account statistics loaded"
-            description="Use the auth feature as the reference pattern when adding stats, matches, replays, and leaderboard APIs."
-          />
+          icon={History}
+          title="No account statistics loaded"
+          description="Use the auth feature as the reference pattern when adding stats, matches, replays, and leaderboard APIs."
+        />
       </section>
     </div>
   );
 }
-
-

@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+import axios from "axios";
 
 export type DevRestLog = {
   id: string;
@@ -46,8 +46,18 @@ function requestLabel(config: { baseURL?: string; url?: string }) {
   return path.startsWith("http") ? path : `${base}${path}`;
 }
 
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== "undefined") {
+    return `http://${window.location.hostname}:5000/api`;
+  }
+  return "http://localhost:5000/api";
+};
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: getApiBaseUrl(),
   timeout: 10000,
   withCredentials: true,
 });

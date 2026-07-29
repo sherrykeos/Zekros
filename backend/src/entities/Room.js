@@ -180,7 +180,7 @@ class Room {
    */
   hasPlayer(player) {
     const playerId = this.getEntityId(player);
-    return this.players.some((entry) => entry.id === playerId);
+    return this.players.some((entry) => entry.id === playerId || (entry.userId && entry.userId === playerId));
   }
 
   /**
@@ -191,7 +191,7 @@ class Room {
    */
   getPlayer(player) {
     const playerId = this.getEntityId(player);
-    return this.players.find((entry) => entry.id === playerId) ?? null;
+    return this.players.find((entry) => entry.id === playerId || (entry.userId && entry.userId === playerId)) ?? null;
   }
 
   /**

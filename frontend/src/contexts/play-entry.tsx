@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 type PlayEntryIntent = "default" | "multiplayer";
 
@@ -37,7 +44,8 @@ export function PlayEntryProvider({ children }: { children: ReactNode }) {
       openEntry(ce.detail?.intent ?? "default");
     };
     window.addEventListener("zekros:play-now", onPlay as EventListener);
-    return () => window.removeEventListener("zekros:play-now", onPlay as EventListener);
+    return () =>
+      window.removeEventListener("zekros:play-now", onPlay as EventListener);
   }, [openEntry]);
 
   return (
@@ -66,5 +74,7 @@ export function usePlayEntry() {
 /** Fire-and-forget helper for non-React call sites (landing page anchors etc.). */
 export function dispatchPlayNow(intent: PlayEntryIntent = "default") {
   if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent("zekros:play-now", { detail: { intent } }));
+  window.dispatchEvent(
+    new CustomEvent("zekros:play-now", { detail: { intent } }),
+  );
 }

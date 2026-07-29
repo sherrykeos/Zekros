@@ -9,6 +9,9 @@ router.post('/', RoomController.createRoom);
 // GET /rooms/:roomId
 router.get('/:roomId', RoomController.getRoom);
 
+// POST /rooms/:roomId/regenerate
+router.post('/:roomId/regenerate', RoomController.regenerateCode);
+
 // POST /rooms/:roomId/join
 router.post('/:roomId/join', RoomController.joinRoom);
 

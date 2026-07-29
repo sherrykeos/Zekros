@@ -177,6 +177,14 @@ class GameEngine {
     this.board.setCell(cellId, this.currentTurn);
     currentPlayer.activePieces.push(cellId);
 
+    if (currentPlayer.activePieces.length > this.config.maxActivePieces) {
+      const oldestMove = currentPlayer.activePieces.shift();
+
+      if (!isReclaimMove) {
+        this.board.clearCell(oldestMove);
+      }
+    }
+
     const winner = Rules.checkWinner(
       this.board.getBoard(),
       this.config.boardSize,
@@ -188,14 +196,6 @@ class GameEngine {
       this.gameOver = true;
       this.draw = false;
       return { success: true };
-    }
-
-    if (currentPlayer.activePieces.length > this.config.maxActivePieces) {
-      const oldestMove = currentPlayer.activePieces.shift();
-
-      if (!isReclaimMove) {
-        this.board.clearCell(oldestMove);
-      }
     }
 
     this.switchTurn();

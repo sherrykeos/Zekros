@@ -21,6 +21,7 @@ import { Route as AuthCheckEmailRouteImport } from './../pages/auth.check-email'
 import { Route as AppSetupRouteImport } from './../pages/app.setup'
 import { Route as AppSettingsRouteImport } from './../pages/app.settings'
 import { Route as AppProfileRouteImport } from './../pages/app.profile'
+import { Route as AppPrepRouteImport } from './../pages/app.prep'
 import { Route as AppPlayRouteImport } from './../pages/app.play'
 import { Route as AppMultiplayerRouteImport } from './../pages/app.multiplayer'
 import { Route as AppLobbyRouteImport } from './../pages/app.lobby'
@@ -91,6 +92,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPrepRoute = AppPrepRouteImport.update({
+  id: '/prep',
+  path: '/prep',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPlayRoute = AppPlayRouteImport.update({
   id: '/play',
   path: '/play',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/app/lobby': typeof AppLobbyRoute
   '/app/multiplayer': typeof AppMultiplayerRoute
   '/app/play': typeof AppPlayRoute
+  '/app/prep': typeof AppPrepRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/setup': typeof AppSetupRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/app/lobby': typeof AppLobbyRoute
   '/app/multiplayer': typeof AppMultiplayerRoute
   '/app/play': typeof AppPlayRoute
+  '/app/prep': typeof AppPrepRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/setup': typeof AppSetupRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/app/lobby': typeof AppLobbyRoute
   '/app/multiplayer': typeof AppMultiplayerRoute
   '/app/play': typeof AppPlayRoute
+  '/app/prep': typeof AppPrepRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/setup': typeof AppSetupRoute
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/app/lobby'
     | '/app/multiplayer'
     | '/app/play'
+    | '/app/prep'
     | '/app/profile'
     | '/app/settings'
     | '/app/setup'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/app/lobby'
     | '/app/multiplayer'
     | '/app/play'
+    | '/app/prep'
     | '/app/profile'
     | '/app/settings'
     | '/app/setup'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/app/lobby'
     | '/app/multiplayer'
     | '/app/play'
+    | '/app/prep'
     | '/app/profile'
     | '/app/settings'
     | '/app/setup'
@@ -374,6 +386,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/prep': {
+      id: '/app/prep'
+      path: '/prep'
+      fullPath: '/app/prep'
+      preLoaderRoute: typeof AppPrepRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/play': {
       id: '/app/play'
       path: '/play'
@@ -449,6 +468,7 @@ interface AppRouteChildren {
   AppLobbyRoute: typeof AppLobbyRoute
   AppMultiplayerRoute: typeof AppMultiplayerRoute
   AppPlayRoute: typeof AppPlayRoute
+  AppPrepRoute: typeof AppPrepRoute
   AppProfileRoute: typeof AppProfileRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSetupRoute: typeof AppSetupRoute
@@ -465,6 +485,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLobbyRoute: AppLobbyRoute,
   AppMultiplayerRoute: AppMultiplayerRoute,
   AppPlayRoute: AppPlayRoute,
+  AppPrepRoute: AppPrepRoute,
   AppProfileRoute: AppProfileRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSetupRoute: AppSetupRoute,

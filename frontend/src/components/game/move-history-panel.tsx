@@ -17,7 +17,10 @@ export function MoveHistoryPanel({
   onSeek?: (index: number) => void;
 }) {
   const total = Math.max(1, moves.length);
-  const pct = currentMove != null ? Math.min(100, ((currentMove + 1) / total) * 100) : 100;
+  const pct =
+    currentMove != null
+      ? Math.min(100, ((currentMove + 1) / total) * 100)
+      : 100;
 
   return (
     <section className="glass rounded-2xl">
@@ -57,14 +60,18 @@ export function MoveHistoryPanel({
       {/* Timeline */}
       <ol className="flex max-h-44 gap-2 overflow-x-auto px-5 py-4">
         {moves.length === 0 && (
-          <li className="text-xs text-muted-foreground">No moves yet. Make the first one.</li>
+          <li className="text-xs text-muted-foreground">
+            No moves yet. Make the first one.
+          </li>
         )}
         {moves.map((m, idx) => {
           const active = currentMove === m.index;
           const prev = idx > 0 ? moves[idx - 1]!.at : m.at;
           const deltaMs = Math.max(0, m.at - prev);
           const deltaLabel =
-            deltaMs < 1000 ? `+${deltaMs}ms` : `+${(deltaMs / 1000).toFixed(1)}s`;
+            deltaMs < 1000
+              ? `+${deltaMs}ms`
+              : `+${(deltaMs / 1000).toFixed(1)}s`;
           return (
             <li key={m.index}>
               <button
@@ -76,7 +83,9 @@ export function MoveHistoryPanel({
                 }`}
               >
                 <div className="flex w-full items-center justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                  <span>#{String(m.index + 1).padStart(2, "0")} · {m.kind}</span>
+                  <span>
+                    #{String(m.index + 1).padStart(2, "0")} · {m.kind}
+                  </span>
                   <span>{deltaLabel}</span>
                 </div>
                 <div className="mt-1 flex items-center gap-2 text-sm font-medium">

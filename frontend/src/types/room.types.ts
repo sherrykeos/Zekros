@@ -6,20 +6,24 @@
 
 export interface CreateRoomRequest {
   roomOptions: {
-    host: {
+    host?: {
       id: string;
       name: string;
     };
-
-    settings: {
-      gameMode: string;
+    settings?: {
+      gameMode?: string;
+      isPrivate?: boolean;
     };
+    metadata?: Record<string, unknown>;
   };
 }
 
 export interface JoinRoomRequest {
   roomId: string;
-  playerName: string;
+  playerInfo: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface LeaveRoomRequest {
@@ -28,6 +32,8 @@ export interface LeaveRoomRequest {
 
 export interface StartMatchRequest {
   roomId: string;
+  config: unknown;
+  metadata?: Record<string, unknown>;
 }
 
 export interface EndMatchRequest {

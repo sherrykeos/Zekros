@@ -61,35 +61,50 @@ function AboutPage() {
 
       <Section title="What is ZEKROS" icon={Info}>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          ZEKROS turns a familiar grid into a living arena. Boards shift in size, pieces decay, and
-          tokens let you rewrite the board mid-fight. It is built for fast, expressive matches —
-          beautifully simple to play, deep to master.
+          ZEKROS turns a familiar grid into a living arena. Boards shift in
+          size, pieces decay, and tokens let you rewrite the board mid-fight. It
+          is built for fast, expressive matches — beautifully simple to play,
+          deep to master.
         </p>
       </Section>
 
       <Section title="Game rules" icon={BookOpen}>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>· Players alternate turns placing a single piece on an empty cell.</li>
-          <li>· Win length is auto-derived from board size (3×3 → 3 in a row, 4×4 → 4, etc.).</li>
-          <li>· Each player has a cap on Active Pieces equal to the board size.</li>
-          <li>· When you exceed the cap, your oldest piece vanishes from the board.</li>
-          <li>· On your turn, you may spend a Reclaim Token to remove one of your own pieces.</li>
+          <li>
+            · Players alternate turns placing a single piece on an empty cell.
+          </li>
+          <li>
+            · Win length is auto-derived from board size (3×3 → 3 in a row, 4×4
+            → 4, etc.).
+          </li>
+          <li>
+            · Each player has a cap on Active Pieces equal to the board size.
+          </li>
+          <li>
+            · When you exceed the cap, your oldest piece vanishes from the
+            board.
+          </li>
+          <li>
+            · On your turn, you may spend a Reclaim Token to remove one of your
+            own pieces.
+          </li>
         </ul>
       </Section>
 
       <Section title="Dynamic pieces" icon={Sparkles}>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          The board is never static. As your active-piece count nears its cap, the oldest pieces
-          pulse to warn you — placing the next one removes them entirely. This keeps every position
-          fluid and rewards forward planning.
+          The board is never static. As your active-piece count nears its cap,
+          the oldest pieces pulse to warn you — placing the next one removes
+          them entirely. This keeps every position fluid and rewards forward
+          planning.
         </p>
       </Section>
 
       <Section title="Reclaim Tokens" icon={RefreshCcw}>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Reclaim Tokens are a tactical lifeline. Spend one to take back a piece you've already
-          placed, opening space and disrupting your opponent's reads. Token counts are configurable
-          per match (0–10).
+          Reclaim Tokens are a tactical lifeline. Spend one to take back a piece
+          you've already placed, opening space and disrupting your opponent's
+          reads. Token counts are configurable per match (0–10).
         </p>
       </Section>
 
@@ -138,18 +153,24 @@ function AboutPage() {
             <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
               Powered by
             </div>
-            <div className="mt-1 font-display text-base font-semibold">D3T Engine</div>
+            <div className="mt-1 font-display text-base font-semibold">
+              D3T Engine
+            </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Custom strategy engine handling dynamic boards, vanish queues, and reclaim logic.
+              Custom strategy engine handling dynamic boards, vanish queues, and
+              reclaim logic.
             </p>
           </div>
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
             <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
               Built by
             </div>
-            <div className="mt-1 font-display text-base font-semibold">ZEROTH Labs</div>
+            <div className="mt-1 font-display text-base font-semibold">
+              ZEROTH Labs
+            </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              A studio crafting premium digital products with obsessive attention to detail.
+              A studio crafting premium digital products with obsessive
+              attention to detail.
             </p>
           </div>
         </div>
@@ -193,7 +214,10 @@ function FAQRow({ q, a }: { q: string; a: string }) {
         className="flex w-full items-center justify-between gap-3 py-3 text-left text-sm"
       >
         <span className="font-medium">{q}</span>
-        <motion.span animate={{ rotate: open ? 180 : 0 }} className="text-muted-foreground">
+        <motion.span
+          animate={{ rotate: open ? 180 : 0 }}
+          className="text-muted-foreground"
+        >
           <ChevronDown className="size-4" />
         </motion.span>
       </button>
@@ -206,7 +230,9 @@ function FAQRow({ q, a }: { q: string; a: string }) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <p className="pb-4 text-sm leading-relaxed text-muted-foreground">{a}</p>
+            <p className="pb-4 text-sm leading-relaxed text-muted-foreground">
+              {a}
+            </p>
           </motion.div>
         )}
       </AnimatePresence>

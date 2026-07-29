@@ -21,6 +21,7 @@ export function GameStatusPanel({
   winner,
   startedAt,
   paused,
+  turnLabel,
 }: {
   turn: Player;
   status: "idle" | "playing" | "won" | "lost" | "draw";
@@ -34,6 +35,7 @@ export function GameStatusPanel({
   winner?: Player | null;
   startedAt?: number;
   paused?: boolean;
+  turnLabel?: string;
 }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -80,8 +82,12 @@ export function GameStatusPanel({
             {turn.toUpperCase()}
           </div>
           <div>
-            <div className="font-display text-base font-semibold">{turn === "x" ? "Crosses" : "Circles"}</div>
-            <div className="text-[11px] text-muted-foreground">Place or reclaim a piece</div>
+            <div className="font-display text-base font-semibold">
+              {turnLabel ?? (turn === "x" ? "Crosses" : "Circles")}
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              Place or reclaim a piece
+            </div>
           </div>
         </div>
       </motion.div>
@@ -148,7 +154,9 @@ function MeterRow({
           <Icon className="size-3" /> {label}
         </span>
         {max != null && (
-          <span className="font-mono text-[10px] text-muted-foreground">cap · {max}</span>
+          <span className="font-mono text-[10px] text-muted-foreground">
+            cap · {max}
+          </span>
         )}
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -159,7 +167,15 @@ function MeterRow({
   );
 }
 
-function SidePill({ label, value, max }: { label: string; value: number; max?: number }) {
+function SidePill({
+  label,
+  value,
+  max,
+}: {
+  label: string;
+  value: number;
+  max?: number;
+}) {
   const pct = max && max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return (
     <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2">
@@ -167,7 +183,9 @@ function SidePill({ label, value, max }: { label: string; value: number; max?: n
         <span className="font-mono text-muted-foreground">{label}</span>
         <span className="tabular-nums">
           {value}
-          {max != null && <span className="text-muted-foreground"> /{max}</span>}
+          {max != null && (
+            <span className="text-muted-foreground"> /{max}</span>
+          )}
         </span>
       </div>
       {max != null && (
@@ -199,7 +217,9 @@ function TokensRow({
           <Coins className="size-3" /> Reclaim tokens
         </span>
         {max != null && (
-          <span className="font-mono text-[10px] text-muted-foreground">start · {max}</span>
+          <span className="font-mono text-[10px] text-muted-foreground">
+            start · {max}
+          </span>
         )}
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -210,13 +230,23 @@ function TokensRow({
   );
 }
 
-function TokenStrip({ label, value, max }: { label: string; value: number; max: number }) {
+function TokenStrip({
+  label,
+  value,
+  max,
+}: {
+  label: string;
+  value: number;
+  max: number;
+}) {
   const dots = Math.max(max, value);
   const empty = value === 0;
   return (
     <div
       className={`rounded-lg border bg-white/[0.02] px-3 py-2 ${
-        empty ? "border-dashed border-white/10 opacity-60" : "border-white/[0.06]"
+        empty
+          ? "border-dashed border-white/10 opacity-60"
+          : "border-white/[0.06]"
       }`}
     >
       <div className="flex items-center justify-between text-xs font-medium">
@@ -250,4 +280,3 @@ function TokenStrip({ label, value, max }: { label: string; value: number; max: 
     </div>
   );
 }
-

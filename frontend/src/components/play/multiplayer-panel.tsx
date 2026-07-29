@@ -47,7 +47,9 @@ export function MultiplayerPanel({
           <div className="grid size-11 place-items-center rounded-xl border border-white/10 bg-white/[0.04]">
             <DoorOpen className="size-5" strokeWidth={1.6} />
           </div>
-          <div className="mt-6 font-display text-base font-semibold">Create room</div>
+          <div className="mt-6 font-display text-base font-semibold">
+            Create room
+          </div>
           <p className="mt-1 text-xs text-muted-foreground">
             Private lobby. Share the code with your friends.
           </p>
@@ -61,14 +63,18 @@ export function MultiplayerPanel({
           <div className="grid size-11 place-items-center rounded-xl border border-white/10 bg-white/[0.04]">
             <DoorClosed className="size-5" strokeWidth={1.6} />
           </div>
-          <div className="mt-6 font-display text-base font-semibold">Join with code</div>
+          <div className="mt-6 font-display text-base font-semibold">
+            Join with code
+          </div>
           <p className="mt-1 text-xs text-muted-foreground">
             Drop in by entering a 6-character room code.
           </p>
           <div className="mt-4 flex w-full items-center gap-2">
             <input
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 7))}
+              onChange={(e) =>
+                setCode(e.target.value.toUpperCase().slice(0, 7))
+              }
               placeholder="ZK-XXXX"
               className="h-10 flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-3 font-mono text-sm uppercase tracking-[0.18em] text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-white/20"
             />
@@ -87,7 +93,9 @@ export function MultiplayerPanel({
             <Users className="size-5" strokeWidth={1.6} />
           </div>
           <div className="mt-6 flex items-center gap-2">
-            <div className="font-display text-base font-semibold">Invite friends</div>
+            <div className="font-display text-base font-semibold">
+              Invite friends
+            </div>
             <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
               <Lock className="size-2.5" /> Soon
             </span>
@@ -113,7 +121,9 @@ export function MultiplayerPanel({
               className="flex items-center justify-between gap-3 px-5 py-3 transition-colors hover:bg-white/[0.02]"
             >
               <div className="min-w-0">
-                <div className="font-mono text-sm tracking-[0.16em]">{r.code}</div>
+                <div className="font-mono text-sm tracking-[0.16em]">
+                  {r.code}
+                </div>
                 <div className="mt-0.5 text-[11px] text-muted-foreground">
                   {r.host} · {r.mode}
                 </div>

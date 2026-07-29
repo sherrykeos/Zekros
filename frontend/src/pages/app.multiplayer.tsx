@@ -40,7 +40,11 @@ function MultiplayerPage() {
         description="When players create public rooms, you'll see them here. Or start your own."
         action={
           <button
-            onClick={() => (isAuthenticated ? navigate({ to: "/app/lobby" }) : openAccountRequired())}
+            onClick={() =>
+              isAuthenticated
+                ? navigate({ to: "/app/lobby" })
+                : openAccountRequired()
+            }
             className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground"
           >
             <Plus className="size-4" /> Create room

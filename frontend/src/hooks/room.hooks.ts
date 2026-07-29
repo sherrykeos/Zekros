@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 
 import { roomApi } from "@/services/api/room.api";
 
@@ -47,20 +46,20 @@ export function useRoom(roomId: string) {
  */
 
 export function useCreateRoom() {
-  const navigate = useNavigate();
-
   return useMutation({
-    mutationFn: (data: CreateRoomRequest) =>
-      roomApi.createRoom(data),
+    mutationFn: (data: CreateRoomRequest) => roomApi.createRoom(data),
+  });
+}
 
-    onSuccess: (room) => {
-      navigate({
-        to: "/room/$roomId",
-        params: {
-          roomId: room.id,
-        },
-      });
-    },
+/**
+ * ==========================================================
+ * Regenerate Room Code
+ * ==========================================================
+ */
+
+export function useRegenerateRoomCode() {
+  return useMutation({
+    mutationFn: (roomId: string) => roomApi.regenerateRoomCode(roomId),
   });
 }
 
@@ -72,24 +71,12 @@ export function useCreateRoom() {
 
 export function useJoinRoom() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (data: JoinRoomRequest) =>
-      roomApi.joinRoom(data),
+    mutationFn: (data: JoinRoomRequest) => roomApi.joinRoom(data),
 
     onSuccess: (room) => {
-      queryClient.setQueryData(
-        [...ROOM_QUERY_KEY, room.id],
-        room,
-      );
-
-      navigate({
-        to: "/app/room/$roomId",
-        params: {
-          roomId: room.id,
-        },
-      });
+      queryClient.setQueryData([...ROOM_QUERY_KEY, room.id], room);
     },
   });
 }
@@ -102,19 +89,13 @@ export function useJoinRoom() {
 
 export function useLeaveRoom() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (data: LeaveRoomRequest) =>
-      roomApi.leaveRoom(data),
+    mutationFn: (data: LeaveRoomRequest) => roomApi.leaveRoom(data),
 
     onSuccess: () => {
       queryClient.removeQueries({
         queryKey: ROOM_QUERY_KEY,
-      });
-
-      navigate({
-        to: "/app/play",
       });
     },
   });
@@ -128,8 +109,7 @@ export function useLeaveRoom() {
 
 export function useStartMatch() {
   return useMutation({
-    mutationFn: (data: StartMatchRequest) =>
-      roomApi.startMatch(data),
+    mutationFn: (data: StartMatchRequest) => roomApi.startMatch(data),
   });
 }
 
@@ -141,8 +121,7 @@ export function useStartMatch() {
 
 export function useEndMatch() {
   return useMutation({
-    mutationFn: (data: EndMatchRequest) =>
-      roomApi.endMatch(data),
+    mutationFn: (data: EndMatchRequest) => roomApi.endMatch(data),
   });
 }
 
@@ -154,8 +133,7 @@ export function useEndMatch() {
 
 export function useCreateRematch() {
   return useMutation({
-    mutationFn: (data: CreateRematchRequest) =>
-      roomApi.createRematch(data),
+    mutationFn: (data: CreateRematchRequest) => roomApi.createRematch(data),
   });
 }
 
@@ -166,16 +144,7 @@ export function useCreateRematch() {
  */
 
 export function useCloseRoom() {
-  const navigate = useNavigate();
-
   return useMutation({
-    mutationFn: (data: CloseRoomRequest) =>
-      roomApi.closeRoom(data),
-
-    onSuccess: () => {
-      navigate({
-        to: "/app/play",
-      });
-    },
+    mutationFn: (data: CloseRoomRequest) => roomApi.closeRoom(data),
   });
 }

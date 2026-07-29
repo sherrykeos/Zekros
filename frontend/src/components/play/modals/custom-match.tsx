@@ -1,5 +1,11 @@
 import { useMemo, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import { MiniBoard } from "../mini-board";
 
@@ -15,7 +21,9 @@ export function CustomMatchModal({
   const [maxActive, setMaxActive] = useState(3);
   const [reclaim, setReclaim] = useState(1);
   const [symbol, setSymbol] = useState<"x" | "o">("x");
-  const [mode, setMode] = useState<"local" | "smart" | "perfect" | "multi">("smart");
+  const [mode, setMode] = useState<"local" | "smart" | "perfect" | "multi">(
+    "smart",
+  );
 
   // Decorative preview pieces — clamped to board size
   const previewPieces = useMemo(() => {
@@ -23,7 +31,11 @@ export function CustomMatchModal({
     return [
       { i: 0 % total, player: "x" as const },
       { i: Math.min(total - 1, boardSize + 1), player: "o" as const },
-      { i: Math.min(total - 1, boardSize * 2), player: "x" as const, fading: true },
+      {
+        i: Math.min(total - 1, boardSize * 2),
+        player: "x" as const,
+        fading: true,
+      },
       { i: total - 1, player: "o" as const },
     ];
   }, [boardSize]);
@@ -132,7 +144,11 @@ export function CustomMatchModal({
                 Live preview
               </div>
               <div className="mt-2 glass rounded-2xl p-3">
-                <MiniBoard size={boardSize} pieces={previewPieces} animated={false} />
+                <MiniBoard
+                  size={boardSize}
+                  pieces={previewPieces}
+                  animated={false}
+                />
                 <div className="mt-3 space-y-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                   <Row k="Board" v={`${boardSize}×${boardSize}`} />
                   <Row k="Win" v={`${winLength} in a row`} />

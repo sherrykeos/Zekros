@@ -1,12 +1,17 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Mail, RefreshCcw, Pencil } from "lucide-react";
-import { AuthShell, FormField, TextInput, PrimaryButton } from "@/components/auth/auth-shell";
+import {
+  AuthShell,
+  FormField,
+  TextInput,
+  PrimaryButton,
+} from "@/components/auth/auth-shell";
 import { useResendVerification } from "@/hooks/useResendVerification";
 
 export const Route = createFileRoute("/auth/check-email")({
-  validateSearch: (search) => ({
-    email: typeof search.email === "string" ? search.email : "",
+  validateSearch: (search: Record<string, unknown>): { email?: string } => ({
+    email: (search.email as string) || undefined,
   }),
   head: () => ({ meta: [{ title: "Check your email - ZEKROS" }] }),
   component: CheckEmailPage,
@@ -14,7 +19,7 @@ export const Route = createFileRoute("/auth/check-email")({
 
 function CheckEmailPage() {
   const { email } = Route.useSearch();
-  const [emailInput, setEmailInput] = useState(email);
+  const [emailInput, setEmailInput] = useState(email ?? "");
   const [validationError, setValidationError] = useState<string | null>(null);
   const resendVerification = useResendVerification();
   const navigate = useNavigate();
@@ -25,7 +30,9 @@ function CheckEmailPage() {
     setValidationError(null);
 
     if (!targetEmail) {
-      setValidationError("Enter the email address you used to create your account.");
+      setValidationError(
+        "Enter the email address you used to create your account.",
+      );
       return;
     }
 
@@ -40,7 +47,7 @@ function CheckEmailPage() {
       title="Check your inbox."
       description="We sent a verification email. Open that link to finish verifying your account."
       footer={
-        <Link to="/auth/sign-in" className="hover:text-foreground">
+        <Link to="/auth/sign-in" search={{}} className="hover:text-foreground">
           Back to sign in
         </Link>
       }
@@ -52,8 +59,12 @@ function CheckEmailPage() {
 
         {email ? (
           <div className="mt-5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-            <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Sent to</div>
-            <div className="mt-1 break-all text-sm font-medium text-foreground">{email}</div>
+            <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              Sent to
+            </div>
+            <div className="mt-1 break-all text-sm font-medium text-foreground">
+              {email}
+            </div>
           </div>
         ) : (
           <div className="mt-5 w-full text-left">
@@ -82,7 +93,11 @@ function CheckEmailPage() {
         )}
 
         <div className="mt-6 w-full space-y-3">
-          <PrimaryButton type="button" loading={resendVerification.isPending} onClick={handleResend}>
+          <PrimaryButton
+            type="button"
+            loading={resendVerification.isPending}
+            onClick={handleResend}
+          >
             <RefreshCcw className="size-4" /> Resend email
           </PrimaryButton>
           <button

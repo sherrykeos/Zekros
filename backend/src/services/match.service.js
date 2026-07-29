@@ -34,16 +34,37 @@ function shouldUpdateRatings(match) {
   );
 }
 
+async function resolveValidUserId(userId, tx) {
+  if (!userId || typeof userId !== "string" || userId.startsWith("local_") || userId.startsWith("player_")) {
+    return null;
+  }
+  try {
+    const dbClient = tx ?? prisma;
+    const user = await dbClient.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    return user ? user.id : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function persistMatch(match) {
   return prisma.$transaction(async (tx) => {
     const persistedMatch = await matchRepository.create(toMatchCreateData(match), tx);
 
-    const participants = getRuntimeParticipants(match).map((participant) =>
-      toParticipantCreateData(match.id, participant),
-    );
-
-    for (const participant of participants) {
-      await participantRepository.create(participant, tx);
+    const runtimeParticipants = getRuntimeParticipants(match);
+    for (const participant of runtimeParticipants) {
+      const validUserId = await resolveValidUserId(participant.userId ?? participant.id, tx);
+      const participantData = {
+        matchId: match.id,
+        userId: validUserId,
+        guestName: validUserId ? null : participant.name ?? "Guest",
+        symbol: normalizeSymbol(participant.symbol),
+        joinedAt: toDate(participant.joinedAt),
+      };
+      await participantRepository.create(participantData, tx);
     }
 
     return persistedMatch;

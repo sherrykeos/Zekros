@@ -57,6 +57,7 @@ function createMatchState({ match = null, moveData = null, roomCode = null } = {
   const gameState = matchState?.game ?? moveData ?? null;
 
   return {
+    id: matchState?.id ?? moveData?.matchId ?? null,
     roomCode: roomCode ?? matchState?.metadata?.roomCode ?? null,
     matchId: matchState?.id ?? moveData?.matchId ?? null,
     matchStatus: matchState?.status ?? moveData?.matchStatus ?? null,

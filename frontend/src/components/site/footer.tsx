@@ -1,8 +1,14 @@
 export function Footer() {
   const cols = [
-    { title: "Product", links: ["Features", "Modes", "How it works", "Replay"] },
+    {
+      title: "Product",
+      links: ["Features", "Modes", "How it works", "Replay"],
+    },
     { title: "Company", links: ["About", "Careers", "Press", "Contact"] },
-    { title: "Resources", links: ["Documentation", "Changelog", "Status", "Brand"] },
+    {
+      title: "Resources",
+      links: ["Documentation", "Changelog", "Status", "Brand"],
+    },
     { title: "Legal", links: ["Privacy", "Terms", "Cookies", "Security"] },
   ];
 
@@ -16,10 +22,13 @@ export function Footer() {
               <div className="grid size-7 place-items-center rounded-md bg-gradient-to-br from-white/95 to-white/60 text-[10px] font-bold text-black">
                 Z
               </div>
-              <span className="font-display text-sm font-semibold tracking-[0.18em]">ZEKROS</span>
+              <span className="font-display text-sm font-semibold tracking-[0.18em]">
+                ZEKROS
+              </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              A real-time strategy game by ZEROTH Labs. Designed for repeat play.
+              A real-time strategy game by ZEROTH Labs. Designed for repeat
+              play.
             </p>
           </div>
           {cols.map((c) => (
@@ -30,7 +39,10 @@ export function Footer() {
               <ul className="mt-4 space-y-2.5">
                 {c.links.map((l) => (
                   <li key={l}>
-                    <a href="#" className="text-sm text-foreground/80 transition-colors hover:text-foreground">
+                    <a
+                      href="#"
+                      className="text-sm text-foreground/80 transition-colors hover:text-foreground"
+                    >
                       {l}
                     </a>
                   </li>
@@ -42,8 +54,12 @@ export function Footer() {
 
         <div className="hairline mt-14" />
         <div className="mt-6 flex flex-col items-start justify-between gap-3 text-xs text-muted-foreground sm:flex-row sm:items-center">
-          <div>© {new Date().getFullYear()} ZEROTH Labs. All rights reserved.</div>
-          <div className="font-mono uppercase tracking-[0.18em]">v0.1 · Alpha</div>
+          <div>
+            © {new Date().getFullYear()} ZEROTH Labs. All rights reserved.
+          </div>
+          <div className="font-mono uppercase tracking-[0.18em]">
+            v0.1 · Alpha
+          </div>
         </div>
       </div>
     </footer>

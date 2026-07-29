@@ -31,9 +31,12 @@ function SettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Settings</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">
+          Settings
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Tune ZEKROS to your preferences. Changes are local â€” sync arrives with accounts.
+          Tune ZEKROS to your preferences. Changes are local â€” sync arrives
+          with accounts.
         </p>
       </div>
 
@@ -74,7 +77,10 @@ function SettingsPage() {
         <Row label="In-app" hint="Banners for invites and results.">
           <Toggle defaultOn />
         </Row>
-        <Row label="Match starts" hint="Notify when a multiplayer match starts.">
+        <Row
+          label="Match starts"
+          hint="Notify when a multiplayer match starts."
+        >
           <Toggle defaultOn />
         </Row>
         <Row label="Friend activity" hint="Coming soon â€” requires social.">
@@ -104,10 +110,14 @@ function SettingsPage() {
 
       <SettingsGroup title="About ZEKROS" icon={Info}>
         <Row label="Build" hint="Current preview build.">
-          <span className="font-mono text-xs text-muted-foreground">0.1.0-preview.3</span>
+          <span className="font-mono text-xs text-muted-foreground">
+            0.1.0-preview.3
+          </span>
         </Row>
         <Row label="Engine" hint="Backend system in development.">
-          <span className="font-mono text-xs text-muted-foreground">D3T Â· pre-alpha</span>
+          <span className="font-mono text-xs text-muted-foreground">
+            D3T Â· pre-alpha
+          </span>
         </Row>
         <Row label="Company" hint="Crafted by ZEROTH Labs.">
           <span className="text-xs text-muted-foreground">ZEROTH Labs</span>
@@ -218,7 +228,9 @@ function Slider({ defaultValue = 50 }: { defaultValue?: number }) {
         onChange={(e) => setV(Number(e.target.value))}
         className="w-32 accent-white"
       />
-      <span className="w-8 text-right font-mono text-xs text-muted-foreground">{v}</span>
+      <span className="w-8 text-right font-mono text-xs text-muted-foreground">
+        {v}
+      </span>
     </div>
   );
 }
@@ -248,4 +260,3 @@ function Badge({ children }: { children: React.ReactNode }) {
     </span>
   );
 }
-

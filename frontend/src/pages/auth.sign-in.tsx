@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
 import {
@@ -10,8 +10,8 @@ import {
 import { useLogin } from "@/hooks/useLogin";
 
 export const Route = createFileRoute("/auth/sign-in")({
-  validateSearch: (search) => ({
-    redirect: typeof search.redirect === "string" ? search.redirect : "",
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => ({
+    redirect: (search.redirect as string) || undefined,
   }),
   head: () => ({ meta: [{ title: "Sign in - ZEKROS" }] }),
   component: SignInPage,
@@ -86,7 +86,11 @@ function SignInPage() {
               className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
               aria-label="Toggle password visibility"
             >
-              {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              {showPw ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
+              )}
             </button>
           </div>
         </FormField>

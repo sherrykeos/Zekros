@@ -26,8 +26,8 @@ export function CTA() {
             Step on the board.
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
-            Jump in as a guest or sign in to save matches across devices. Multiplayer rooms and
-            ranked seasons are one tap away.
+            Jump in as a guest or sign in to save matches across devices.
+            Multiplayer rooms and ranked seasons are one tap away.
           </p>
 
           <div className="mx-auto mt-8 flex max-w-md flex-col items-center justify-center gap-3 sm:flex-row">

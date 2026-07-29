@@ -77,7 +77,9 @@ function ReplayPage() {
         >
           <ChevronLeft className="size-3.5" /> Back to history
         </Link>
-        <span className="font-mono text-[11px] text-muted-foreground">#{REPLAY.id}</span>
+        <span className="font-mono text-[11px] text-muted-foreground">
+          #{REPLAY.id}
+        </span>
       </div>
 
       <SectionHeader
@@ -112,7 +114,11 @@ function ReplayPage() {
               className="grid size-11 place-items-center rounded-full bg-white text-black transition-transform hover:scale-105"
               aria-label={playing ? "Pause" : "Play"}
             >
-              {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+              {playing ? (
+                <Pause className="size-4" />
+              ) : (
+                <Play className="size-4" />
+              )}
             </button>
             <CtrlBtn
               onClick={() => setStep((s) => Math.min(total, s + 1))}
@@ -163,7 +169,10 @@ function ReplayPage() {
               <Stat label="Move" value={`${step}/${total}`} />
               <Stat label="Turn" value={currentTurn.toUpperCase()} />
               <Stat label="Speed" value={`${speed}×`} />
-              <Stat label="Board" value={`${REPLAY.boardSize}×${REPLAY.boardSize}`} />
+              <Stat
+                label="Board"
+                value={`${REPLAY.boardSize}×${REPLAY.boardSize}`}
+              />
             </div>
           </GlassPanel>
 
@@ -187,8 +196,12 @@ function ReplayPage() {
                         #{String(i + 1).padStart(2, "0")}
                       </span>
                       <span className="font-medium uppercase">{m.player}</span>
-                      <span className="text-muted-foreground">cell {m.cell}</span>
-                      <span className="font-mono text-[10px] text-muted-foreground">{m.ts}</span>
+                      <span className="text-muted-foreground">
+                        cell {m.cell}
+                      </span>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {m.ts}
+                      </span>
                     </button>
                   </li>
                 );
@@ -230,7 +243,9 @@ function Stat({ label, value }: { label: string; value: string }) {
       <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </div>
-      <div className="mt-1 font-display text-lg font-semibold tracking-tight">{value}</div>
+      <div className="mt-1 font-display text-lg font-semibold tracking-tight">
+        {value}
+      </div>
     </div>
   );
 }

@@ -27,7 +27,9 @@ export function AuthShell({
           <div className="grid size-7 place-items-center rounded-md bg-gradient-to-br from-white/95 to-white/60 text-[10px] font-bold text-black">
             Z
           </div>
-          <span className="font-display text-sm font-semibold tracking-[0.18em]">ZEKROS</span>
+          <span className="font-display text-sm font-semibold tracking-[0.18em]">
+            ZEKROS
+          </span>
         </Link>
         <Link
           to="/"
@@ -49,14 +51,18 @@ export function AuthShell({
               {eyebrow}
             </div>
           )}
-          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">{title}</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">
+            {title}
+          </h1>
           {description && (
             <p className="mt-2 text-sm text-muted-foreground">{description}</p>
           )}
           <div className="mt-6">{children}</div>
         </div>
         {footer && (
-          <div className="mt-5 text-center text-xs text-muted-foreground">{footer}</div>
+          <div className="mt-5 text-center text-xs text-muted-foreground">
+            {footer}
+          </div>
         )}
       </motion.main>
     </div>
@@ -78,10 +84,16 @@ export function FormField({
     <label className="block">
       <div className="mb-1.5 flex items-center justify-between">
         <span className="text-xs font-medium text-foreground">{label}</span>
-        {hint && <span className="text-[10px] text-muted-foreground">{hint}</span>}
+        {hint && (
+          <span className="text-[10px] text-muted-foreground">{hint}</span>
+        )}
       </div>
       {children}
-      {error && <div className="mt-1.5 text-[11px] text-destructive-foreground/90">{error}</div>}
+      {error && (
+        <div className="mt-1.5 text-[11px] text-destructive-foreground/90">
+          {error}
+        </div>
+      )}
     </label>
   );
 }
@@ -121,13 +133,17 @@ export function PrimaryButton({
   );
 }
 
-export function OAuthRow({ onProvider }: { onProvider?: (id: "google" | "github") => void }) {
+export function OAuthRow({
+  onProvider,
+}: {
+  onProvider?: (id: "google" | "github") => void;
+}) {
   return (
     <div className="grid grid-cols-2 gap-2">
-      {([
+      {[
         { id: "google" as const, label: "Google" },
         { id: "github" as const, label: "GitHub" },
-      ]).map((p) => (
+      ].map((p) => (
         <button
           key={p.id}
           type="button"
