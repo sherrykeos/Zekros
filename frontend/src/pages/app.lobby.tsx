@@ -1,6 +1,6 @@
 import { createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Wifi,
   RefreshCcw,
@@ -30,6 +30,7 @@ import { useSocketStore } from "@/store/useSocketStore";
 import { socketService } from "@/services/socket.service";
 import { GAME_INFO } from "@/constants/gameinfoconst";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
+import { audioManager } from "@/services/audio/AudioManager";
 
 export const Route = createFileRoute("/app/lobby")({
   head: () => ({ meta: [{ title: "Lobby - ZEKROS" }] }),
@@ -82,6 +83,7 @@ function LobbyPage() {
 
   const [isStartingRoom, setIsStartingRoom] = useState(false);
   const [copied, setCopied] = useState(false);
+  const prevPlayersCount = useRef(0);
 
   // Sync maxActivePieces and reclaimTokens when boardSize changes
   useEffect(() => {
@@ -145,6 +147,14 @@ function LobbyPage() {
         if (roomData.code && roomData.code !== roomCode) {
           setRoomCode(roomData.code);
         }
+
+        const newCount = roomData.players?.length ?? 0;
+        if (prevPlayersCount.current > 0 && newCount > prevPlayersCount.current) {
+          audioManager.play("playerJoin");
+        } else if (prevPlayersCount.current > 0 && newCount < prevPlayersCount.current) {
+          audioManager.play("playerLeave");
+        }
+        prevPlayersCount.current = newCount;
       }
     };
 
@@ -201,6 +211,7 @@ function LobbyPage() {
         document.body.removeChild(textarea);
       }
       setCopied(true);
+      audioManager.play("notification");
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Copy failed", err);

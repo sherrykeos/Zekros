@@ -34,6 +34,8 @@ export function ResultModal({
   outcome,
   durationMs,
   matchId,
+  mode,
+  winnerSymbol,
   onPlayAgain,
   onClose,
 }: {
@@ -41,13 +43,34 @@ export function ResultModal({
   outcome: GameOutcome;
   durationMs: number;
   matchId?: string;
+  mode?: string;
+  winnerSymbol?: "x" | "o" | "X" | "O" | null;
   onPlayAgain?: () => void;
   onClose?: () => void;
 }) {
-  const m = meta[outcome];
   const navigate = useNavigate();
   const mm = String(Math.floor(durationMs / 60_000)).padStart(2, "0");
   const ss = String(Math.floor((durationMs % 60_000) / 1000)).padStart(2, "0");
+
+  const isPvP = mode === "local";
+  const normalizedWinner = winnerSymbol ? winnerSymbol.toUpperCase() : null;
+
+  let m = meta[outcome];
+  let title = m.title;
+  let description = m.description;
+  let IconComponent = m.icon;
+
+  if (isPvP) {
+    if (outcome === "draw" || !normalizedWinner) {
+      title = "Match Draw.";
+      description = "It's a draw between Player X and Player O. Great game!";
+      IconComponent = Equal;
+    } else {
+      title = `PLAYER ${normalizedWinner} WINS!`;
+      description = `Player ${normalizedWinner} dominated the board and claimed victory.`;
+      IconComponent = Trophy;
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? null : onClose?.())}>
@@ -64,17 +87,17 @@ export function ResultModal({
             transition={{ type: "spring", stiffness: 240, damping: 18 }}
             className="mx-auto grid size-16 place-items-center rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.14] to-transparent"
           >
-            <m.icon className="size-7" />
+            <IconComponent className="size-7" />
           </motion.div>
 
           <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
             {m.eyebrow}
           </div>
           <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight">
-            {m.title}
+            {title}
           </h2>
           <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-            {m.description}
+            {description}
           </p>
 
           <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   createFileRoute,
   useLocation,
@@ -26,6 +26,7 @@ import {
 import { useGameState, usePlayMove, useResetGame } from "@/hooks/game";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { audioManager } from "@/services/audio/AudioManager";
 
 type BackendSymbol = "X" | "O";
 
@@ -169,6 +170,47 @@ function GamePage() {
     senderName: string;
   } | null>(null);
   const [rematchDeclined, setRematchDeclined] = useState(false);
+
+  const prevMoveCount = useRef(0);
+  const prevGameOver = useRef(false);
+
+  // Play gameStart sound on initial match load or matchId change
+  useEffect(() => {
+    audioManager.play("gameStart");
+    prevMoveCount.current = 0;
+    prevGameOver.current = false;
+  }, [matchId]);
+
+  // Track moves count for move/reclaim/opponentMove audio cues
+  useEffect(() => {
+    if (moves.length > prevMoveCount.current) {
+      const latestMove = moves[moves.length - 1];
+      const isMyMove = latestMove.player === config.playerSymbol;
+
+      if (latestMove.kind === "reclaim") {
+        audioManager.play("reclaim");
+      } else if (isMyMove) {
+        audioManager.play("move");
+      } else {
+        audioManager.play("opponentMove");
+      }
+      prevMoveCount.current = moves.length;
+    }
+  }, [moves, config.playerSymbol]);
+
+  // Track game outcome for victory/defeat/draw audio cues
+  useEffect(() => {
+    if (resultOpen && !prevGameOver.current) {
+      prevGameOver.current = true;
+      if (outcome === "win") {
+        audioManager.play("victory");
+      } else if (outcome === "loss") {
+        audioManager.play("defeat");
+      } else {
+        audioManager.play("draw");
+      }
+    }
+  }, [resultOpen, outcome]);
 
   const {
     data: gameStateResponse,
@@ -845,6 +887,8 @@ function GamePage() {
         outcome={outcome}
         durationMs={Date.now() - startedAt}
         matchId={matchId}
+        mode={config.mode}
+        winnerSymbol={winner}
         onPlayAgain={() => void handleReset()}
         onClose={() => setResultOpen(false)}
       />

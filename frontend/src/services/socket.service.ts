@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { api, getAccessToken } from "./client";
+import { audioManager } from "./audio/AudioManager";
 
 class SocketService {
   private socket: Socket | null = null;
@@ -32,6 +33,10 @@ class SocketService {
 
     this.socket.on("connect", () => {
       console.log("Socket connected:", this.socket?.id);
+    });
+
+    this.socket.io.on("reconnect", () => {
+      audioManager.play("reconnect");
     });
 
     this.socket.on("disconnect", (reason) => {

@@ -16,6 +16,7 @@ import type { ComponentType } from "react";
 import { GlassPanel } from "@/components/app/primitives";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { useDeleteAccount } from "@/hooks/useUpdateProfile";
+import { useAudio } from "@/hooks/useAudio";
 import { AnimatePresence, motion } from "motion/react";
 import { TextInput } from "@/components/auth/auth-shell";
 import { createPortal } from "react-dom";
@@ -35,6 +36,7 @@ function SettingsRoute() {
 
 function SettingsPage() {
   const deleteAccount = useDeleteAccount();
+  const audio = useAudio();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
@@ -54,36 +56,63 @@ function SettingsPage() {
         <Row label="Theme" hint="Dark is the canonical ZEKROS theme.">
           <Segmented options={["Dark", "System", "Light"]} value="Dark" />
         </Row>
-        <Row label="Accent" hint="Monochrome by design.">
+        {/* <Row label="Accent" hint="Monochrome by design.">
           <Segmented options={["Bone", "Smoke", "Ash"]} value="Bone" />
-        </Row>
-        <Row label="Density" hint="Compact UI for power users.">
+        </Row> */}
+        {/* <Row label="Density" hint="Compact UI for power users.">
           <Segmented options={["Comfortable", "Compact"]} value="Comfortable" />
-        </Row>
+        </Row> */}
       </SettingsGroup>
 
       <SettingsGroup title="Sound" icon={Volume2}>
-        <Row label="UI sounds" hint="Subtle clicks and hovers.">
-          <Toggle />
-        </Row>
-        <Row label="Match cues" hint="Place, capture, victory.">
-          <Toggle defaultOn />
+        <Row label="Mute all" hint="Instantly silence all audio output.">
+          <Toggle
+            checked={audio.settings.muted}
+            onChange={() => audio.toggleMute()}
+          />
         </Row>
         <Row label="Master volume" hint="0 mutes everything.">
-          <Slider defaultValue={70} />
+          <Slider
+            value={audio.settings.masterVolume}
+            onChange={(val) => audio.setMasterVolume(val)}
+          />
+        </Row>
+        <Row label="SFX volume" hint="Game cues and UI clicks volume.">
+          <Slider
+            value={audio.settings.sfxVolume}
+            onChange={(val) => audio.setSfxVolume(val)}
+          />
+        </Row>
+        <Row label="Music volume" hint="Background music volume setting.">
+          <Slider
+            value={audio.settings.musicVolume}
+            onChange={(val) => audio.setMusicVolume(val)}
+          />
+        </Row>
+        <Row label="UI sounds" hint="Subtle clicks and navigation.">
+          <Toggle
+            checked={audio.settings.uiSoundsEnabled}
+            onChange={(val) => audio.setUiSoundsEnabled(val)}
+          />
+        </Row>
+        <Row label="Match cues" hint="Place, capture, victory.">
+          <Toggle
+            checked={audio.settings.matchCuesEnabled}
+            onChange={(val) => audio.setMatchCuesEnabled(val)}
+          />
         </Row>
       </SettingsGroup>
 
-      <SettingsGroup title="Animations" icon={Sparkles}>
+      {/* <SettingsGroup title="Animations" icon={Sparkles}>
         <Row label="Motion" hint="Disable to honor system reduce-motion.">
           <Segmented options={["Full", "Reduced", "Off"]} value="Full" />
         </Row>
         <Row label="Board transitions" hint="Animate placement and vanishes.">
           <Toggle defaultOn />
         </Row>
-      </SettingsGroup>
+      </SettingsGroup> */}
 
-      <SettingsGroup title="Notifications" icon={Bell}>
+      {/* <SettingsGroup title="Notifications" icon={Bell}>
         <Row label="In-app" hint="Banners for invites and results.">
           <Toggle defaultOn />
         </Row>
@@ -96,9 +125,9 @@ function SettingsPage() {
         <Row label="Friend activity" hint="Coming soon â€” requires social.">
           <Toggle />
         </Row>
-      </SettingsGroup>
+      </SettingsGroup> */}
 
-      <SettingsGroup title="Accessibility" icon={Accessibility}>
+      {/* <SettingsGroup title="Accessibility" icon={Accessibility}>
         <Row label="High contrast" hint="Stronger borders and focus rings.">
           <Toggle />
         </Row>
@@ -108,15 +137,15 @@ function SettingsPage() {
         <Row label="Color-blind symbols" hint="Adds shape badges to X / O.">
           <Toggle defaultOn />
         </Row>
-      </SettingsGroup>
+      </SettingsGroup> */}
 
-      <SettingsGroup title="Keyboard shortcuts" icon={Keyboard}>
+      {/* <SettingsGroup title="Keyboard shortcuts" icon={Keyboard}>
         <Shortcut keys={["âŒ˜", "K"]} label="Open command bar" />
         <Shortcut keys={["âŒ˜", "/"]} label="Focus search" />
         <Shortcut keys={["G", "P"]} label="Go to Play" />
         <Shortcut keys={["G", "H"]} label="Go to History" />
         <Shortcut keys={["?"]} label="Show shortcuts" />
-      </SettingsGroup>
+      </SettingsGroup> */}
 
       <SettingsGroup title="About ZEKROS" icon={Info}>
         <Row label="Build" hint="Current preview build.">
@@ -316,11 +345,29 @@ function Segmented({ options, value }: { options: string[]; value: string }) {
   );
 }
 
-function Toggle({ defaultOn = false }: { defaultOn?: boolean }) {
-  const [on, setOn] = useState(defaultOn);
+function Toggle({
+  defaultOn = false,
+  checked,
+  onChange,
+}: {
+  defaultOn?: boolean;
+  checked?: boolean;
+  onChange?: (val: boolean) => void;
+}) {
+  const [internalOn, setInternalOn] = useState(defaultOn);
+  const isControlled = typeof checked === "boolean";
+  const on = isControlled ? checked : internalOn;
+
+  const handleClick = () => {
+    const next = !on;
+    if (!isControlled) setInternalOn(next);
+    onChange?.(next);
+  };
+
   return (
     <button
-      onClick={() => setOn((v) => !v)}
+      type="button"
+      onClick={handleClick}
       aria-pressed={on}
       className={`relative h-5 w-9 rounded-full transition-colors ${on ? "bg-white" : "bg-white/10"}`}
     >
@@ -331,8 +378,25 @@ function Toggle({ defaultOn = false }: { defaultOn?: boolean }) {
   );
 }
 
-function Slider({ defaultValue = 50 }: { defaultValue?: number }) {
-  const [v, setV] = useState(defaultValue);
+function Slider({
+  defaultValue = 50,
+  value,
+  onChange,
+}: {
+  defaultValue?: number;
+  value?: number;
+  onChange?: (val: number) => void;
+}) {
+  const [internalV, setInternalV] = useState(defaultValue);
+  const isControlled = typeof value === "number";
+  const v = isControlled ? value : internalV;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const next = Number(e.target.value);
+    if (!isControlled) setInternalV(next);
+    onChange?.(next);
+  };
+
   return (
     <div className="flex items-center gap-2">
       <input
@@ -340,7 +404,7 @@ function Slider({ defaultValue = 50 }: { defaultValue?: number }) {
         min={0}
         max={100}
         value={v}
-        onChange={(e) => setV(Number(e.target.value))}
+        onChange={handleChange}
         className="w-32 accent-white"
       />
       <span className="w-8 text-right font-mono text-xs text-muted-foreground">

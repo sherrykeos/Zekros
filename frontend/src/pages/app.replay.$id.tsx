@@ -17,6 +17,7 @@ import { GlassPanel, SectionHeader } from "@/components/app/primitives";
 import type { CellState, Player } from "@/components/game/types";
 import { useMatchHistory } from "@/hooks/match";
 import type { MatchHistoryItem } from "@/services/api/matchService";
+import { audioManager } from "@/services/audio/AudioManager";
 
 export const Route = createFileRoute("/app/replay/$id")({
   head: () => ({ meta: [{ title: "Replay — ZEKROS" }] }),
@@ -53,6 +54,13 @@ function ReplayPage() {
     const t = setTimeout(() => setStep((s) => s + 1), 900 / speed);
     return () => clearTimeout(t);
   }, [playing, step, speed, total]);
+
+  // Play move cue on step changes during replay
+  useEffect(() => {
+    if (step > 0 && step <= total) {
+      audioManager.play("move");
+    }
+  }, [step, total]);
 
   // Compute cell states dynamically up to the current playback step
   const cells = useMemo<CellState[]>(() => {
