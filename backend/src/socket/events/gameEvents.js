@@ -155,17 +155,26 @@ async function handleMakeMove(io, socket, payload = {}, acknowledgeCallback) {
 
 async function handleFinishMatch(io, socket, payload = {}, acknowledgeCallback) {
   const roomCode = getRoomCode(payload) ?? socket.data?.roomCode;
-  const result = await RoomManager.endMatch(roomCode, payload.winner ?? null);
+  let result;
+  if (roomCode) {
+    result = await RoomManager.endMatch(roomCode, payload.winner ?? null);
+  } else if (payload.matchId) {
+    result = await MatchManager.finishMatch(payload.matchId, payload.winner ?? null);
+  } else {
+    result = failure("INVALID_PAYLOAD", "Missing roomCode or matchId");
+  }
 
   if (!result.success) {
     emitMatchError(socket, "match:finish", result, acknowledgeCallback);
     return;
   }
 
-  const matchRoomCode = result.data.metadata?.roomCode ?? roomCode;
+  const matchRoomCode = result.data.metadata?.roomCode ?? roomCode ?? payload.matchId;
   const response = createMatchResponse({ match: result.data, roomCode: matchRoomCode });
   acknowledgeAndBroadcastMatch(io, matchRoomCode, response, acknowledgeCallback);
-  emitRoomUpdate(io, matchRoomCode);
+  if (matchRoomCode) {
+    emitRoomUpdate(io, matchRoomCode);
+  }
 }
 
 async function handleRematch(io, socket, payload = {}, acknowledgeCallback) {

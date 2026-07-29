@@ -1,4 +1,5 @@
-﻿import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { Link } from "@tanstack/react-router";
 import {
   Activity,
   Trophy,
@@ -6,9 +7,12 @@ import {
   Lightbulb,
   Calendar,
   Code2,
+  Play,
 } from "lucide-react";
 import { useAppShell } from "@/contexts/app-shell";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useMatchList } from "@/hooks/match";
+import type { MatchHistoryItem } from "@/services/api/matchService";
 
 export function RightPanel() {
   const { rightOpen } = useAppShell();
@@ -49,9 +53,7 @@ export function RightPanel() {
               </Section>
 
               <Section title="Recent Matches" icon={Activity}>
-                <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-3 text-[11px] leading-snug text-muted-foreground">
-                  Match activity will render from the match history API.
-                </div>
+                <RightPanelRecentMatches />
               </Section>
 
               <Section title="Announcement" icon={Megaphone}>
@@ -121,6 +123,49 @@ function Section({
         {title}
       </div>
       {children}
+    </div>
+  );
+}
+
+function RightPanelRecentMatches() {
+  const { data: response, isLoading } = useMatchList({ limit: 3 });
+  const matches: MatchHistoryItem[] = response?.data ?? [];
+
+  if (isLoading) {
+    return <div className="h-16 animate-pulse rounded-xl bg-white/[0.03]" />;
+  }
+
+  if (matches.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-3 text-[11px] leading-snug text-muted-foreground">
+        No recent matches recorded.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {matches.map((m) => (
+        <div key={m.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
+          <div className="space-y-0.5">
+            <div className="text-[11px] font-semibold text-foreground">{m.gameMode}</div>
+            <div className="text-[10px] text-muted-foreground">{m.boardSize}x{m.boardSize} • {m.totalMoves} moves</div>
+          </div>
+          <Link
+            to="/app/replay/$id"
+            params={{ id: m.id }}
+            className="grid size-7 place-items-center rounded-lg border border-white/10 bg-white/5 hover:bg-white hover:text-black transition-colors"
+          >
+            <Play className="size-3 fill-current" />
+          </Link>
+        </div>
+      ))}
+      <Link
+        to="/app/history"
+        className="block text-center text-[10px] font-medium text-muted-foreground hover:text-foreground pt-1"
+      >
+        View match history →
+      </Link>
     </div>
   );
 }

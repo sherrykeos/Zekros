@@ -33,12 +33,14 @@ export function ResultModal({
   open,
   outcome,
   durationMs,
+  matchId,
   onPlayAgain,
   onClose,
 }: {
   open: boolean;
   outcome: GameOutcome;
   durationMs: number;
+  matchId?: string;
   onPlayAgain?: () => void;
   onClose?: () => void;
 }) {
@@ -87,17 +89,22 @@ export function ResultModal({
               <RotateCcw className="size-4" /> Play again
             </button>
             <button
-              onClick={() => navigate({ to: "/app" })}
+              onClick={() => {
+                if (matchId) {
+                  void navigate({ to: "/app/replay/$id", params: { id: matchId } });
+                } else {
+                  void navigate({ to: "/app/history" });
+                }
+              }}
               className="glass inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium text-foreground hover:bg-white/[0.06]"
             >
-              <Home className="size-4" /> Home
+              <Film className="size-4" /> Replay
             </button>
             <button
-              disabled
-              className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-3.5 py-2.5 text-sm font-medium text-muted-foreground"
-              title="Coming soon"
+              onClick={() => navigate({ to: "/app/history" })}
+              className="glass inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium text-foreground hover:bg-white/[0.06]"
             >
-              <Film className="size-4" /> Replay
+              <Home className="size-4" /> History
             </button>
           </div>
         </div>

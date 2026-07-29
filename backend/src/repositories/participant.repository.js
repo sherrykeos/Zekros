@@ -58,3 +58,29 @@ export function update(participantId, data, db=prisma) {
     data,
   });
 }
+
+/**
+ * Find participant by matchId and userId.
+ */
+export function findByMatchAndUser(matchId, userId, db=prisma) {
+  return db.participant.findFirst({
+    where: {
+      matchId,
+      userId,
+    },
+  });
+}
+
+/**
+ * Soft delete participant by setting isDeleted to true.
+ */
+export function markDeleted(participantId, db=prisma) {
+  return db.participant.update({
+    where: {
+      id: participantId,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
+}

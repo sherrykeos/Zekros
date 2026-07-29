@@ -36,4 +36,24 @@ async function authenticate(req, res, next) {
   }
 }
 
+export async function optionalAuthenticate(req, res, next) {
+  try {
+    const authorization = req.headers.authorization;
+
+    if (authorization && authorization.startsWith("Bearer ")) {
+      const token = authorization.split(" ")[1];
+      const payload = verifyAccessToken(token);
+      if (payload?.userId) {
+        const user = await findUserById(payload.userId);
+        if (user) {
+          req.user = user;
+        }
+      }
+    }
+  } catch {
+    // Ignore invalid tokens in optional auth
+  }
+  next();
+}
+
 export default authenticate;

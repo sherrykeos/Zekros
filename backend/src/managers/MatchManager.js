@@ -77,15 +77,21 @@ class MatchManager {
     return success(this.matches.has(matchId));
   }
 
-  deleteMatch(matchId) {
-    if (!this.matches.has(matchId)) {
-      return failure(MATCH_MANAGER_ERRORS.MATCH_NOT_FOUND, "Match not found.");
-    }
-
+  async deleteMatch(matchId, userId = null) {
     this.gameManager.deleteGame(matchId);
     this.matches.delete(matchId);
 
+    try {
+      await this.matchService.deleteMatch(matchId, userId);
+    } catch {
+      // Record might already be removed
+    }
+
     return success(true);
+  }
+
+  async cleanupUnfinishedMatches() {
+    return await this.matchService.cleanupUnfinishedMatches();
   }
 
   async makeMove(
@@ -195,6 +201,11 @@ class MatchManager {
     }
 
     return success(history);
+  }
+
+  async listMatches(params) {
+    const matches = await this.matchService.listMatches(params);
+    return success(matches);
   }
 
   async getReplayData(matchId) {

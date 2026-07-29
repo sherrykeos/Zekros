@@ -1,6 +1,13 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import matchService from "../services/api/matchService";
+
+export function useMatchList(params?: { userId?: string; limit?: number }) {
+  return useQuery({
+    queryKey: ["matches", params],
+    queryFn: () => matchService.listMatches(params),
+  });
+}
 
 export function useMatchHistory(matchId: string) {
   return useQuery({
@@ -21,5 +28,20 @@ export function useReplay(matchId: string) {
 export function useRestartMatch() {
   return useMutation({
     mutationFn: matchService.restartMatch,
+  });
+}
+
+export function useDeleteMatch() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: string | { matchId: string; userId?: string }) => {
+      if (typeof payload === "string") {
+        return matchService.deleteMatch(payload);
+      }
+      return matchService.deleteMatch(payload.matchId, { userId: payload.userId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["matches"] });
+    },
   });
 }

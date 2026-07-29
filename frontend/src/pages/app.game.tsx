@@ -725,16 +725,23 @@ function GamePage() {
     navigate({ to: "/app/play" });
   };
 
-  const finish = (o: GameOutcome) => {
-    if (matchId && o === "loss") {
+  const handleResign = () => {
+    if (status !== "playing") return;
+
+    if (matchId) {
       const winnerSymbol = actualSymbol === "x" ? "O" : "X";
       socket?.emit("match:finish", {
         matchId,
         roomCode,
         winner: winnerSymbol,
       });
+      socket?.emit("finish-match", {
+        matchId,
+        roomCode,
+        winner: winnerSymbol,
+      });
     } else {
-      setOutcome(o);
+      setOutcome("loss");
       setResultOpen(true);
     }
   };
@@ -769,8 +776,9 @@ function GamePage() {
             <Pause className="size-3.5" /> Pause
           </button>
           <button
-            onClick={() => finish("loss")}
-            className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/4 px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+            onClick={handleResign}
+            disabled={status !== "playing"}
+            className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/4 px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Flag className="size-3.5" /> Resign
           </button>
@@ -836,6 +844,7 @@ function GamePage() {
         open={resultOpen}
         outcome={outcome}
         durationMs={Date.now() - startedAt}
+        matchId={matchId}
         onPlayAgain={() => void handleReset()}
         onClose={() => setResultOpen(false)}
       />

@@ -1,5 +1,6 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
+import { useMemo } from "react";
 import {
   Trophy,
   BarChart3,
@@ -11,6 +12,8 @@ import {
   Sparkles,
   Pencil,
   Crown,
+  Play,
+  History as HistoryIcon,
 } from "lucide-react";
 import {
   EmptyState,
@@ -20,6 +23,8 @@ import {
 } from "@/components/app/primitives";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useMatchList } from "@/hooks/match";
+import type { MatchHistoryItem } from "@/services/api/matchService";
 
 export const Route = createFileRoute("/app/profile")({
   head: () => ({
@@ -27,17 +32,6 @@ export const Route = createFileRoute("/app/profile")({
   }),
   component: ProfileRoute,
 });
-
-const emptyStats = [
-  { label: "Games Played", value: "0", hint: "all-time", icon: BarChart3 },
-  { label: "Wins", value: "0", icon: Trophy },
-  { label: "Losses", value: "0", icon: TrendingUp },
-  { label: "Draws", value: "0", icon: Sparkles },
-  { label: "Win Rate", value: "0%", icon: TrendingUp },
-  { label: "Favorite Mode", value: "-", hint: "no games yet", icon: Target },
-  { label: "Longest Match", value: "-", icon: Clock },
-  { label: "Avg. Match Time", value: "-", icon: Clock },
-];
 
 function ProfileRoute() {
   return (
@@ -129,22 +123,22 @@ function ProfilePage() {
       <section>
         <SectionHeader
           title="Lifetime statistics"
-          description="Stats will populate from the stats feature API."
+          description="Your real gameplay metrics calculated from recorded match history."
         />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {emptyStats.map((s) => (
-            <StatCard key={s.label} {...s} />
-          ))}
-        </div>
+        <ProfileStats />
       </section>
 
       <section>
-        <SectionHeader title="Recent matches" />
-        <EmptyState
-          icon={Clock}
-          title="No match history loaded"
-          description="Connect the match history API with the same types -> api -> hooks -> components pattern used by auth."
-        />
+        <div className="flex items-center justify-between">
+          <SectionHeader title="Recent matches" />
+          <Link
+            to="/app/history"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View all history →
+          </Link>
+        </div>
+        <ProfileRecentMatches />
       </section>
 
       <section>
@@ -160,6 +154,106 @@ function ProfilePage() {
           }
         />
       </section>
+    </div>
+  );
+}
+
+function ProfileStats() {
+  const { data: user } = useCurrentUser();
+  const { data: response } = useMatchList(user?.id ? { userId: user.id, limit: 200 } : { limit: 100 });
+  const matches: MatchHistoryItem[] = response?.data ?? [];
+
+  const stats = useMemo(() => {
+    const totalGames = matches.length;
+    if (totalGames === 0) {
+      return [
+        { label: "Games Played", value: "0", hint: "all-time", icon: BarChart3 },
+        { label: "Wins", value: "0", icon: Trophy },
+        { label: "Losses", value: "0", icon: TrendingUp },
+        { label: "Win Rate", value: "0%", icon: TrendingUp },
+        { label: "Favorite Mode", value: "-", hint: "no games played", icon: Target },
+        { label: "Longest Match", value: "-", icon: Clock },
+        { label: "Avg. Match Time", value: "-", icon: Clock },
+      ];
+    }
+
+    let wins = 0;
+    let losses = 0;
+    let totalDurationMs = 0;
+    let maxDurationMs = 0;
+    let durationCount = 0;
+
+    const modeCounts: Record<string, number> = {};
+
+    for (const m of matches) {
+      // Game mode tracking
+      const mode =
+        m.gameMode === "PBOT"
+          ? "Perfect Bot"
+          : m.gameMode === "NBOT"
+          ? "Smart Bot"
+          : m.gameMode === "ONLINE"
+          ? "Online"
+          : "Local";
+      modeCounts[mode] = (modeCounts[mode] ?? 0) + 1;
+
+      // Win / loss tracking
+      const userParticipant = m.participants?.find((p) => p.userId === user?.id);
+      if (userParticipant) {
+        if (userParticipant.isWinner) wins++;
+        else if (m.result) losses++;
+      } else {
+        // Fallback if local/guest match
+        if (m.result === "PLAYER_X") wins++;
+        else if (m.result === "PLAYER_O") losses++;
+      }
+
+      // Duration tracking
+      if (m.durationMs) {
+        totalDurationMs += m.durationMs;
+        durationCount++;
+        if (m.durationMs > maxDurationMs) maxDurationMs = m.durationMs;
+      }
+    }
+
+    const winRate = totalGames > 0 ? `${Math.round((wins / totalGames) * 100)}%` : "0%";
+
+    let favMode = "-";
+    let maxModeCount = 0;
+    for (const [mode, count] of Object.entries(modeCounts)) {
+      if (count > maxModeCount) {
+        maxModeCount = count;
+        favMode = mode;
+      }
+    }
+
+    const formatMs = (ms: number) => {
+      const sec = Math.round(ms / 1000);
+      if (sec < 60) return `${sec}s`;
+      const min = Math.floor(sec / 60);
+      const remSec = sec % 60;
+      return `${min}m ${remSec}s`;
+    };
+
+    const longest = maxDurationMs > 0 ? formatMs(maxDurationMs) : "-";
+    const avgTime = durationCount > 0 ? formatMs(totalDurationMs / durationCount) : "-";
+
+    return [
+      { label: "Games Played", value: String(totalGames), hint: "all-time", icon: BarChart3 },
+      { label: "Wins", value: String(wins), icon: Trophy },
+      { label: "Losses", value: String(losses), icon: TrendingUp },
+      { label: "Win Rate", value: winRate, icon: TrendingUp },
+      { label: "Favorite Mode", value: favMode, icon: Target },
+      { label: "Longest Match", value: longest, icon: Clock },
+      { label: "Avg. Match Time", value: avgTime, icon: Clock },
+    ];
+  }, [matches, user?.id]);
+
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {stats.map((s) => (
+        <StatCard key={s.label} {...s} />
+      ))}
     </div>
   );
 }
@@ -181,5 +275,64 @@ function Badge({
     >
       {children}
     </span>
+  );
+}
+
+function ProfileRecentMatches() {
+  const { data: user } = useCurrentUser();
+  const { data: response, isLoading } = useMatchList(user?.id ? { userId: user.id, limit: 5 } : { limit: 5 });
+  const matches: MatchHistoryItem[] = response?.data ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2].map((n) => (
+          <GlassPanel key={n} className="h-20 animate-pulse p-4" />
+        ))}
+      </div>
+    );
+  }
+
+  if (matches.length === 0) {
+    return (
+      <EmptyState
+        icon={HistoryIcon}
+        title="No match history"
+        description="Your recent matches will appear here."
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {matches.map((m) => {
+        const playerX = m.participants?.find((p) => p.symbol === "X");
+        const playerO = m.participants?.find((p) => p.symbol === "O");
+        const nameX = playerX?.user?.displayName || playerX?.user?.username || playerX?.guestName || "X";
+        const nameO = playerO?.user?.displayName || playerO?.user?.username || playerO?.guestName || "O";
+
+        return (
+          <GlassPanel key={m.id} className="flex items-center justify-between p-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <span>{m.gameMode}</span>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-muted-foreground">{m.boardSize}×{m.boardSize}</span>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {nameX} vs {nameO}
+              </div>
+            </div>
+            <Link
+              to="/app/replay/$id"
+              params={{ id: m.id }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium hover:bg-white hover:text-black transition-colors"
+            >
+              <Play className="size-3 fill-current" /> Replay
+            </Link>
+          </GlassPanel>
+        );
+      })}
+    </div>
   );
 }

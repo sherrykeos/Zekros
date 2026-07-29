@@ -64,6 +64,10 @@ class Match {
   finish(winner = null) {
     this.status = MATCH_STATUS.FINISHED;
     this.winner = winner;
+    if (this.game) {
+      this.game.gameOver = true;
+      this.game.winner = winner;
+    }
     this.endedAt = new Date().toISOString();
   }
 

@@ -107,6 +107,55 @@ export function getHistory(matchId) {
   return matchRepository.findWithParticipantsAndMoves(matchId);
 }
 
+export function listMatches({ userId, limit = 50 } = {}) {
+  const where = {
+    result: { not: null },
+  };
+  if (userId) {
+    where.participants = {
+      some: {
+        userId,
+        isDeleted: false,
+      },
+    };
+  }
+  return matchRepository.findMany(where, limit);
+}
+
+export async function cleanupUnfinishedMatches() {
+  try {
+    return await matchRepository.deleteUnfinishedMatches();
+  } catch (error) {
+    console.error("Error cleaning up unfinished matches:", error);
+    return { count: 0 };
+  }
+}
+
+export async function deleteMatch(matchId, userId = null) {
+  try {
+    if (userId) {
+      const participant = await participantRepository.findByMatchAndUser(matchId, userId);
+      if (participant) {
+        await participantRepository.markDeleted(participant.id);
+
+        // Check if all participants for this match are deleted
+        const allParticipants = await participantRepository.findByMatch(matchId);
+        const allDeleted = allParticipants.length > 0 && allParticipants.every((p) => p.isDeleted);
+        if (allDeleted) {
+          return await matchRepository.remove(matchId);
+        }
+        return { id: matchId, hidden: true };
+      }
+    }
+
+    // Fallback if no specific user participant found or no userId provided
+    return await matchRepository.remove(matchId);
+  } catch (error) {
+    console.error("Error in deleteMatch:", error);
+    return null;
+  }
+}
+
 export async function getReplay(matchId) {
   const match = await matchRepository.findById(matchId);
 

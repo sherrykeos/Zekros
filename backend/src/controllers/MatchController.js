@@ -70,6 +70,51 @@ class MatchController {
     }
 
     /**
+     * Deletes a match by its ID.
+     * @param {import('express').Request} req - The Express request object.
+     * @param {import('express').Response} res - The Express response object.
+     * @param {import('express').NextFunction} next - The Express next middleware function.
+     */
+    static async deleteMatch(req, res, next) {
+        try {
+            const { matchId } = req.params;
+            const userId = req.user?.id || req.query.userId || req.body?.userId || null;
+            const result = await MatchManager.deleteMatch(matchId, userId ? String(userId) : null);
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * Purges all matches with result = null from the database.
+     */
+    static async cleanupUnfinishedMatches(req, res, next) {
+        try {
+            const result = await MatchManager.cleanupUnfinishedMatches();
+            res.status(200).json({ success: true, ...result });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * Lists stored match history from DB.
+     * @param {import('express').Request} req - The Express request object.
+     * @param {import('express').Response} res - The Express response object.
+     * @param {import('express').NextFunction} next - The Express next middleware function.
+     */
+    static async listMatches(req, res, next) {
+        try {
+            const { userId, limit } = req.query;
+            const result = await MatchManager.listMatches({ userId: userId ? String(userId) : undefined, limit: limit ? Number(limit) : 50 });
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
      * Gets the replay data for a match.
      * @param {import('express').Request} req - The Express request object.
      * @param {import('express').Response} res - The Express response object.
