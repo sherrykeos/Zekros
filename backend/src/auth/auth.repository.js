@@ -190,7 +190,7 @@ async function updateUserPassword(userId, passwordHash) {
 }
 
 async function findUserByProviderId(providerId) {
-  return prisma.user.findUnique({
+  return prisma.user.findFirst({
     where: {
       providerId,
     },

@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { Check, Eye, EyeOff } from "lucide-react";
 import {
   AuthShell,
   FormField,
   TextInput,
   PrimaryButton,
+  Divider,
+  OAuthRow,
 } from "@/components/auth/auth-shell";
 import { useRegister } from "@/hooks/useRegister";
 
@@ -29,6 +31,12 @@ function SignUpPage() {
   const [password, setPassword] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
   const register = useRegister();
+  const [showPw, setShowPw] = useState(false);
+
+  const handleGoogleLogin = () => {
+    const apiBaseUrl = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
+    window.location.href = `${apiBaseUrl}/auth/google`;
+  };
 
   const strength = useMemo(() => score(password), [password]);
   const strengthLabel = ["Too weak", "Weak", "Okay", "Strong", "Excellent"][
@@ -104,13 +112,25 @@ function SignUpPage() {
           />
         </FormField>
         <FormField label="Password" hint="Min. 8 characters">
+          <div className="relative">  
           <TextInput
-            type="password"
+            type={showPw ? "text" : "password"}
             autoComplete="new-password"
             placeholder="********"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-          />
+          /><button
+              type="button"
+              onClick={() => setShowPw((v) => !v)}
+              className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
+              aria-label="Toggle password visibility"
+            >
+              {showPw ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
+              )}
+            </button>
           {password && (
             <div className="mt-2">
               <div className="flex h-1 gap-1">
@@ -127,7 +147,7 @@ function SignUpPage() {
                 {strength >= 3 && <Check className="size-3" />} {strengthLabel}
               </div>
             </div>
-          )}
+          )}</div>
         </FormField>
 
         {error && (
@@ -139,6 +159,14 @@ function SignUpPage() {
         <PrimaryButton loading={register.isPending}>
           Create account
         </PrimaryButton>
+
+        <Divider>or continue with</Divider>
+        <OAuthRow onProvider={(provider) => {
+          if (provider === "google") {
+            handleGoogleLogin();
+          }
+        }} />
+
         <p className="text-center text-[11px] text-muted-foreground">
           By continuing you agree to our Terms and Privacy Policy.
         </p>

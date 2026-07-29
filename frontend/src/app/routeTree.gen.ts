@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './../pages/app'
 import { Route as IndexRouteImport } from './../pages/index'
 import { Route as AppIndexRouteImport } from './../pages/app.index'
 import { Route as AuthVerifyRouteImport } from './../pages/auth.verify'
+import { Route as AuthSuccessRouteImport } from './../pages/auth.success'
 import { Route as AuthSignUpRouteImport } from './../pages/auth.sign-up'
 import { Route as AuthSignInRouteImport } from './../pages/auth.sign-in'
 import { Route as AuthResetPasswordRouteImport } from './../pages/auth.reset-password'
@@ -50,6 +51,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AuthVerifyRoute = AuthVerifyRouteImport.update({
   id: '/auth/verify',
   path: '/auth/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSuccessRoute = AuthSuccessRouteImport.update({
+  id: '/auth/success',
+  path: '/auth/success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/auth/success': typeof AuthSuccessRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/app/': typeof AppIndexRoute
   '/app/replay/$id': typeof AppReplayIdRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/auth/success': typeof AuthSuccessRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/app': typeof AppIndexRoute
   '/app/replay/$id': typeof AppReplayIdRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/auth/success': typeof AuthSuccessRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/app/': typeof AppIndexRoute
   '/app/replay/$id': typeof AppReplayIdRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/auth/success'
     | '/auth/verify'
     | '/app/'
     | '/app/replay/$id'
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/auth/success'
     | '/auth/verify'
     | '/app'
     | '/app/replay/$id'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/auth/success'
     | '/auth/verify'
     | '/app/'
     | '/app/replay/$id'
@@ -297,6 +309,7 @@ export interface RootRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
+  AuthSuccessRoute: typeof AuthSuccessRoute
   AuthVerifyRoute: typeof AuthVerifyRoute
 }
 
@@ -328,6 +341,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/verify'
       fullPath: '/auth/verify'
       preLoaderRoute: typeof AuthVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/success': {
+      id: '/auth/success'
+      path: '/auth/success'
+      fullPath: '/auth/success'
+      preLoaderRoute: typeof AuthSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-up': {
@@ -503,6 +523,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
+  AuthSuccessRoute: AuthSuccessRoute,
   AuthVerifyRoute: AuthVerifyRoute,
 }
 export const routeTree = rootRouteImport

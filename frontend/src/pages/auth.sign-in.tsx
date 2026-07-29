@@ -6,6 +6,8 @@ import {
   FormField,
   TextInput,
   PrimaryButton,
+  Divider,
+  OAuthRow,
 } from "@/components/auth/auth-shell";
 import { useLogin } from "@/hooks/useLogin";
 
@@ -22,6 +24,15 @@ function SignInPage() {
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const login = useLogin();
+  const search = Route.useSearch();
+
+  const handleGoogleLogin = () => {
+    if (search.redirect) {
+      sessionStorage.setItem("auth_redirect", search.redirect);
+    }
+    const apiBaseUrl = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
+    window.location.href = `${apiBaseUrl}/auth/google`;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +113,13 @@ function SignInPage() {
         )}
 
         <PrimaryButton loading={login.isPending}>Sign in</PrimaryButton>
+
+        <Divider>or continue with</Divider>
+        <OAuthRow onProvider={(provider) => {
+          if (provider === "google") {
+            handleGoogleLogin();
+          }
+        }} />
       </form>
     </AuthShell>
   );

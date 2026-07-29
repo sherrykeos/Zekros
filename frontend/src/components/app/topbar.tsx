@@ -141,6 +141,7 @@ export function TopBar() {
               <img
                 src={user.avatar}
                 alt=""
+                referrerPolicy="no-referrer"
                 className="size-full object-cover"
               />
             ) : (
@@ -162,6 +163,7 @@ export function TopBar() {
                       <img
                         src={user.avatar}
                         alt=""
+                        referrerPolicy="no-referrer"
                         className="size-full object-cover"
                       />
                     ) : (

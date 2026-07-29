@@ -3,11 +3,26 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { useEffect, useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { dispatchPlayNow } from "@/contexts/play-entry";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+
+function initials(name?: string | null) {
+  if (!name) return "ZK";
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "ZK"
+  );
+}
 
 export function Navigation() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
+  const currentUser = useCurrentUser();
+  const user = currentUser.data;
 
   useEffect(() => {
     return scrollY.on("change", (v) => setScrolled(v > 12));
@@ -52,14 +67,35 @@ export function Navigation() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => dispatchPlayNow("default")}
-            className="hidden items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98] md:inline-flex"
-          >
-            Play Now
-            <ArrowRight className="size-3.5" />
-          </button>
+          {user ? (
+            <Link
+              to="/app/play"
+              className="hidden items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-sm font-medium text-foreground transition-all hover:bg-white/[0.08] hover:border-white/20 active:scale-[0.98] md:inline-flex"
+            >
+              <div className="grid size-6 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-white/30 to-white/5 text-[10px] font-semibold ring-1 ring-white/10">
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt=""
+                    referrerPolicy="no-referrer"
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  initials(user.username)
+                )}
+              </div>
+              <span className="max-w-[100px] truncate">{user.username}</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => dispatchPlayNow("default")}
+              className="hidden items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98] md:inline-flex"
+            >
+              Play Now
+              <ArrowRight className="size-3.5" />
+            </button>
+          )}
           <button
             onClick={() => setOpen((v) => !v)}
             className="grid size-9 place-items-center rounded-lg border border-white/10 md:hidden"
@@ -87,16 +123,38 @@ export function Navigation() {
                 {l.label}
               </a>
             ))}
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                dispatchPlayNow("default");
-              }}
-              className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-2.5 text-sm font-medium text-primary-foreground"
-            >
-              Play Now <ArrowRight className="size-3.5" />
-            </button>
+            {user ? (
+              <Link
+                to="/app/play"
+                onClick={() => setOpen(false)}
+                className="mt-2 inline-flex items-center justify-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-white/[0.08]"
+              >
+                <div className="grid size-6 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-white/30 to-white/5 text-[10px] font-semibold ring-1 ring-white/10">
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    initials(user.username)
+                  )}
+                </div>
+                <span className="truncate">{user.username}</span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  dispatchPlayNow("default");
+                }}
+                className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-2.5 text-sm font-medium text-primary-foreground"
+              >
+                Play Now <ArrowRight className="size-3.5" />
+              </button>
+            )}
           </div>
         </motion.div>
       )}

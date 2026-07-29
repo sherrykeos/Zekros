@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
+import { FcGoogle } from "react-icons/fc";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -136,13 +137,12 @@ export function PrimaryButton({
 export function OAuthRow({
   onProvider,
 }: {
-  onProvider?: (id: "google" | "github") => void;
+  onProvider?: (id: "google") => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 gap-2">
       {[
         { id: "google" as const, label: "Google" },
-        { id: "github" as const, label: "GitHub" },
       ].map((p) => (
         <button
           key={p.id}
@@ -151,9 +151,7 @@ export function OAuthRow({
           className="glass inline-flex h-10 items-center justify-center gap-2 rounded-xl text-xs font-medium text-foreground hover:bg-white/[0.06]"
         >
           {/* simple monochrome glyphs */}
-          <span className="grid size-4 place-items-center rounded-sm bg-white/80 font-mono text-[10px] font-bold text-black">
-            {p.id === "google" ? "G" : "GH"}
-          </span>
+         <FcGoogle size="20" />
           {p.label}
         </button>
       ))}
