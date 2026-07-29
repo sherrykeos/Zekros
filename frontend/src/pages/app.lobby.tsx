@@ -28,6 +28,8 @@ import {
 } from "@/components/game/types";
 import { useSocketStore } from "@/store/useSocketStore";
 import { socketService } from "@/services/socket.service";
+import { GAME_INFO } from "@/constants/gameinfoconst";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 export const Route = createFileRoute("/app/lobby")({
   head: () => ({ meta: [{ title: "Lobby - ZEKROS" }] }),
@@ -69,7 +71,8 @@ function LobbyPage() {
   const { socket, connect } = useSocketStore();
 
   // Setup / Configuration state (when no active roomCode)
-  const [tab, setTab] = useState<"create" | "join">("create");
+  const initialTab = (location.state as { tab?: "create" | "join" } | undefined)?.tab;
+  const [tab, setTab] = useState<"create" | "join">(initialTab ?? "create");
   const [boardSize, setBoardSize] = useState<number>(3);
   const [maxActivePieces, setMaxActivePieces] = useState<number>(3);
   const [reclaimTokens, setReclaimTokens] = useState<number>(3);
@@ -477,18 +480,22 @@ function LobbyPage() {
           )}
 
           {tab === "create" ? (
-            <div className="space-y-6">
+            <div className="space-y-8 pt-2">
               {/* Board Size */}
-              <div className="space-y-3">
-                <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground block text-center">
-                  Board Size
-                </label>
-                <div className="flex justify-center gap-4">
+              <div className="flex justify-between items-center px-2 py-2">
+                <div className="flex items-center gap-2">
+                  <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Board Size
+                  </label>
+                  <InfoTooltip info={GAME_INFO.boardSize} />
+                </div>
+                <div className="flex justify-center gap-3">
                   {[3, 4, 5].map((size) => (
                     <button
                       key={size}
+                      type="button"
                       onClick={() => setBoardSize(size)}
-                      className={`px-5 py-3 rounded-xl border text-sm font-semibold transition-all ${
+                      className={`px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
                         boardSize === size
                           ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
                           : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground"
@@ -501,82 +508,98 @@ function LobbyPage() {
               </div>
 
               {/* Max Active Pieces */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between px-2">
-                  <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    Max Active Pieces
-                  </label>
-                  <span className="font-mono text-xs text-muted-foreground font-semibold">
+              <div className="flex justify-between items-center px-2 py-2">
+                <div className="flex flex-col items-start gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                      Max Active Pieces
+                    </label>
+                    <InfoTooltip info={GAME_INFO.maxActivePieces} />
+                  </div>
+                  <span className="font-mono text-xs text-muted-foreground/70">
                     {boardSize === 3 ? "Fixed (3)" : `${minActive} – ${maxActive}`}
                   </span>
                 </div>
-                <div className="flex items-center justify-center gap-6">
+
+                <div className="flex items-center justify-center gap-5">
                   <button
+                    type="button"
                     onClick={() =>
                       setMaxActivePieces((prev) => Math.max(minActive, prev - 1))
                     }
                     disabled={boardSize === 3 || maxActivePieces <= minActive}
-                    className="w-10 h-10 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
+                    className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
                   >
-                    <Minus className="size-4" />
+                    <Minus className="size-3.5" />
                   </button>
-                  <span className="font-display text-3xl font-semibold w-12 text-center text-foreground">
+                  <span className="font-display text-2xl sm:text-3xl font-semibold w-10 text-center text-foreground">
                     {maxActivePieces}
                   </span>
                   <button
+                    type="button"
                     onClick={() =>
                       setMaxActivePieces((prev) => Math.min(maxActive, prev + 1))
                     }
                     disabled={boardSize === 3 || maxActivePieces >= maxActive}
-                    className="w-10 h-10 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
+                    className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
                   >
-                    <Plus className="size-4" />
+                    <Plus className="size-3.5" />
                   </button>
                 </div>
               </div>
 
               {/* Reclaim Tokens */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between px-2">
-                  <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    Reclaim Tokens
-                  </label>
-                  <span className="font-mono text-xs text-muted-foreground font-semibold">
+              <div className="flex justify-between items-center px-2 py-2">
+                <div className="flex flex-col items-start gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                      Reclaim Tokens
+                    </label>
+                    <InfoTooltip info={GAME_INFO.reclaimTokens} />
+                  </div>
+                  <span className="font-mono text-xs text-muted-foreground/70">
                     0 – 10
                   </span>
                 </div>
-                <div className="flex items-center justify-center gap-6">
+
+                <div className="flex items-center justify-center gap-5">
                   <button
+                    type="button"
                     onClick={() => setReclaimTokens((prev) => Math.max(0, prev - 1))}
                     disabled={reclaimTokens <= 0}
-                    className="w-10 h-10 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
+                    className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
                   >
-                    <Minus className="size-4" />
+                    <Minus className="size-3.5" />
                   </button>
-                  <span className="font-display text-3xl font-semibold w-12 text-center text-foreground">
+                  <span className="font-display text-2xl sm:text-3xl font-semibold w-10 text-center text-foreground">
                     {reclaimTokens}
                   </span>
                   <button
+                    type="button"
                     onClick={() => setReclaimTokens((prev) => Math.min(10, prev + 1))}
                     disabled={reclaimTokens >= 10}
-                    className="w-10 h-10 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
+                    className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
                   >
-                    <Plus className="size-4" />
+                    <Plus className="size-3.5" />
                   </button>
                 </div>
               </div>
 
-              {/* Starting Piece Symbol */}
-              <div className="space-y-3">
-                <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground block text-center">
-                  Your Piece Symbol
-                </label>
-                <div className="flex justify-center gap-4">
+              {/* Player Symbol */}
+              <div className="flex justify-between items-center px-2 py-2">
+                <div className="flex items-center gap-2">
+                  <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Player Symbol
+                  </label>
+                  <InfoTooltip info={GAME_INFO.playerSymbol} />
+                </div>
+                <div className="flex justify-center gap-3">
                   {(["x", "o"] as const).map((sym) => (
                     <button
                       key={sym}
+                      type="button"
                       onClick={() => setPlayerSymbol(sym)}
-                      className={`px-6 py-3 rounded-xl border font-mono font-bold text-sm uppercase transition-all ${
+                      className={`px-5 py-2.5 rounded-xl border font-mono font-bold text-sm uppercase transition-all ${
                         playerSymbol === sym
                           ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
                           : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground"
@@ -660,27 +683,31 @@ function LobbyPage() {
                 <div className="flex-1 rounded-xl border border-white/10 bg-white/3 px-4 py-3 text-center font-mono text-xl tracking-[0.25em]">
                   {roomCode}
                 </div>
-                <button
-                  onClick={handleCopyCode}
-                  className="grid size-12 place-items-center rounded-xl border border-white/10 bg-white/4 text-foreground hover:bg-white/8 transition-all"
-                  title="Copy room code"
-                >
-                  {copied ? (
-                    <Check className="size-4 text-emerald-400" />
-                  ) : (
-                    <Copy className="size-4" />
-                  )}
-                </button>
-                <button
-                  onClick={() => void handleRegenerateCode()}
-                  disabled={isRegeneratingCode}
-                  className="grid size-12 place-items-center rounded-xl border border-white/10 bg-white/4 text-foreground hover:bg-white/8 disabled:opacity-40"
-                  title="Generate new room code"
-                >
-                  <RefreshCcw
-                    className={`size-4 ${isRegeneratingCode ? "animate-spin" : ""}`}
-                  />
-                </button>
+                {isHost && (
+                  <>
+                    <button
+                      onClick={handleCopyCode}
+                      className="grid size-12 place-items-center rounded-xl border border-white/10 bg-white/4 text-foreground hover:bg-white/8 transition-all"
+                      title="Copy room code"
+                    >
+                      {copied ? (
+                        <Check className="size-4 text-emerald-400" />
+                      ) : (
+                        <Copy className="size-4" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => void handleRegenerateCode()}
+                      disabled={isRegeneratingCode}
+                      className="grid size-12 place-items-center rounded-xl border border-white/10 bg-white/4 text-foreground hover:bg-white/8 disabled:opacity-40"
+                      title="Generate new room code"
+                    >
+                      <RefreshCcw
+                        className={`size-4 ${isRegeneratingCode ? "animate-spin" : ""}`}
+                      />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 

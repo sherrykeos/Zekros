@@ -1,6 +1,6 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Users, Plus, Balloon } from "lucide-react";
+import { Users, Plus, LogIn, Balloon } from "lucide-react";
 import { EmptyState, SectionHeader } from "@/components/app/primitives";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -39,16 +39,28 @@ function MultiplayerPage() {
         title="No open rooms yet"
         description="When players create public rooms, you'll see them here. Or start your own."
         action={
-          <button
-            onClick={() =>
-              isAuthenticated
-                ? navigate({ to: "/app/lobby" })
-                : openAccountRequired()
-            }
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground"
-          >
-            <Plus className="size-4" /> Create room
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() =>
+                isAuthenticated
+                  ? navigate({ to: "/app/lobby" as any, state: { tab: "create" } as any })
+                  : openAccountRequired()
+              }
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.98] transition-all"
+            >
+              <Plus className="size-4" /> Create room
+            </button>
+            <button
+              onClick={() =>
+                isAuthenticated
+                  ? navigate({ to: "/app/lobby" as any, state: { tab: "join" } as any })
+                  : openAccountRequired()
+              }
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-foreground hover:bg-white/10 active:scale-[0.98] transition-all"
+            >
+              <LogIn className="size-4" /> Join room
+            </button>
+          </div>
         }
       />
 

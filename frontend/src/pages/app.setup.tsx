@@ -20,8 +20,8 @@ import {
   useJoinRoom,
   useStartMatch as useStartRoom,
 } from "@/hooks/room.hooks";
-import { JoinRoomModal } from "@/components/play/modals/join-room";
-import { usePlayEntry } from "@/contexts/play-entry";
+import { GAME_INFO } from "@/constants/gameinfoconst";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 export const Route = createFileRoute("/app/setup")({
   head: () => ({ meta: [{ title: "Match Setup - ZEKROS" }] }),
@@ -29,7 +29,6 @@ export const Route = createFileRoute("/app/setup")({
 });
 
 type BoardSize = 3 | 4 | 5;
-type BotDifficulty = "nbot" | "pbot";
 
 function backendMode(mode: GameMode) {
   if (mode === "perfect") return "HUMAN_VS_PBOT";
@@ -58,55 +57,50 @@ function SetupPage() {
     useCreateRoom();
   const { mutateAsync: joinRoom, isPending: isJoiningRoom } = useJoinRoom();
   const { mutateAsync: startRoom, isPending: isStartingRoom } = useStartRoom();
-  const { openAccountRequired } = usePlayEntry();
 
   const initialMode = (location.state as { mode?: GameMode } | undefined)?.mode;
 
-  const [openJoin, setOpenJoin] = useState(false);
-  const [mode, setMode] = useState<GameMode>(
-    initialMode === "local" ? "local" : "smart",
+  // Main Tabs: "pvp" (2 player local) vs "bot" (vs AI)
+  const [tab, setTab] = useState<"pvp" | "bot">(
+    initialMode === "smart" || initialMode === "perfect" ? "bot" : "pvp",
   );
-  const [boardSize, setBoardSize] = useState<BoardSize>(3);
-  const [winLength, setWinLength] = useState<MatchConfig["winLength"]>(3);
 
+  // Bot difficulty: "smart" vs "perfect"
+  const [botDifficulty, setBotDifficulty] = useState<"smart" | "perfect">(
+    initialMode === "perfect" ? "perfect" : "smart",
+  );
+
+  // Match Configuration controls (Lobby logic)
+  const [boardSize, setBoardSize] = useState<BoardSize>(3);
+  const [maxActivePieces, setMaxActivePieces] = useState<number>(3);
   const [reclaimTokens, setReclaimTokens] = useState<number>(3);
-  const [manualReclaim, setManualReclaim] = useState(false);
 
   const [isLaunching, setIsLaunching] = useState(false);
   const isStarting =
     isLaunching || isCreatingRoom || isJoiningRoom || isStartingRoom;
 
-  // Sync board size changes with defaults unless manually overridden
+  // Sync maxActivePieces & reclaimTokens whenever boardSize changes (Lobby logic)
   useEffect(() => {
-    setWinLength(boardSize);
-    if (!manualReclaim) {
-      setReclaimTokens(maxActiveFor(boardSize));
-    }
-  }, [boardSize, manualReclaim]);
+    const defActive = maxActiveFor(boardSize);
+    setMaxActivePieces(defActive);
+    setReclaimTokens(boardSize);
+  }, [boardSize]);
 
-  const handleReclaimChange = (delta: number) => {
-    setReclaimTokens((prev) => {
-      const next = prev + delta;
-      if (next >= 0 && next <= 10) {
-        setManualReclaim(true);
-        return next;
-      }
-      return prev;
-    });
-  };
+  // Min / Max bounds for Active Pieces depending on board size
+  const minActive = boardSize === 3 ? 3 : boardSize;
+  const maxActive = boardSize === 3 ? 3 : 10;
 
   const handleLaunch = async () => {
     if (isStarting) return;
 
-    // Use selected difficulty for bots
-    const actualMode: GameMode = mode === "local" ? "local" : mode;
+    const actualMode: GameMode = tab === "pvp" ? "local" : botDifficulty;
 
     const config: MatchConfig = {
       mode: actualMode,
       boardSize,
-      winLength,
+      winLength: boardSize,
       reclaimTokens,
-      maxActivePieces: maxActiveFor(boardSize), // Simplified for this layout as requested
+      maxActivePieces,
       playerSymbol: "x",
       startingPlayer: "x",
     };
@@ -114,21 +108,10 @@ function SetupPage() {
     const normalizedConfig = normalizeMatchConfig(config);
     setIsLaunching(true);
 
-    if (actualMode === "multiplayer") {
-      void navigate({
-        to: "/app/lobby" as any,
-        state: {
-          config: normalizedConfig,
-          mode: normalizedConfig.mode,
-        } as any,
-      });
-      return;
-    }
-
     try {
       const gameModeStr = backendMode(normalizedConfig.mode);
       const hostId = user?.id ?? `player_${Date.now()}`;
-      const hostName = user?.username ?? "Local Player";
+      const hostName = user?.username ?? (tab === "pvp" ? "Player 1" : "Player");
       const secondPlayerId = `player_local_o_${Date.now()}`;
       const isBotMode = gameModeStr !== "HUMAN_VS_HUMAN";
 
@@ -152,7 +135,7 @@ function SetupPage() {
           roomId: roomCode,
           playerInfo: {
             id: secondPlayerId,
-            name: "Local Player 2",
+            name: "Player 2",
           },
         });
 
@@ -173,7 +156,6 @@ function SetupPage() {
       });
 
       if (startResult) {
-        // Smooth premium exit delay
         await new Promise((resolve) => setTimeout(resolve, 300));
         void navigate({
           to: "/app/game" as any,
@@ -200,253 +182,266 @@ function SetupPage() {
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col items-center justify-center p-6 text-foreground bg-background selection:bg-primary/20">
+    <div className="min-h-[85vh] flex flex-col items-center justify-center p-4 sm:p-6 text-foreground selection:bg-primary/20">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-2xl mx-auto flex flex-col items-center gap-14 sm:gap-20 pb-12"
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-xl mx-auto flex flex-col items-center"
       >
-        {/* Header (Using ZEKROS Design System Typography) */}
-        <div className="text-center space-y-4">
-          <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-tight">
-            Start New Match
-          </h1>
-          <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">
-            Strategy begins here.
-          </p>
-        </div>
-
-        {/* Mode Switcher */}
-        <div className="relative flex w-full max-w-[400px] p-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl">
-          {[
-            { id: "local", label: "Local" },
-            { id: "smart", label: "Bot" },
-            { id: "multiplayer", label: "Multiplayer" },
-          ].map((m) => {
-            const isActive =
-              mode === "local"
-                ? m.id === "local"
-                : mode === "multiplayer"
-                  ? m.id === "multiplayer"
-                  : m.id === "smart";
-            return (
-              <button
-                key={m.id}
-                onClick={() => setMode(m.id as GameMode)}
-                className={cn(
-                  "relative flex-1 py-3 text-sm font-medium tracking-wide transition-colors rounded-full z-10",
-                  isActive
-                    ? "text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="mode-indicator"
-                    className="absolute inset-0 bg-primary rounded-full -z-10 shadow-[0_0_20px_rgba(255,255,255,0.08)]"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                {m.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Board Size */}
-        <section className="flex flex-col items-center gap-8 w-full">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Board Size
-          </h2>
-          <div className="flex items-center justify-center gap-12 sm:gap-20">
-            {([3, 4, 5] as BoardSize[]).map((size) => (
-              <button
-                key={size}
-                onClick={() => setBoardSize(size)}
-                className="group flex flex-col items-center gap-5 outline-none"
-              >
-                <div
-                  className={cn(
-                    "w-5 h-5 rounded-full border-[1.5px] transition-all duration-500 flex items-center justify-center relative",
-                    boardSize === size
-                      ? "border-primary bg-primary shadow-[0_0_20px_rgba(255,255,255,0.15)]"
-                      : "border-white/[0.15] bg-white/[0.02] group-hover:border-white/[0.3]",
-                  )}
-                >
-                  <AnimatePresence>
-                    {boardSize === size && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                        className="w-1.5 h-1.5 bg-primary-foreground rounded-full"
-                      />
-                    )}
-                  </AnimatePresence>
-                </div>
-                <span
-                  className={cn(
-                    "font-display text-2xl font-semibold tracking-tight transition-colors duration-500",
-                    boardSize === size
-                      ? "text-foreground"
-                      : "text-muted-foreground/40 group-hover:text-foreground/80",
-                  )}
-                >
-                  {size}×{size}
-                </span>
-              </button>
-            ))}
+        <div className="w-full glass rounded-3xl border border-white/10 p-6 sm:p-8 space-y-8 bg-background/80 shadow-2xl backdrop-blur-xl">
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">
+              Match Setup
+            </h1>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Configure game parameters & start playing
+            </p>
           </div>
-        </section>
 
-        {/* Reclaim Tokens */}
-        <section className="flex flex-col items-center gap-8 w-full">
-          <div className="flex flex-col items-center gap-2">
-            <h2 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              Reclaim Tokens
-            </h2>
-            <AnimatePresence>
-              {manualReclaim && (
-                <motion.span
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="inline-flex text-[9px] uppercase tracking-[0.16em] text-primary"
-                >
-                  Custom override
-                </motion.span>
+          {/* Mode Switcher: PvP vs Bot */}
+          <div className="relative flex w-full p-1 rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+            <button
+              onClick={() => setTab("pvp")}
+              className={cn(
+                "relative flex-1 py-2 text-xs sm:text-sm font-medium tracking-wide transition-colors rounded-xl z-10 flex items-center justify-center gap-2",
+                tab === "pvp"
+                  ? "text-primary-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground",
               )}
-            </AnimatePresence>
-          </div>
-          <div className="flex items-center justify-center gap-12 sm:gap-16">
-            <button
-              onClick={() => handleReclaimChange(-1)}
-              disabled={reclaimTokens <= 0}
-              className="w-12 h-12 flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-white/[0.03] rounded-full text-3xl font-light transition-all disabled:opacity-20 disabled:pointer-events-none"
             >
-              –
+              <Users className="size-4" />
+              <span>PvP (Pass & Play)</span>
+              {tab === "pvp" && (
+                <motion.div
+                  layoutId="setup-tab-indicator"
+                  className="absolute inset-0 bg-primary rounded-xl -z-10 shadow-[0_0_20px_rgba(255,255,255,0.12)]"
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                />
+              )}
             </button>
-            <div className="w-20 flex justify-center">
-              <AnimatePresence mode="popLayout">
-                <motion.span
-                  key={reclaimTokens}
-                  initial={{
-                    opacity: 0,
-                    y: -15,
-                    filter: "blur(8px)",
-                    scale: 0.9,
-                  }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
-                  exit={{ opacity: 0, y: 15, filter: "blur(8px)", scale: 0.9 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-display text-5xl sm:text-6xl font-semibold text-foreground"
-                >
-                  {reclaimTokens}
-                </motion.span>
-              </AnimatePresence>
-            </div>
             <button
-              onClick={() => handleReclaimChange(1)}
-              disabled={reclaimTokens >= 10}
-              className="w-12 h-12 flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-white/[0.03] rounded-full text-3xl font-light transition-all disabled:opacity-20 disabled:pointer-events-none"
+              onClick={() => setTab("bot")}
+              className={cn(
+                "relative flex-1 py-2 text-xs sm:text-sm font-medium tracking-wide transition-colors rounded-xl z-10 flex items-center justify-center gap-2",
+                tab === "bot"
+                  ? "text-primary-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
             >
-              +
+              <Bot className="size-4" />
+              <span>Vs Bot</span>
+              {tab === "bot" && (
+                <motion.div
+                  layoutId="setup-tab-indicator"
+                  className="absolute inset-0 bg-primary rounded-xl -z-10 shadow-[0_0_20px_rgba(255,255,255,0.12)]"
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                />
+              )}
             </button>
           </div>
-        </section>
 
-        {/* Bot Difficulty */}
-        <div className="h-[90px] flex items-center justify-center w-full">
+          {/* Bot Difficulty Selector (Only visible in Bot tab) */}
           <AnimatePresence mode="wait">
-            {(mode === "smart" || mode === "perfect") && (
-              <motion.section
-                key="bot-diff"
-                initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-                transition={{ duration: 0.4 }}
-                className="flex flex-col items-center gap-6"
+            {tab === "bot" && (
+              <motion.div
+                key="bot-diff-section"
+                initial={{ opacity: 0, height: 0, y: -10 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-2 pt-1 border-t border-white/5 overflow-hidden"
               >
-                <h2 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground block text-center">
                   Bot Difficulty
-                </h2>
+                </label>
                 <div className="flex justify-center gap-3">
                   {[
-                    { id: "smart", label: "Smart Bot" },
-                    { id: "perfect", label: "Perfect Bot" },
+                    {
+                      id: "smart",
+                      label: "Smart Bot",
+                      desc: "Adaptive Heuristic AI",
+                      infoKey: "smartBot",
+                    },
+                    {
+                      id: "perfect",
+                      label: "Perfect Bot",
+                      desc: "Unbeatable Minimax AI",
+                      infoKey: "perfectBot",
+                    },
                   ].map((diff) => (
                     <button
                       key={diff.id}
-                      onClick={() => setMode(diff.id as GameMode)}
+                      type="button"
+                      onClick={() => setBotDifficulty(diff.id as any)}
                       className={cn(
-                        "px-6 py-2.5 rounded-xl text-sm font-medium tracking-wide transition-all duration-300 border",
-                        mode === diff.id
-                          ? "border-primary/30 bg-primary/10 text-primary shadow-[0_0_15px_rgba(255,255,255,0.05)]"
-                          : "border-white/[0.06] bg-white/[0.02] text-muted-foreground hover:text-foreground hover:bg-white/[0.05]",
+                        "flex-1 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all flex flex-col items-center gap-1 relative group/botbtn",
+                        botDifficulty === diff.id
+                          ? "border-primary bg-primary/10 text-primary shadow-[0_0_15px_rgba(255,255,255,0.08)]"
+                          : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground hover:bg-white/[0.05]",
                       )}
                     >
-                      {diff.label}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-semibold">{diff.label}</span>
+                        <InfoTooltip info={GAME_INFO[diff.infoKey]} />
+                      </div>
+                      <span className="text-[10px] opacity-60 font-mono font-normal">
+                        {diff.desc}
+                      </span>
                     </button>
                   ))}
                 </div>
-              </motion.section>
+              </motion.div>
             )}
           </AnimatePresence>
-        </div>
 
-        {/* Play Button */}
-        <motion.div
-          className="pt-8 w-full max-w-sm"
-          whileHover={{ scale: isStarting ? 1 : 1.02 }}
-          whileTap={{ scale: isStarting ? 1 : 0.98 }}
-        >
-          <button
-            onClick={handleLaunch}
-            disabled={isStarting}
-            className="group relative w-full py-5 rounded-2xl bg-primary text-primary-foreground font-semibold text-lg tracking-wide transition-all disabled:opacity-80 overflow-hidden shadow-[0_4px_14px_0_rgba(255,255,255,0.1)] hover:shadow-[0_6px_20px_rgba(255,255,255,0.15)] flex justify-center items-center"
-          >
-            <AnimatePresence mode="wait">
-              {isStarting ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  className="w-5 h-5 border-[2.5px] border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"
-                />
-              ) : (
-                <motion.div
-                  key="text"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="flex items-center gap-3"
+          {/* Game Configuration Options */}
+          <div className="space-y-8 pt-5 border-t border-white/5">
+            {/* Board Size */}
+            <div className="flex justify-between items-center px-2 py-2">
+              <div className="flex items-center gap-2">
+                <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Board Size
+                </label>
+                <InfoTooltip info={GAME_INFO.boardSize} />
+              </div>
+              <div className="flex justify-center gap-3">
+                {([3, 4, 5] as BoardSize[]).map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setBoardSize(size)}
+                    className={cn(
+                      "px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all",
+                      boardSize === size
+                        ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                        : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {size}×{size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Max Active Pieces */}
+            <div className="flex justify-between items-center px-2 py-2">
+              <div className="flex flex-col items-start gap-0.5">
+                <div className="flex items-center gap-2">
+                  <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Max Active Pieces
+                  </label>
+                  <InfoTooltip info={GAME_INFO.maxActivePieces} />
+                </div>
+                <span className="font-mono text-xs text-muted-foreground/70">
+                  {boardSize === 3 ? "Fixed (3)" : `${minActive} – ${maxActive}`}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center gap-5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMaxActivePieces((prev) => Math.max(minActive, prev - 1))
+                  }
+                  disabled={boardSize === 3 || maxActivePieces <= minActive}
+                  className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
                 >
-                  <Play className="size-5 fill-primary-foreground" />
-                  <span>Start Match</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
+                  <Minus className="size-3.5" />
+                </button>
+                <span className="font-display text-2xl sm:text-3xl font-semibold w-10 text-center text-foreground">
+                  {maxActivePieces}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMaxActivePieces((prev) => Math.min(maxActive, prev + 1))
+                  }
+                  disabled={boardSize === 3 || maxActivePieces >= maxActive}
+                  className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
+            </div>
 
-          <AnimatePresence>
-            {mode === "multiplayer" && (
-              <motion.button
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                onClick={() =>
-                  user ? setOpenJoin(true) : openAccountRequired()
-                }
-                className="mt-4 w-full py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06] hover:text-foreground font-medium text-sm transition-colors"
-              >
-                Have a code? Join Room
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </motion.div>
+            {/* Reclaim Tokens */}
+            <div className="flex justify-between items-center px-2 py-2">
+              <div className="flex flex-col items-start gap-0.5">
+                <div className="flex items-center gap-2">
+                  <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Reclaim Tokens
+                  </label>
+                  <InfoTooltip info={GAME_INFO.reclaimTokens} />
+                </div>
+                <span className="font-mono text-xs text-muted-foreground/70">
+                  0 – 10
+                </span>
+              </div>
 
-        <JoinRoomModal open={openJoin} onOpenChange={setOpenJoin} />
+              <div className="flex items-center justify-center gap-5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setReclaimTokens((prev) => Math.max(0, prev - 1))
+                  }
+                  disabled={reclaimTokens <= 0}
+                  className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <Minus className="size-3.5" />
+                </button>
+                <span className="font-display text-2xl sm:text-3xl font-semibold w-10 text-center text-foreground">
+                  {reclaimTokens}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setReclaimTokens((prev) => Math.min(10, prev + 1))
+                  }
+                  disabled={reclaimTokens >= 10}
+                  className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/5 rounded-full text-lg transition-all disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Launch Action */}
+          <div className="pt-4">
+            <button
+              onClick={handleLaunch}
+              disabled={isStarting}
+              className="group relative w-full py-4 rounded-2xl bg-primary text-primary-foreground font-semibold text-base tracking-wide transition-all disabled:opacity-80 overflow-hidden shadow-[0_4px_14px_0_rgba(255,255,255,0.1)] hover:shadow-[0_6px_20px_rgba(255,255,255,0.15)] flex justify-center items-center active:scale-[0.99]"
+            >
+              <AnimatePresence mode="wait">
+                {isStarting ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="w-5 h-5 border-[2.5px] border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"
+                  />
+                ) : (
+                  <motion.div
+                    key="text"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center gap-2.5 font-bold"
+                  >
+                    <Play className="size-4 fill-primary-foreground" />
+                    <span>
+                      {tab === "pvp" ? "Start PvP Match" : "Start Bot Match"}
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
+        </div>
       </motion.div>
     </div>
   );
