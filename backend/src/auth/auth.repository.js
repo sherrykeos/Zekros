@@ -225,6 +225,44 @@ async function linkGoogleAccount(userId, providerId, avatar) {
     },
   });
 }
+
+async function updateUser(userId, data) {
+  return prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data,
+  });
+}
+
+async function deleteUser(userId) {
+  return prisma.$transaction(async (tx) => {
+    // Nullify participant references to avoid foreign key violations
+    await tx.participant.updateMany({
+      where: {
+        userId: userId,
+      },
+      data: {
+        userId: null,
+      },
+    });
+
+    // Delete associated settings, stats, ratings, and tokens
+    await tx.userSettings.deleteMany({ where: { userId } });
+    await tx.userStats.deleteMany({ where: { userId } });
+    await tx.userRating.deleteMany({ where: { userId } });
+    await tx.session.deleteMany({ where: { userId } });
+    await tx.verificationToken.deleteMany({ where: { userId } });
+    await tx.passwordResetToken.deleteMany({ where: { userId } });
+
+    // Finally delete the user
+    return tx.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+  });
+}
 /* -------------------------------------------------------------------------- */
 
 export {
@@ -234,6 +272,8 @@ export {
   findUserByUsername,
   createUser,
   verifyUserEmail,
+  updateUser,
+  deleteUser,
 
   // Verification
   createVerificationToken,

@@ -69,7 +69,20 @@ const changePasswordSchema = z.object({
     },
   );
 
-
+const updateProfileSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username cannot exceed 20 characters")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers and underscores"
+    )
+    .optional(),
+  email: z.string().email("Invalid email address").trim().toLowerCase().optional(),
+  avatar: z.string().optional(),
+});
 
 export {
   registerSchema,
@@ -78,5 +91,5 @@ export {
   forgotPasswordSchema,
   resetPasswordSchema,
   changePasswordSchema,
-  
+  updateProfileSchema,
 };

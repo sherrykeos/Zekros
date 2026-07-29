@@ -20,6 +20,8 @@ import {
   linkGoogleAccount,
   findUserById,
   deleteVerificationTokenByUserId,
+  updateUser,
+  deleteUser,
 } from "./auth.repository.js";
 
 import { createId } from "@paralleldrive/cuid2";
@@ -620,6 +622,51 @@ async function changePassword(userId, currentPassword, newPassword) {
   };
 }
 
+async function updateProfile(userId, { username, avatar }) {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw createError("User not found.", 404);
+  }
+
+  const updateData = {};
+
+  if (username && username !== user.username) {
+    const existing = await findUserByUsername(username);
+    if (existing) {
+      throw createError("Username is already taken.", 400);
+    }
+    updateData.username = username;
+  }
+
+  if (avatar !== undefined) {
+    updateData.avatar = avatar;
+  }
+
+  if (Object.keys(updateData).length > 0) {
+    await updateUser(userId, updateData);
+  }
+
+  return getCurrentUser(userId);
+}
+
+async function deleteAccount(userId) {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw createError("User not found.", 404);
+  }
+
+  // Delete all active sessions
+  await deleteAllUserSessions(userId);
+
+  // Delete user record from database (cascades settings, sessions, ratings, stats)
+  await deleteUser(userId);
+
+  return {
+    success: true,
+    message: "Account deleted successfully.",
+  };
+}
+
 export {
   register,
   verifyEmail,
@@ -632,4 +679,6 @@ export {
   getCurrentUser,
   resendVerification,
   changePassword,
+  updateProfile,
+  deleteAccount,
 };

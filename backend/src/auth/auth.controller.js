@@ -6,7 +6,7 @@ import {
   resetPasswordSchema,
   resendVerificationSchema,
   changePasswordSchema,
-  
+  updateProfileSchema,
 } from "./auth.validation.js";
 
 import {
@@ -157,6 +157,34 @@ async function changePassword(req, res, next) {
   }
 }
 
+async function updateProfile(req, res, next) {
+  try {
+    const data = updateProfileSchema.parse(req.body);
+
+    const user = await authService.updateProfile(req.user.id, data);
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteAccount(req, res, next) {
+  try {
+    const result = await authService.deleteAccount(req.user.id);
+
+    // Clear refresh token cookie
+    clearRefreshTokenCookie(res);
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
 
 export {
   register,
@@ -170,4 +198,6 @@ export {
   googleCallback,
   me,
   changePassword,
+  updateProfile,
+  deleteAccount,
 };

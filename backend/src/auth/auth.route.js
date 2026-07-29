@@ -35,6 +35,7 @@ router.get(
 
 
 router.get("/me", authenticate, authController.me);
-// router.post("/resend-verification", authController.resendVerification);
+router.patch("/profile", authenticate, authController.updateProfile);
+router.delete("/profile", authenticate, authController.deleteAccount);
 
 export default router;

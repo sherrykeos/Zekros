@@ -1,4 +1,4 @@
-﻿export type AuthProviderName = "LOCAL" | "GOOGLE" | "local" | "google";
+export type AuthProviderName = "LOCAL" | "GOOGLE" | "local" | "google";
 
 export type AuthUser = {
   id: string;
@@ -39,4 +39,9 @@ export type LoginResult = AuthMessage & {
 export type RefreshResult = {
   success: boolean;
   accessToken: string;
+};
+
+export type ChangePasswordRequest = {
+  currentPassword: string;
+  newPassword: string;
 };

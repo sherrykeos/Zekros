@@ -1,4 +1,4 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Palette,
@@ -9,10 +9,16 @@ import {
   Keyboard,
   Info,
   Rocket,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { GlassPanel } from "@/components/app/primitives";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { useDeleteAccount } from "@/hooks/useUpdateProfile";
+import { AnimatePresence, motion } from "motion/react";
+import { TextInput } from "@/components/auth/auth-shell";
+import { createPortal } from "react-dom";
 
 export const Route = createFileRoute("/app/settings")({
   head: () => ({ meta: [{ title: "Settings â€” ZEKROS" }] }),
@@ -28,6 +34,10 @@ function SettingsRoute() {
 }
 
 function SettingsPage() {
+  const deleteAccount = useDeleteAccount();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+
   return (
     <div className="space-y-8">
       <div>
@@ -138,6 +148,111 @@ function SettingsPage() {
           <Badge>Planned</Badge>
         </Row>
       </SettingsGroup>
+
+      {/* Danger Zone: Delete Account */}
+      <SettingsGroup title="Danger zone" icon={Trash2}>
+        <div className="rounded-xl border border-red-500/20 bg-red-950/10 p-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h4 className="text-xs font-bold text-red-400 uppercase tracking-wider">
+                Delete Account
+              </h4>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Permanently delete your profile and matches data.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setDeleteConfirmText("");
+                setShowDeleteModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/20 active:scale-[0.98] transition-all"
+            >
+              <Trash2 className="size-3.5" /> Delete Account
+            </button>
+          </div>
+        </div>
+      </SettingsGroup>
+
+      {/* Delete Account Double Confirmation Modal */}
+      {typeof window !== "undefined" && createPortal(
+        <AnimatePresence>
+          {showDeleteModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowDeleteModal(false)}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              />
+
+              {/* Modal Content */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="glass-strong relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-red-500/20 p-6 shadow-[0_0_50px_rgba(239,68,68,0.1)]"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-red-500/10 text-red-500">
+                    <AlertTriangle className="size-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-display text-base font-bold text-foreground">
+                      Delete Account Permanently?
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      This action is final. Your record, ratings, and statistics will be wiped forever. Opponent matches will preserve your historic games under "Deleted User".
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-3.5">
+                  <p className="text-[11px] text-muted-foreground">
+                    To confirm, type <span className="font-mono text-red-400 font-bold select-none">"delete my account"</span> below:
+                  </p>
+
+                  <TextInput
+                    type="text"
+                    placeholder="Type verification phrase"
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    className="!border-red-500/30 focus:!border-red-500/60 focus:!ring-red-500/10"
+                  />
+
+                  {deleteAccount.errorMessage && (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive-foreground">
+                      {deleteAccount.errorMessage}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteModal(false)}
+                      className="rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={deleteConfirmText.toLowerCase() !== "delete my account" || deleteAccount.isPending}
+                      onClick={() => deleteAccount.mutate()}
+                      className="inline-flex h-9 items-center justify-center rounded-lg bg-red-500 px-4 text-xs font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {deleteAccount.isPending ? "Deleting..." : "Permanently Delete"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

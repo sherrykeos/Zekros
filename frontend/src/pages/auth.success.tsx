@@ -36,6 +36,11 @@ function SuccessPage() {
           throw new Error("Session restore failed - user is null");
         }
 
+        // Cache Google OAuth avatar in localStorage so they can always select it later
+        if (user.provider?.toUpperCase() === "GOOGLE" && user.avatar?.startsWith("https://")) {
+          localStorage.setItem(`google_avatar_${user.id}`, user.avatar);
+        }
+
         setStatus("Redirecting...");
         const redirect = sessionStorage.getItem("auth_redirect") || "/app/play";
         sessionStorage.removeItem("auth_redirect");

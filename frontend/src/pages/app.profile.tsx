@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "motion/react";
-import { useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Trophy,
   BarChart3,
@@ -14,6 +14,9 @@ import {
   Crown,
   Play,
   History as HistoryIcon,
+  Lock,
+  X,
+  Check,
 } from "lucide-react";
 import {
   EmptyState,
@@ -25,6 +28,10 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useMatchList } from "@/hooks/match";
 import type { MatchHistoryItem } from "@/services/api/matchService";
+import { useUpdateProfile } from "@/hooks/useUpdateProfile";
+import { PRESET_AVATARS } from "@/lib/avatar-presets";
+import { FormField, TextInput, PrimaryButton } from "@/components/auth/auth-shell";
+import { authApi } from "@/api/auth.api";
 
 export const Route = createFileRoute("/app/profile")({
   head: () => ({
@@ -66,59 +73,370 @@ function formatDate(value?: string) {
 
 function ProfilePage() {
   const { data: user } = useCurrentUser();
+  const updateProfile = useUpdateProfile();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [selectedAvatar, setSelectedAvatar] = useState("");
+
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdError, setPwdError] = useState<string | null>(null);
+  const [pwdSuccess, setPwdSuccess] = useState<string | null>(null);
+
+  const googleAvatar = user ? localStorage.getItem(`google_avatar_${user.id}`) : null;
+
+  useEffect(() => {
+    if (user) {
+      setUsername(user.username);
+      setEmail(user.email);
+      setSelectedAvatar(user.avatar || "");
+    }
+  }, [user, isEditing]);
+
   if (!user) return null;
+
+  const handleSaveProfile = () => {
+    if (!username.trim()) return;
+
+    updateProfile.mutate({
+      username: username.trim(),
+      email: email.trim(),
+      avatar: selectedAvatar || undefined,
+    }, {
+      onSuccess: () => {
+        setIsEditing(false);
+      }
+    });
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwdError(null);
+    setPwdSuccess(null);
+
+    if (!currentPassword || !newPassword) {
+      setPwdError("All fields are required.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPwdError("New password must be at least 8 characters long.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPwdError("Passwords do not match.");
+      return;
+    }
+
+    setPwdLoading(true);
+    try {
+      const response = await authApi.changePassword({
+        currentPassword,
+        newPassword,
+      });
+
+      if (response.success) {
+        setPwdSuccess("Password changed successfully!");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setTimeout(() => setShowPasswordChange(false), 2000);
+      } else {
+        setPwdError(response.message || "Failed to change password.");
+      }
+    } catch (err: any) {
+      setPwdError(err.response?.data?.error?.message || err.message || "Failed to change password.");
+    } finally {
+      setPwdLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
       <GlassPanel className="overflow-hidden p-6">
-        <div className="flex flex-wrap items-start gap-5">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 280, damping: 22 }}
-            className="relative grid size-20 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-white/30 to-white/5 font-display text-xl font-semibold ring-1 ring-white/15"
-          >
-            {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt=""
-                referrerPolicy="no-referrer"
-                className="size-full object-cover"
-              />
-            ) : (
-              initials(user.username)
-            )}
-          </motion.div>
+        <AnimatePresence mode="wait">
+          {!isEditing ? (
+            <motion.div
+              key="view-profile"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-wrap items-start gap-5"
+            >
+              <div className="relative grid size-20 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-white/30 to-white/5 font-display text-xl font-semibold ring-1 ring-white/15">
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt=""
+                    referrerPolicy="no-referrer"
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  initials(user.username)
+                )}
+              </div>
 
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-display text-2xl font-semibold tracking-tight">
-                {user.username}
-              </h1>
-              <Badge tone="solid">
-                {user.isEmailVerified ? "Verified" : "Unverified"}
-              </Badge>
-            </div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              {user.email}
-            </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="font-display text-2xl font-semibold tracking-tight">
+                    {user.username}
+                  </h1>
+                  <Badge tone="solid">
+                    {user.isEmailVerified ? "Verified" : "Unverified"}
+                  </Badge>
+                </div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {user.email}
+                </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <Calendar className="size-3.5" /> Joined{" "}
-                {formatDate(user.createdAt)}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Crown className="size-3.5" /> Provider:{" "}
-                {user.provider ?? "LOCAL"}
-              </span>
-            </div>
-          </div>
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Calendar className="size-3.5" /> Joined{" "}
+                    {formatDate(user.createdAt)}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Crown className="size-3.5" /> Provider:{" "}
+                    {user.provider ?? "LOCAL"}
+                  </span>
+                </div>
+              </div>
 
-          <button className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-sm hover:bg-white/[0.06]">
-            <Pencil className="size-3.5" /> Edit
-          </button>
-        </div>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-sm hover:bg-white/[0.06] transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Pencil className="size-3.5" /> Edit Profile
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="edit-profile"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <h2 className="font-display text-lg font-semibold tracking-tight">
+                  Edit Profile
+                </h2>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-3">
+                {/* Column 1: Avatar Selector */}
+                <div className="space-y-3">
+                  <span className="text-xs font-medium text-foreground">
+                    Choose Avatar
+                  </span>
+
+                  {/* Selected Preview */}
+                  <div className="flex justify-center md:justify-start">
+                    <div className="relative grid size-24 place-items-center overflow-hidden rounded-3xl bg-gradient-to-br from-white/30 to-white/5 ring-2 ring-primary/40 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                      {selectedAvatar ? (
+                        <img
+                          src={selectedAvatar}
+                          alt=""
+                          referrerPolicy="no-referrer"
+                          className="size-full object-cover"
+                        />
+                      ) : (
+                        initials(username || user.username)
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Grid Selector */}
+                  <div className="grid grid-cols-4 gap-2.5 pt-2">
+                    {user.provider?.toUpperCase() === "GOOGLE" && googleAvatar && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedAvatar(googleAvatar)}
+                        className={`relative size-11 overflow-hidden rounded-full ring-2 transition-all hover:scale-105 ${
+                          selectedAvatar === googleAvatar
+                            ? "ring-primary scale-105 shadow-[0_0_12px_rgba(255,255,255,0.25)]"
+                            : "ring-white/10 opacity-70 hover:opacity-100"
+                        }`}
+                        title="Gmail Profile Photo"
+                      >
+                        <img
+                          src={googleAvatar}
+                          alt="Google"
+                          referrerPolicy="no-referrer"
+                          className="size-full object-cover"
+                        />
+                      </button>
+                    )}
+
+                    {PRESET_AVATARS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => setSelectedAvatar(preset.dataUrl)}
+                        className={`relative size-11 overflow-hidden rounded-full ring-2 transition-all hover:scale-105 ${
+                          selectedAvatar === preset.dataUrl
+                            ? "ring-primary scale-105 shadow-[0_0_12px_rgba(255,255,255,0.25)]"
+                            : "ring-white/10 opacity-70 hover:opacity-100"
+                        }`}
+                        title={preset.name}
+                      >
+                        <img
+                          src={preset.dataUrl}
+                          alt=""
+                          className="size-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Column 2: Account Details */}
+                <div className="space-y-4 md:col-span-2">
+                  <FormField label="Username">
+                    <TextInput
+                      type="text"
+                      placeholder="Username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                    />
+                  </FormField>
+
+                  <FormField
+                    label="Email Address"
+                    hint={<span className="text-[10px] text-yellow-500 font-semibold uppercase tracking-wider">Mock Mode</span>}
+                  >
+                    <TextInput
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </FormField>
+
+                  {updateProfile.errorMessage && (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive-foreground">
+                      {updateProfile.errorMessage}
+                    </div>
+                  )}
+
+                  {/* Password section for LOCAL accounts */}
+                  {user.provider?.toUpperCase() === "LOCAL" ? (
+                    <div className="border-t border-white/10 pt-4 mt-2">
+                      {!showPasswordChange ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswordChange(true)}
+                          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <Lock className="size-3.5" /> Change Password
+                        </button>
+                      ) : (
+                        <form onSubmit={handlePasswordChange} className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-foreground">
+                              Change Password
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowPasswordChange(false);
+                                setPwdError(null);
+                                setPwdSuccess(null);
+                              }}
+                              className="text-[10px] text-muted-foreground hover:text-foreground"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <TextInput
+                              type="password"
+                              placeholder="Current Password"
+                              value={currentPassword}
+                              onChange={(e) => setCurrentPassword(e.target.value)}
+                            />
+                            <div className="space-y-2">
+                              <TextInput
+                                type="password"
+                                placeholder="New Password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                              />
+                              <TextInput
+                                type="password"
+                                placeholder="Confirm New Password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          {pwdError && (
+                            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs text-destructive-foreground">
+                              {pwdError}
+                            </div>
+                          )}
+
+                          {pwdSuccess && (
+                            <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-xs text-green-400 flex items-center gap-1.5">
+                              <Check className="size-3.5" /> {pwdSuccess}
+                            </div>
+                          )}
+
+                          <button
+                            type="submit"
+                            disabled={pwdLoading}
+                            className="inline-flex h-9 items-center justify-center rounded-lg bg-white px-4 text-xs font-semibold text-black transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                          >
+                            {pwdLoading ? "Saving..." : "Update Password"}
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="border-t border-white/10 pt-4 mt-2">
+                      <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Lock className="size-3.5" /> Password changes managed by Google.
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className="rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <PrimaryButton
+                      onClick={handleSaveProfile}
+                      loading={updateProfile.isPending}
+                      className="!w-auto !px-5 text-xs"
+                    >
+                      Save Changes
+                    </PrimaryButton>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </GlassPanel>
 
       <section>

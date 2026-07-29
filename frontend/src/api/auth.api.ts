@@ -1,4 +1,4 @@
-﻿import { api } from "@/services/client";
+import { api } from "@/services/client";
 import type {
   AuthMessage,
   AuthUser,
@@ -7,6 +7,7 @@ import type {
   RefreshResult,
   RegisterRequest,
   ResetPasswordRequest,
+  ChangePasswordRequest,
 } from "@/types/auth";
 
 type CurrentUserResponse = {
@@ -63,6 +64,21 @@ export const authApi = {
 
   async resetPassword(data: ResetPasswordRequest): Promise<AuthMessage> {
     const response = await api.post<AuthMessage>("/auth/reset-password", data);
+    return response.data;
+  },
+
+  async updateProfile(data: { username?: string; email?: string; avatar?: string }): Promise<AuthUser> {
+    const response = await api.patch<{ success: boolean; user: AuthUser }>("/auth/profile", data);
+    return response.data.user;
+  },
+
+  async deleteAccount(): Promise<AuthMessage> {
+    const response = await api.delete<AuthMessage>("/auth/profile");
+    return response.data;
+  },
+
+  async changePassword(data: ChangePasswordRequest): Promise<AuthMessage> {
+    const response = await api.patch<AuthMessage>("/auth/change-password", data);
     return response.data;
   },
 };
