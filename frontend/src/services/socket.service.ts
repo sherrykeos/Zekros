@@ -7,12 +7,13 @@ class SocketService {
   private baseURL: string;
 
   constructor() {
-    // Determine the base URL from the API client or environment. Strip /api if it exists.
-    const apiBaseURL =
-      api.defaults.baseURL ||
-      import.meta.env.VITE_API_URL ||
+    // Determine base URL from environment or API client
+    const socketBaseURL =
+      import.meta.env.VITE_SOCKET_URL ||
+      import.meta.env.VITE_API_URL?.replace(/\/api$/, "") ||
+      api.defaults.baseURL?.replace(/\/api$/, "") ||
       "http://localhost:5000";
-    this.baseURL = apiBaseURL.replace(/\/api$/, "");
+    this.baseURL = socketBaseURL;
   }
 
   public connect(): Socket {

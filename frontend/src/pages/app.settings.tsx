@@ -54,7 +54,7 @@ function SettingsPage() {
 
       <SettingsGroup title="Appearance" icon={Palette}>
         <Row label="Theme" hint="Dark is the canonical ZEKROS theme.">
-          <Segmented options={["Dark", "System", "Light"]} value="Dark" />
+          <Segmented options={["Dark"]} value="Dark" />
         </Row>
         {/* <Row label="Accent" hint="Monochrome by design.">
           <Segmented options={["Bone", "Smoke", "Ash"]} value="Bone" />
