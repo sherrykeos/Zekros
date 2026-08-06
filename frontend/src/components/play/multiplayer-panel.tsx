@@ -107,7 +107,7 @@ export function MultiplayerPanel({
       </div>
 
       {/* Recent rooms */}
-      <div className="mt-5 glass overflow-hidden rounded-2xl">
+      {/* <div className="mt-5 glass overflow-hidden rounded-2xl">
         <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
             Recent rooms
@@ -142,7 +142,7 @@ export function MultiplayerPanel({
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
     </section>
   );
 }

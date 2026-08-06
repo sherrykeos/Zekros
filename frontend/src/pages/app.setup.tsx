@@ -3,9 +3,10 @@ import {
   createFileRoute,
   useNavigate,
   useLocation,
+  Link,
 } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { Users, Bot, Minus, Plus, Play } from "lucide-react";
+import { Users, Bot, Minus, Plus, Play, ChevronLeft } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -189,6 +190,12 @@ function SetupPage() {
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-xl mx-auto flex flex-col items-center"
       >
+        <Link
+          to="/app/play"
+          className="self-start mb-4 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="size-3.5" /> Back to play
+        </Link>
         <div className="w-full glass rounded-3xl border border-white/10 p-6 sm:p-8 space-y-8 bg-background/80 shadow-2xl backdrop-blur-xl">
           {/* Header */}
           <div className="text-center space-y-2">

@@ -51,7 +51,8 @@ function PlayPage() {
     }
     switch (id) {
       case "create":
-        setOpenCreate(true);
+        // setOpenCreate(true);
+        void navigate({ to: "/app/lobby" as any, state: { mode: "create" } as any });
         break;
       case "join":
         setOpenJoin(true);
@@ -84,6 +85,8 @@ function PlayPage() {
     setOpenJoin(true);
   };
 
+  const { data: user } = useCurrentUser();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
@@ -91,11 +94,20 @@ function PlayPage() {
       transition={{ duration: 0.35 }}
       className="space-y-10 pb-6"
     >
-      <PlayHero onQuickPlay={() => handleQuickAction("quick")} />
+      <div>
+        <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          ZEKROS - Play
+        </div>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+          welcome back, <span className="text-gradient"> {user?.username}</span>,
+        </h1>
+      </div>
+
+      {/* <PlayHero onQuickPlay={() => handleQuickAction("quick")} /> */}
 
       {/* <ContinueMatch /> */}
 
-      <GameModes onLaunch={handleQuickAction} />
+      {/* <GameModes onLaunch={handleQuickAction} /> */}
 
       <QuickActions onSelect={handleQuickAction} />
 
@@ -105,7 +117,7 @@ function PlayPage() {
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <RecentActivity />
+        {/* <RecentActivity /> */}
         <Tips />
       </div>
 

@@ -31,20 +31,6 @@ const actions: Action[] = [
     tag: "Fastest",
   },
   {
-    id: "Room",
-    title: "Custom Room",
-    description: "Spin up a private lobby with your own rules.",
-    icon: DoorOpen,
-    tag: "Private",
-  },
-  {
-    id: "custom",
-    title: "Custom Match",
-    description: "Configure board, pieces, tokens and win length.",
-    icon: Settings2,
-    tag: "Tweak",
-  },
-  {
     id: "smart",
     title: "Play vs Smart AI",
     description: "An adaptive opponent that studies your patterns.",
@@ -58,14 +44,28 @@ const actions: Action[] = [
     icon: Sparkles,
     tag: "Hardest",
   },
+  // {
+  //   id: "Room",
+  //   title: "Custom Room",
+  //   description: "Spin up a private lobby with your own rules.",
+  //   icon: DoorOpen,
+  //   tag: "Private",
+  // },
+  // {
+  //   id: "custom",
+  //   title: "Custom Match",
+  //   description: "Configure board, pieces, tokens and win length.",
+  //   icon: Settings2,
+  //   tag: "Tweak",
+  // },
 
-  {
-    id: "multiplayer",
-    title: "Multiplayer",
-    description: "Real-time match against a random player on the server.",
-    icon: CirclePile,
-    tag: "COMING SOON",
-  },
+  // {
+  //   id: "multiplayer",
+  //   title: "Multiplayer",
+  //   description: "Real-time match against a random player on the server.",
+  //   icon: CirclePile,
+  //   tag: "COMING SOON",
+  // },
 ];
 
 export function QuickActions({

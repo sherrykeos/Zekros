@@ -1,4 +1,4 @@
-import { createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useLocation, useNavigate, Link  } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -11,6 +11,7 @@ import {
   Check,
   Plus,
   Minus,
+  ChevronLeft,
 } from "lucide-react";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -444,6 +445,12 @@ function LobbyPage() {
         transition={{ duration: 0.4 }}
         className="flex flex-col items-center justify-center min-h-[65vh] max-w-xl mx-auto p-4 sm:p-6"
       >
+        <Link
+          to="/app/play"
+          className="self-start mb-4 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="size-3.5" /> Back to play
+        </Link>
         <div className="w-full glass rounded-3xl border border-white/10 p-6 sm:p-8 space-y-8 bg-background/80 shadow-2xl backdrop-blur-xl">
           <div className="text-center space-y-2">
             <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">
@@ -668,6 +675,14 @@ function LobbyPage() {
       transition={{ duration: 0.3 }}
       className="pb-6 relative max-w-5xl mx-auto"
     >
+      <div className="flex items-center gap-1 mb-6">
+        <Link
+          to="/app/play"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="size-3.5" /> Back to play
+        </Link>
+      </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <section className="glass space-y-6 rounded-2xl p-6 border border-white/10 bg-background/80">
           <header className="flex items-center justify-between">

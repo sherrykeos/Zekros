@@ -24,6 +24,7 @@ function AppLayout() {
       <div className="flex h-screen gap-2 bg-background p-2 text-foreground">
         <Sidebar />
         <MobileSidebar />
+        {/* <RightPanel /> */}
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <TopBar />

@@ -25,7 +25,7 @@ type NavItem = {
 };
 
 const items: NavItem[] = [
-  { to: "/app", label: "Dashboard", icon: LayoutDashboard },
+  // { to: "/app", label: "Dashboard", icon: LayoutDashboard },
   { to: "/app/play", label: "Play", icon: Gamepad2 },
   { to: "/app/multiplayer", label: "Multiplayer", icon: Users },
   { to: "/app/history", label: "History", icon: History },
