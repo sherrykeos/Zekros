@@ -41,6 +41,7 @@ export interface SocialLinks {
   github?: string;
   twitter?: string;
   discord?: string;
+  linkedin?: string;
   docs?: string;
 }
 
@@ -91,6 +92,7 @@ export const APP_CONSTANTS: AppConstants = {
     github: "https://github.com",
     twitter: "https://twitter.com",
     discord: "https://discord.gg",
+    linkedin: "https://linkedin.com",
     docs: "#",
   },
 };
