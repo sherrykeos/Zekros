@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useJoinRoom } from "@/hooks/room.hooks";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function JoinRoomModal({
   open,
@@ -59,11 +60,7 @@ export function JoinRoomModal({
       setError("Unable to join room.");
     } catch (err: any) {
       console.error(err);
-      setError(
-        err?.response?.data?.error?.message ??
-        err?.message ??
-        "Failed to join room."
-      );
+      setError(getApiErrorMessage(err, "Failed to join room."));
     }
   };
 

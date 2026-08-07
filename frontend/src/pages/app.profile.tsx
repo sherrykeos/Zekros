@@ -28,6 +28,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useMatchList } from "@/hooks/match";
 import type { MatchHistoryItem } from "@/services/api/matchService";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { PRESET_AVATARS } from "@/lib/avatar-presets";
 import { FormField, TextInput, PrimaryButton } from "@/components/auth/auth-shell";
@@ -152,7 +153,7 @@ function ProfilePage() {
         setPwdError(response.message || "Failed to change password.");
       }
     } catch (err: any) {
-      setPwdError(err.response?.data?.error?.message || err.message || "Failed to change password.");
+      setPwdError(getApiErrorMessage(err, "Failed to change password."));
     } finally {
       setPwdLoading(false);
     }
@@ -160,7 +161,7 @@ function ProfilePage() {
 
   return (
     <div className="space-y-8">
-      <GlassPanel className="overflow-hidden p-6">
+      <GlassPanel className="overflow-hidden p-4 sm:p-6">
         <AnimatePresence mode="wait">
           {!isEditing ? (
             <motion.div
@@ -169,9 +170,9 @@ function ProfilePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="flex flex-wrap items-start gap-5"
+              className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-5"
             >
-              <div className="relative grid size-20 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-white/30 to-white/5 font-display text-xl font-semibold ring-1 ring-white/15">
+              <div className="relative grid size-20 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-white/30 to-white/5 font-display text-xl font-semibold ring-1 ring-white/15 shrink-0">
                 {user.avatar ? (
                   <img
                     src={user.avatar}
@@ -184,8 +185,8 @@ function ProfilePage() {
                 )}
               </div>
 
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
+              <div className="min-w-0 flex-1 flex flex-col items-center sm:items-start">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                   <h1 className="font-display text-2xl font-semibold tracking-tight">
                     {user.username}
                   </h1>
@@ -197,7 +198,7 @@ function ProfilePage() {
                   {user.email}
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                <div className="mt-3 flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="size-3.5" /> Joined{" "}
                     {formatDate(user.createdAt)}
@@ -211,7 +212,7 @@ function ProfilePage() {
 
               <button
                 onClick={() => setIsEditing(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-sm hover:bg-white/[0.06] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-sm hover:bg-white/[0.06] transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
               >
                 <Pencil className="size-3.5" /> Edit Profile
               </button>
@@ -239,8 +240,8 @@ function ProfilePage() {
 
               <div className="grid gap-6 md:grid-cols-3">
                 {/* Column 1: Avatar Selector */}
-                <div className="space-y-3">
-                  <span className="text-xs font-medium text-foreground">
+                <div className="space-y-3 flex flex-col items-center md:items-start">
+                  <span className="text-xs font-medium text-foreground self-start">
                     Choose Avatar
                   </span>
 
@@ -261,7 +262,7 @@ function ProfilePage() {
                   </div>
 
                   {/* Grid Selector */}
-                  <div className="grid grid-cols-4 gap-2.5 pt-2">
+                  <div className="grid grid-cols-4 xs:grid-cols-5 sm:grid-cols-6 md:grid-cols-4 gap-2.5 pt-2 w-full justify-items-center md:justify-items-start">
                     {user.provider?.toUpperCase() === "GOOGLE" && googleAvatar && (
                       <button
                         type="button"
@@ -416,18 +417,18 @@ function ProfilePage() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+                  <div className="flex flex-col-reverse xs:flex-row items-center justify-end gap-2.5 sm:gap-3 pt-4 border-t border-white/10">
                     <button
                       type="button"
                       onClick={() => setIsEditing(false)}
-                      className="rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
+                      className="w-full xs:w-auto rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
                     >
                       Cancel
                     </button>
                     <PrimaryButton
                       onClick={handleSaveProfile}
                       loading={updateProfile.isPending}
-                      className="!w-auto !px-5 text-xs"
+                      className="w-full xs:!w-auto !px-5 text-xs"
                     >
                       Save Changes
                     </PrimaryButton>

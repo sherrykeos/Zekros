@@ -931,7 +931,10 @@ function GamePage() {
         </button>
 
         <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-          <div className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.22em] text-muted-foreground truncate max-w-[120px] xs:max-w-[160px] sm:max-w-none">
+          <div
+            className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.22em] text-muted-foreground truncate max-w-[120px] xs:max-w-[160px] sm:max-w-none"
+            suppressHydrationWarning
+          >
             Match - {config.boardSize}x{config.boardSize} - {config.mode}
           </div>
 

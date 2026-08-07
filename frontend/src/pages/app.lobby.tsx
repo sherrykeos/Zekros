@@ -32,6 +32,7 @@ import { socketService } from "@/services/socket.service";
 import { GAME_INFO } from "@/constants/gameinfoconst";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { audioManager } from "@/services/audio/AudioManager";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export const Route = createFileRoute("/app/lobby")({
   head: () => ({ meta: [{ title: "Lobby - ZEKROS" }] }),
@@ -267,11 +268,7 @@ function LobbyPage() {
         }
       }
     } catch (error: any) {
-      setRoomError(
-        error?.response?.data?.error?.message ??
-          error?.message ??
-          "Failed to create room.",
-      );
+      setRoomError(getApiErrorMessage(error, "Failed to create room."));
     }
   };
 
@@ -321,9 +318,7 @@ function LobbyPage() {
         return;
       }
       setRoomError(
-        error?.response?.data?.error?.message ??
-          error?.message ??
-          "Failed to join room. Please check the code.",
+        getApiErrorMessage(error, "Failed to join room. Please check the code."),
       );
     }
   };
