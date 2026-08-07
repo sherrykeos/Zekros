@@ -2,10 +2,11 @@ import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { SectionHeader } from "./features";
+import { APP_CONSTANTS } from "@/constants/appConstants";
 
 const faqs = [
   {
-    q: "What is ZEKROS?",
+    q: `What is ${APP_CONSTANTS.app.name}?`,
     a: "A real-time strategy game built around adaptive boards, decaying pieces, and a token economy. Minimal on the surface, deep underneath.",
   },
   {
@@ -14,7 +15,7 @@ const faqs = [
   },
   {
     q: "What platforms are supported?",
-    a: "ZEKROS runs in any modern browser. Native clients for desktop and mobile are on the roadmap after public launch.",
+    a: `${APP_CONSTANTS.app.name} runs in any modern browser. Native clients for desktop and mobile are on the roadmap after public launch.`,
   },
   {
     q: "How does the AI work?",
@@ -26,7 +27,7 @@ const faqs = [
   },
   {
     q: "Who is building this?",
-    a: "ZEROTH Labs. A small, opinionated team focused on systems-driven games with long half-lives.",
+    a: `${APP_CONSTANTS.company.name}. A small, opinionated team focused on systems-driven games with long half-lives.`,
   },
 ];
 

@@ -20,10 +20,14 @@ export function JoinRoomModal({
   initialCode?: string;
 }) {
   const [code, setCode] = useState(initialCode);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { data: user } = useCurrentUser();
   const { mutateAsync: joinRoom, isPending: isJoiningRoom } = useJoinRoom();
-  useEffect(() => setCode(initialCode), [initialCode, open]);
+  useEffect(() => {
+    setCode(initialCode);
+    setError(null);
+  }, [initialCode, open]);
 
   const handleJoin = async () => {
     const normalizedCode = code.replace(/[^A-Z0-9]/g, "").toUpperCase();
@@ -52,8 +56,14 @@ export function JoinRoomModal({
       }
 
       console.error("Unable to join room.");
-    } catch (error) {
-      console.error(error);
+      setError("Unable to join room.");
+    } catch (err: any) {
+      console.error(err);
+      setError(
+        err?.response?.data?.error?.message ??
+        err?.message ??
+        "Failed to join room."
+      );
     }
   };
 
@@ -77,12 +87,18 @@ export function JoinRoomModal({
             <input
               autoFocus
               value={code}
-              onChange={(e) =>
-                setCode(e.target.value.toUpperCase().slice(0, 7))
-              }
+              onChange={(e) => {
+                setCode(e.target.value.toUpperCase().slice(0, 7));
+                setError(null);
+              }}
               placeholder="ZK-XXXX"
               className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center font-mono text-lg tracking-[0.32em] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-white/20"
             />
+            {error && (
+              <div className="mt-3 text-center text-xs font-medium text-red-500/90 bg-red-500/10 py-2 rounded-lg border border-red-500/20">
+                {error}
+              </div>
+            )}
           </div>
 
           <div className="mt-6 flex items-center justify-end gap-2">
@@ -97,7 +113,7 @@ export function JoinRoomModal({
               disabled={code.length < 4 || isJoiningRoom}
               className="rounded-lg bg-primary px-3.5 py-2 text-xs font-medium text-primary-foreground disabled:opacity-40"
             >
-              {isJoiningRoom ? "Joiningâ€¦" : "Join match"}
+              {isJoiningRoom ? "Joining…" : "Join match"}
             </button>
           </div>
         </div>

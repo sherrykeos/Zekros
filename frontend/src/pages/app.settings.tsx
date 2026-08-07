@@ -21,8 +21,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { TextInput } from "@/components/auth/auth-shell";
 import { createPortal } from "react-dom";
 
+import { APP_CONSTANTS, getPageTitle } from "@/constants/appConstants";
+
 export const Route = createFileRoute("/app/settings")({
-  head: () => ({ meta: [{ title: "Settings â€” ZEKROS" }] }),
+  head: () => ({ meta: [{ title: getPageTitle("Settings") }] }),
   component: SettingsRoute,
 });
 
@@ -147,19 +149,21 @@ function SettingsPage() {
         <Shortcut keys={["?"]} label="Show shortcuts" />
       </SettingsGroup> */}
 
-      <SettingsGroup title="About ZEKROS" icon={Info}>
+      <SettingsGroup title={`About ${APP_CONSTANTS.app.name}`} icon={Info}>
         <Row label="Build" hint="Current preview build.">
           <span className="font-mono text-xs text-muted-foreground">
-            0.1.0-preview.3
+            {APP_CONSTANTS.version.build}
           </span>
         </Row>
         <Row label="Engine" hint="Backend system in development.">
           <span className="font-mono text-xs text-muted-foreground">
-            D3T Â· pre-alpha
+            {APP_CONSTANTS.version.engine.version}
           </span>
         </Row>
-        <Row label="Company" hint="Crafted by ZEROTH Labs.">
-          <span className="text-xs text-muted-foreground">ZEROTH Labs</span>
+        <Row label="Company" hint={`Crafted by ${APP_CONSTANTS.company.name}.`}>
+          <span className="text-xs text-muted-foreground">
+            {APP_CONSTANTS.company.name}
+          </span>
         </Row>
       </SettingsGroup>
 

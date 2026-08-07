@@ -24,6 +24,8 @@ export type MatchConfig = {
   reclaimTokens: number;
   playerSymbol: Player;
   startingPlayer: Player;
+  /** Timer duration per player in seconds (0 = unlimited / no clock) */
+  timerDuration: number;
 };
 
 export type MoveRecord = {
@@ -44,6 +46,7 @@ export const defaultConfig: MatchConfig = {
   reclaimTokens: 3,
   playerSymbol: "x",
   startingPlayer: "x",
+  timerDuration: 120,
 };
 
 export function maxActiveFor(size: number): number {
@@ -84,5 +87,6 @@ export function normalizeMatchConfig(
     winLength: derivedWinLength,
     maxActivePieces: derivedMaxActivePieces,
     reclaimTokens: config.reclaimTokens ?? derivedMaxActivePieces,
+    timerDuration: config.timerDuration ?? 120,
   };
 }

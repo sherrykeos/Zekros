@@ -16,23 +16,25 @@ import { useAppShell } from "@/contexts/app-shell";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLogout } from "@/hooks/useLogout";
 
+import { APP_CONSTANTS } from "@/constants/appConstants";
+
 const titleMap: Record<string, { title: string; crumb: string[] }> = {
-  "/app": { title: "Dashboard", crumb: ["ZEKROS", "Dashboard"] },
-  "/app/play": { title: "Play", crumb: ["ZEKROS", "Play"] },
+  "/app": { title: "Dashboard", crumb: [APP_CONSTANTS.app.name, "Dashboard"] },
+  "/app/play": { title: "Play", crumb: [APP_CONSTANTS.app.name, "Play"] },
   "/app/multiplayer": {
     title: "Multiplayer",
-    crumb: ["ZEKROS", "Multiplayer"],
+    crumb: [APP_CONSTANTS.app.name, "Multiplayer"],
   },
-  "/app/history": { title: "Match History", crumb: ["ZEKROS", "History"] },
-  "/app/profile": { title: "Profile", crumb: ["ZEKROS", "Profile"] },
-  "/app/settings": { title: "Settings", crumb: ["ZEKROS", "Settings"] },
+  "/app/history": { title: "Match History", crumb: [APP_CONSTANTS.app.name, "History"] },
+  "/app/profile": { title: "Profile", crumb: [APP_CONSTANTS.app.name, "Profile"] },
+  "/app/settings": { title: "Settings", crumb: [APP_CONSTANTS.app.name, "Settings"] },
   "/app/developer": {
     title: "Developer Console",
-    crumb: ["ZEKROS", "Developer"],
+    crumb: [APP_CONSTANTS.app.name, "Developer"],
   },
   "/app/leaderboard": {
     title: "Leaderboard",
-    crumb: ["ZEKROS", "Leaderboard"],
+    crumb: [APP_CONSTANTS.app.name, "Leaderboard"],
   },
 };
 
@@ -51,7 +53,7 @@ function initials(name?: string | null) {
 
 export function TopBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const meta = titleMap[pathname] ?? { title: "ZEKROS", crumb: ["ZEKROS"] };
+  const meta = titleMap[pathname] ?? { title: APP_CONSTANTS.app.name, crumb: [APP_CONSTANTS.app.name] };
   const { setMobileNavOpen } = useAppShell();
   const currentUser = useCurrentUser();
   const logout = useLogout();
@@ -106,6 +108,13 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-3">
+         <Link
+          to="/app/play"
+          className="hidden items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-transform hover:scale-[1.02] sm:inline-flex"
+        >
+          <Zap className="size-3.5" /> Quick Play
+        </Link> 
+
         <div className="hidden items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 md:flex">
           <span className="relative grid size-1.5 place-items-center">
             <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/50" />
@@ -116,20 +125,15 @@ export function TopBar() {
           </span>
         </div>
 
-        <Link
-          to="/app/play"
-          className="hidden items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-transform hover:scale-[1.02] sm:inline-flex"
-        >
-          <Zap className="size-3.5" /> Quick Play
-        </Link>
+       
 
-        <button
+        {/* <button
           className="relative grid size-9 place-items-center rounded-lg border border-white/10 text-muted-foreground hover:text-foreground"
           aria-label="Notifications"
         >
           <Bell className="size-4" />
           <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-foreground" />
-        </button>
+        </button> */}
 
         <div ref={profileRef} className="relative">
           <button
@@ -155,7 +159,7 @@ export function TopBar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -6, scale: 0.98 }}
                 transition={{ duration: 0.14 }}
-                className="glass-strong absolute right-0 top-11 z-50 w-64 rounded-xl p-2"
+                className=" glass-strong absolute right-0 top-11 z-50 w-64 rounded-xl p-2"
               >
                 <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
                   <div className="grid size-9 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-white/30 to-white/5 text-xs font-semibold ring-1 ring-white/10">
@@ -197,7 +201,7 @@ export function TopBar() {
                       label="Profile"
                       onClick={() => closeAndNavigate("/app/profile")}
                     />
-                    <DropdownItem
+                    {/* <DropdownItem
                       icon={SlidersHorizontal}
                       label="Preferences"
                       onClick={() => closeAndNavigate("/app/settings")}
@@ -210,7 +214,7 @@ export function TopBar() {
                           Dark
                         </span>
                       }
-                    />
+                    /> */}
                     <DropdownItem
                       icon={Settings}
                       label="Settings"

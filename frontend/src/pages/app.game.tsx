@@ -6,7 +6,13 @@ import {
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { ChevronLeft, Pause, Flag } from "lucide-react";
+import { ChevronLeft, Pause, Flag, Clock, RotateCcw, Info } from "lucide-react";
+
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
 
 import { Board } from "@/components/game/board";
 import { GameInfoPanel } from "@/components/game/game-info-panel";
@@ -14,6 +20,7 @@ import { GameStatusPanel } from "@/components/game/game-status-panel";
 import { MoveHistoryPanel } from "@/components/game/move-history-panel";
 import { ResultModal, type GameOutcome } from "@/components/game/result-modal";
 import { RematchModal } from "@/components/game/rematch-modal";
+import { SinglePlayerPanel } from "@/components/game/single-player-panel";
 import {
   defaultConfig,
   normalizeMatchConfig,
@@ -26,6 +33,7 @@ import {
 import { useGameState, usePlayMove, useResetGame } from "@/hooks/game";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { PRESET_AVATARS } from "@/lib/avatar-presets";
 import { audioManager } from "@/services/audio/AudioManager";
 
 type BackendSymbol = "X" | "O";
@@ -161,8 +169,22 @@ function GamePage() {
   const [lastMove, setLastMove] = useState<number | null>(null);
   const [serverState, setServerState] = useState<BackendGameState | null>(null);
   const [startedAt, setStartedAt] = useState<number>(() => Date.now());
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [resultOpen, setResultOpen] = useState(false);
   const [outcome, setOutcome] = useState<GameOutcome>("draw");
+  const [showConfigTooltip, setShowConfigTooltip] = useState(false);
+
+  const [timeLeftX, setTimeLeftX] = useState<number>(config.timerDuration);
+  const [timeLeftO, setTimeLeftO] = useState<number>(config.timerDuration);
+
+  useEffect(() => {
+    const updateElapsed = () => {
+      setElapsedSeconds(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
+    };
+    updateElapsed();
+    const interval = setInterval(updateElapsed, 1000);
+    return () => clearInterval(interval);
+  }, [startedAt]);
 
   const [rematchPending, setRematchPending] = useState(false);
   const [incomingRematch, setIncomingRematch] = useState<{
@@ -219,6 +241,7 @@ function GamePage() {
   } = useGameState(matchId);
   const [isPlayingMove, setIsPlayingMove] = useState(false);
   const [isResettingGame, setIsResettingGame] = useState(false);
+  const resetGameMutation = useResetGame();
   const { socket, connect } = useSocketStore();
 
   useEffect(() => {
@@ -369,6 +392,62 @@ function GamePage() {
   }, [config.mode, config.playerSymbol, localPlayerId, serverState]);
 
   const status = statusFromState(serverState, actualSymbol);
+
+  // Sync / Reset timers when config.timerDuration or matchId changes
+  useEffect(() => {
+    setTimeLeftX(config.timerDuration);
+    setTimeLeftO(config.timerDuration);
+  }, [config.timerDuration, matchId]);
+
+  // Handle Timeout Loss
+  const handleTimeoutLoss = useCallback(
+    (timedOutPlayer: Player) => {
+      const isMeTimedOut = timedOutPlayer === actualSymbol;
+      audioManager.play("defeat");
+      setOutcome(isMeTimedOut ? "loss" : "win");
+      setResultOpen(true);
+
+      if (matchId) {
+        const winner = timedOutPlayer === "x" ? "o" : "x";
+        socket?.emit("finish-match", {
+          matchId,
+          roomCode,
+          winner,
+          reason: "timeout",
+        });
+      }
+    },
+    [actualSymbol, matchId, roomCode, socket],
+  );
+
+  // Active turn countdown interval
+  useEffect(() => {
+    if (config.timerDuration <= 0 || status !== "playing" || resultOpen) return;
+
+    const interval = setInterval(() => {
+      if (turn === "x") {
+        setTimeLeftX((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            handleTimeoutLoss("x");
+            return 0;
+          }
+          return prev - 1;
+        });
+      } else {
+        setTimeLeftO((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            handleTimeoutLoss("o");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [turn, status, resultOpen, config.timerDuration, handleTimeoutLoss]);
   const winner = serverState?.winner ? toPlayer(serverState.winner) : null;
   const tokensX =
     serverState?.players?.X?.reclaimTokens ?? config.reclaimTokens;
@@ -521,6 +600,35 @@ function GamePage() {
     };
   }, [config.mode, serverState, localPlayerId]);
 
+  const dynamicAvatars = useMemo(() => {
+    const playerAvatar = user?.avatar ?? PRESET_AVATARS[0]?.dataUrl;
+    let opponentAvatar: string | null = null;
+
+    if (config.mode === "smart" || config.mode === "perfect") {
+      opponentAvatar = PRESET_AVATARS[1]?.dataUrl ?? null; // Quantum Core Bot Avatar
+    } else if (config.mode === "local") {
+      opponentAvatar = PRESET_AVATARS[3]?.dataUrl ?? null; // Nebula Core Circles Avatar
+    } else if (config.mode === "multiplayer") {
+      const participants = serverState?.match?.metadata?.participants;
+      if (Array.isArray(participants)) {
+        const otherPlayer = participants.find((p: any) => p.id !== localPlayerId);
+        if (otherPlayer?.avatar || otherPlayer?.avatarUrl) {
+          opponentAvatar = otherPlayer.avatar ?? otherPlayer.avatarUrl;
+        }
+      }
+      if (!opponentAvatar) {
+        opponentAvatar = PRESET_AVATARS[2]?.dataUrl ?? null;
+      }
+    } else {
+      opponentAvatar = PRESET_AVATARS[2]?.dataUrl ?? null;
+    }
+
+    return {
+      player: playerAvatar,
+      opponent: opponentAvatar,
+    };
+  }, [user?.avatar, config.mode, serverState, localPlayerId]);
+
   const turnLabel = useMemo(() => {
     if (config.mode === "local") {
       return turn === "x" ? "Crosses" : "Circles";
@@ -657,8 +765,8 @@ function GamePage() {
   const handleReset = async () => {
     const resetStartedAt = Date.now();
 
-    if (matchId) {
-      if (config.mode === "multiplayer") {
+    if (config.mode === "multiplayer") {
+      if (matchId) {
         setResultOpen(false);
         setRematchPending(true);
         socket?.emit("match:rematch-request", {
@@ -667,26 +775,32 @@ function GamePage() {
           senderId: localPlayerId,
           senderName: user?.username ?? "Opponent",
         });
-        return;
       }
+      return;
+    }
 
-      setIsResettingGame(true);
-      socket?.emit(
-        "match:rematch",
-        { roomCode, matchId },
-        (response: any) => {
-          setIsResettingGame(false);
+    setIsResettingGame(true);
+
+    try {
+      if (matchId) {
+        try {
+          const response = await resetGameMutation.mutateAsync(matchId);
+          const resAny = response as any;
           const newMatchId =
-            response?.data?.id ??
-            response?.data?.matchId ??
-            response?.data?.match?.id;
+            resAny?.data?.id ??
+            resAny?.data?.matchId ??
+            resAny?.data?.match?.id ??
+            resAny?.id;
 
-          if (response?.success && newMatchId) {
+          if (newMatchId && newMatchId !== matchId) {
             setCells(Array(total).fill(null));
             setMoves([]);
             setLastMove(null);
+            setTurn(config.startingPlayer);
             setServerState(null);
-            setStartedAt(Date.now());
+            setTimeLeftX(config.timerDuration);
+            setTimeLeftO(config.timerDuration);
+            setStartedAt(resetStartedAt);
             setResultOpen(false);
 
             void navigate({
@@ -697,22 +811,25 @@ function GamePage() {
                 roomCode,
               } as any,
             });
-          } else {
-            console.error(response?.error?.message ?? "Unable to restart match.");
+            return;
           }
-        },
-      );
-      return;
-    } else {
+        } catch (err) {
+          console.warn("Reset game API warning:", err);
+        }
+      }
+    } finally {
+      // Local fallback reset (for offline / local PvP or if match API fails)
       setCells(Array(total).fill(null));
       setMoves([]);
       setLastMove(null);
       setTurn(config.startingPlayer);
       setServerState(null);
+      setTimeLeftX(config.timerDuration);
+      setTimeLeftO(config.timerDuration);
+      setStartedAt(resetStartedAt);
+      setResultOpen(false);
+      setIsResettingGame(false);
     }
-
-    setStartedAt(resetStartedAt);
-    setResultOpen(false);
   };
 
   const handleAcceptRematch = () => {
@@ -801,43 +918,122 @@ function GamePage() {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-3"
     >
-      <div className="glass flex items-center justify-between rounded-2xl px-4 py-2.5">
+      <div className="glass-pure flex items-center justify-between gap-1.5 sm:gap-2 rounded-2xl px-3 py-2 sm:px-4">
         <button
           onClick={handleLeaveMatch}
-          className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/4 px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-white/6 hover:text-foreground"
+          className="inline-flex items-center gap-1 sm:gap-1.5 rounded-md border border-white/10 bg-white/4 px-2 py-1 sm:px-2.5 sm:py-1.5 text-xs text-muted-foreground hover:bg-white/6 hover:text-foreground shrink-0 transition-all"
         >
-          <ChevronLeft className="size-3.5" /> Leave match
+          <ChevronLeft className="size-3.5" />
+          <span className="hidden sm:inline">Leave match</span>
+          <span className="sm:hidden">Leave</span>
         </button>
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          Match - {config.boardSize}x{config.boardSize} - {config.mode}
+
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <div className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.22em] text-muted-foreground truncate max-w-[120px] xs:max-w-[160px] sm:max-w-none">
+            Match - {config.boardSize}x{config.boardSize} - {config.mode}
+          </div>
+
+          <div className="relative group">
+            <button
+              type="button"
+              onClick={() => setShowConfigTooltip((prev) => !prev)}
+              onBlur={() => setTimeout(() => setShowConfigTooltip(false), 200)}
+              className="grid size-5 place-items-center rounded-full border border-white/10 bg-white/5 text-muted-foreground hover:border-white/20 hover:bg-white/10 hover:text-foreground transition-all cursor-pointer"
+              aria-label="Match Configuration"
+            >
+              <Info className="size-3" />
+            </button>
+
+            {/* Hover & Touch Tap Tooltip / Card */}
+            <div
+              className={`absolute left-1/2 top-full mt-2 -translate-x-1/2 z-50 w-60 max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-black/95 p-3 sm:p-3.5 shadow-2xl backdrop-blur-md transition-all duration-200 ${
+                showConfigTooltip
+                  ? "opacity-100 pointer-events-auto"
+                  : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+              }`}
+            >
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary font-semibold mb-2 pb-1.5 border-b border-white/10 flex items-center justify-between">
+                <span>Match Configuration</span>
+                <span className="text-[9px] text-muted-foreground/80 uppercase">{config.mode}</span>
+              </div>
+              <div className="space-y-1.5 font-mono text-xs">
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>Board Size:</span>
+                  <span className="text-foreground font-medium">{config.boardSize} × {config.boardSize}</span>
+                </div>
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>Win Length:</span>
+                  <span className="text-foreground font-medium">{config.winLength} in a row</span>
+                </div>
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>Max Active Pieces:</span>
+                  <span className="text-foreground font-medium">{config.maxActivePieces}</span>
+                </div>
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>Reclaim Tokens:</span>
+                  <span className="text-foreground font-medium">{config.reclaimTokens}</span>
+                </div>
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>Timer Clock:</span>
+                  <span className="text-foreground font-medium">
+                    {config.timerDuration > 0 ? `${config.timerDuration}s` : "Unlimited"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>Starting Player:</span>
+                  <span className="text-foreground font-medium uppercase">Player {config.startingPlayer}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/4 px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground">
-            <Pause className="size-3.5" /> Pause
-          </button>
+
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleResign}
             disabled={status !== "playing"}
-            className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/4 px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1 sm:gap-1.5 rounded-md border border-white/10 bg-white/4 px-2 py-1 sm:px-2.5 sm:py-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            <Flag className="size-3.5" /> Resign
+            <Flag className="size-3.5" />
+            <span className="hidden sm:inline">Resign</span>
+            <span className="sm:hidden font-mono text-[10px]">Resign</span>
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[280px_minmax(0,1fr)_280px]">
-        <div className="order-2 xl:order-1">
+      {/* Layout Grid: Left (Opponent - Top on mobile, Left on laptop), Center (Board - Middle on mobile, Center on laptop), Right (Player - Bottom on mobile, Right on laptop) */}
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-[280px_minmax(0,1fr)_280px] items-stretch">
+        {/* Opponent Box: Top on mobile, Left on laptop */}
+        <div className="order-1 lg:order-1 flex flex-col justify-center">
+          {/* Previous GameInfoPanel (kept as comment) */}
+          {/* 
           <GameInfoPanel
             config={{ ...config, playerSymbol: actualSymbol }}
             playerName={dynamicNames.player}
             opponentName={dynamicNames.opponent}
             turn={turn}
+            timeLeftX={timeLeftX}
+            timeLeftO={timeLeftO}
+          />
+          */}
+          <SinglePlayerPanel
+            name={dynamicNames.opponent}
+            symbol={actualSymbol === "x" ? "o" : "x"}
+            active={turn !== actualSymbol}
+            timeLeft={actualSymbol === "x" ? timeLeftO : timeLeftX}
+            hasTimer={config.timerDuration > 0}
+            activePieces={actualSymbol === "x" ? counts.o : counts.x}
+            maxActivePieces={config.maxActivePieces}
+            reclaimTokens={actualSymbol === "x" ? tokensO : tokensX}
+            maxReclaimTokens={config.reclaimTokens}
+            avatarUrl={dynamicAvatars.opponent}
           />
         </div>
 
-        <div className="order-1 xl:order-2">
+        {/* Center Column: Board */}
+        <div className="order-2 lg:order-2 flex flex-col items-center justify-center">
           <Board
             size={config.boardSize}
             cells={cells}
@@ -851,17 +1047,32 @@ function GamePage() {
             tokensX={tokensX}
             tokensO={tokensO}
           />
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-            <button
-              onClick={() => void handleReset()}
-              className="rounded-md border border-white/10 bg-white/3 px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-white/6 hover:text-foreground"
+          <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-2.5">
+            <div
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/3 px-2.5 py-1 text-[11px] font-mono text-muted-foreground shadow-sm"
+              title="Total match duration"
             >
-              Reset board
-            </button>
+              <Clock className="size-3 text-muted-foreground/80" />
+              <span>{formatDuration(elapsedSeconds)}</span>
+            </div>
+
+            {config.mode !== "multiplayer" && (
+              <button
+                onClick={() => void handleReset()}
+                disabled={isResettingGame}
+                className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/3 px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-white/6 hover:text-foreground transition-all disabled:opacity-50"
+              >
+                <RotateCcw className="size-3" />
+                <span>{isResettingGame ? "Resetting..." : "Reset board"}</span>
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="order-3">
+        {/* Player Box: Bottom on mobile, Right on laptop */}
+        <div className="order-3 lg:order-3 flex flex-col justify-center">
+          {/* Previous GameStatusPanel (kept as comment) */}
+          {/* 
           <GameStatusPanel
             key={startedAt}
             turn={turn}
@@ -877,10 +1088,24 @@ function GamePage() {
             startedAt={startedAt}
             turnLabel={turnLabel}
           />
+          */}
+          <SinglePlayerPanel
+            name={dynamicNames.player}
+            symbol={actualSymbol}
+            active={turn === actualSymbol}
+            timeLeft={actualSymbol === "x" ? timeLeftX : timeLeftO}
+            hasTimer={config.timerDuration > 0}
+            activePieces={actualSymbol === "x" ? counts.x : counts.o}
+            maxActivePieces={config.maxActivePieces}
+            reclaimTokens={actualSymbol === "x" ? tokensX : tokensO}
+            maxReclaimTokens={config.reclaimTokens}
+            avatarUrl={dynamicAvatars.player}
+            you
+          />
         </div>
       </div>
 
-      <MoveHistoryPanel moves={moves} currentMove={moves.length - 1} />
+      {/* <MoveHistoryPanel moves={moves} currentMove={moves.length - 1} /> */}
 
       <ResultModal
         open={resultOpen}

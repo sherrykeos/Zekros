@@ -28,9 +28,9 @@ export function MultiplayerPanel({
         title="Custom Rooms"
         description="Create a room, join with a code, or rejoin a recent lobby."
         action={
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[8px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
             <span
-              className={`size-1.5 rounded-full ${connection.online ? "bg-bone" : "bg-smoke"}`}
+              className={`size-2 rounded-full ${connection.online ? "bg-bone" : "bg-smoke"}`}
             />
             {connection.online ? `Online · ${connection.latency}ms` : "Offline"}
           </div>
@@ -75,7 +75,7 @@ export function MultiplayerPanel({
               onChange={(e) =>
                 setCode(e.target.value.toUpperCase().slice(0, 7))
               }
-              placeholder="ZK-XXXX"
+              placeholder="XXXXXX"
               className="h-10 flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-3 font-mono text-sm uppercase tracking-[0.18em] text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-white/20"
             />
             <button

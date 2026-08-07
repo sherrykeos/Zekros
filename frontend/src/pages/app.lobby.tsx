@@ -79,6 +79,9 @@ function LobbyPage() {
   const [maxActivePieces, setMaxActivePieces] = useState<number>(3);
   const [reclaimTokens, setReclaimTokens] = useState<number>(3);
   const [playerSymbol, setPlayerSymbol] = useState<"x" | "o">("x");
+  const [timerDuration, setTimerDuration] = useState<number>(120);
+  const [customTimerMinutes, setCustomTimerMinutes] = useState<number>(3);
+  const [isCustomTimer, setIsCustomTimer] = useState<boolean>(false);
   const [joinCodeInput, setJoinCodeInput] = useState("");
   const [roomError, setRoomError] = useState<string | null>(null);
 
@@ -231,6 +234,7 @@ function LobbyPage() {
         maxActivePieces,
         playerSymbol,
         startingPlayer: playerSymbol,
+        timerDuration: isCustomTimer ? customTimerMinutes * 60 : timerDuration,
       });
 
       const result = await createRoom({
@@ -451,7 +455,7 @@ function LobbyPage() {
         >
           <ChevronLeft className="size-3.5" /> Back to play
         </Link>
-        <div className="w-full glass rounded-3xl border border-white/10 p-6 sm:p-8 space-y-8 bg-background/80 shadow-2xl backdrop-blur-xl">
+        <div className="w-full glass rounded-3xl border border-white/10 p-4 sm:p-8 space-y-6 sm:space-y-8 bg-background/80 shadow-2xl backdrop-blur-xl">
           <div className="text-center space-y-2">
             <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">
               Multiplayer Setup
@@ -468,9 +472,9 @@ function LobbyPage() {
                 setTab("create");
                 setRoomError(null);
               }}
-              className={`flex-1 py-3 text-xs sm:text-sm font-medium tracking-wide transition-all rounded-xl ${
+              className={`flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-medium tracking-wide transition-all rounded-xl ${
                 tab === "create"
-                  ? "bg-white/[0.08] text-foreground shadow-sm"
+                  ? "bg-white/[0.08] text-foreground shadow-sm font-semibold"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -481,9 +485,9 @@ function LobbyPage() {
                 setTab("join");
                 setRoomError(null);
               }}
-              className={`flex-1 py-3 text-xs sm:text-sm font-medium tracking-wide transition-all rounded-xl ${
+              className={`flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-medium tracking-wide transition-all rounded-xl ${
                 tab === "join"
-                  ? "bg-white/[0.08] text-foreground shadow-sm"
+                  ? "bg-white/[0.08] text-foreground shadow-sm font-semibold"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -498,22 +502,22 @@ function LobbyPage() {
           )}
 
           {tab === "create" ? (
-            <div className="space-y-8 pt-2">
+            <div className="space-y-6 sm:space-y-8 pt-2">
               {/* Board Size */}
-              <div className="flex justify-between items-center px-2 py-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 sm:px-2 py-1 sm:py-2">
                 <div className="flex items-center gap-2">
                   <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Board Size
                   </label>
                   <InfoTooltip info={GAME_INFO.boardSize} />
                 </div>
-                <div className="flex justify-center gap-3">
+                <div className="flex justify-center gap-2 sm:gap-3">
                   {[3, 4, 5].map((size) => (
                     <button
                       key={size}
                       type="button"
                       onClick={() => setBoardSize(size)}
-                      className={`px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+                      className={`flex-1 sm:flex-none px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all ${
                         boardSize === size
                           ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
                           : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground"
@@ -526,20 +530,20 @@ function LobbyPage() {
               </div>
 
               {/* Max Active Pieces */}
-              <div className="flex justify-between items-center px-2 py-2">
-                <div className="flex flex-col items-start gap-0.5">
-                  <div className="flex items-center gap-2">
-                    <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <div className="flex flex-row items-center justify-between gap-3 px-1 sm:px-2 py-1 sm:py-2">
+                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <label className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] text-muted-foreground truncate">
                       Max Active Pieces
                     </label>
                     <InfoTooltip info={GAME_INFO.maxActivePieces} />
                   </div>
-                  <span className="font-mono text-xs text-muted-foreground/70">
+                  <span className="font-mono text-[10px] sm:text-xs text-muted-foreground/70">
                     {boardSize === 3 ? "Fixed (3)" : `${minActive} – ${maxActive}`}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-center gap-5">
+                <div className="flex items-center justify-center gap-3 sm:gap-5 shrink-0">
                   <button
                     type="button"
                     onClick={() =>
@@ -550,7 +554,7 @@ function LobbyPage() {
                   >
                     <Minus className="size-3.5" />
                   </button>
-                  <span className="font-display text-2xl sm:text-3xl font-semibold w-10 text-center text-foreground">
+                  <span className="font-display text-xl sm:text-3xl font-semibold w-8 sm:w-10 text-center text-foreground">
                     {maxActivePieces}
                   </span>
                   <button
@@ -567,20 +571,20 @@ function LobbyPage() {
               </div>
 
               {/* Reclaim Tokens */}
-              <div className="flex justify-between items-center px-2 py-2">
-                <div className="flex flex-col items-start gap-0.5">
-                  <div className="flex items-center gap-2">
-                    <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <div className="flex flex-row items-center justify-between gap-3 px-1 sm:px-2 py-1 sm:py-2">
+                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <label className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.22em] text-muted-foreground truncate">
                       Reclaim Tokens
                     </label>
                     <InfoTooltip info={GAME_INFO.reclaimTokens} />
                   </div>
-                  <span className="font-mono text-xs text-muted-foreground/70">
+                  <span className="font-mono text-[10px] sm:text-xs text-muted-foreground/70">
                     0 – 10
                   </span>
                 </div>
 
-                <div className="flex items-center justify-center gap-5">
+                <div className="flex items-center justify-center gap-3 sm:gap-5 shrink-0">
                   <button
                     type="button"
                     onClick={() => setReclaimTokens((prev) => Math.max(0, prev - 1))}
@@ -589,7 +593,7 @@ function LobbyPage() {
                   >
                     <Minus className="size-3.5" />
                   </button>
-                  <span className="font-display text-2xl sm:text-3xl font-semibold w-10 text-center text-foreground">
+                  <span className="font-display text-xl sm:text-3xl font-semibold w-8 sm:w-10 text-center text-foreground">
                     {reclaimTokens}
                   </span>
                   <button
@@ -604,20 +608,20 @@ function LobbyPage() {
               </div>
 
               {/* Player Symbol */}
-              <div className="flex justify-between items-center px-2 py-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 sm:px-2 py-1 sm:py-2">
                 <div className="flex items-center gap-2">
                   <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Player Symbol
                   </label>
                   <InfoTooltip info={GAME_INFO.playerSymbol} />
                 </div>
-                <div className="flex justify-center gap-3">
+                <div className="flex justify-center gap-2 sm:gap-3">
                   {(["x", "o"] as const).map((sym) => (
                     <button
                       key={sym}
                       type="button"
                       onClick={() => setPlayerSymbol(sym)}
-                      className={`px-5 py-2.5 rounded-xl border font-mono font-bold text-sm uppercase transition-all ${
+                      className={`flex-1 sm:flex-none px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl border font-mono font-bold text-xs sm:text-sm uppercase transition-all ${
                         playerSymbol === sym
                           ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
                           : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground"
@@ -627,6 +631,111 @@ function LobbyPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Time Control (Chess Clock) */}
+              <div className="space-y-3 pt-2">
+                <div className="flex justify-between items-center">
+                  <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    Time Control
+                  </label>
+                  <span className="font-mono text-[10px] text-muted-foreground/70">
+                    Per Player
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: "Unlimited", duration: 0 },
+                    { label: "2 Min", duration: 120 },
+                    { label: "5 Min", duration: 300 },
+                  ].map((item) => (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => {
+                        setIsCustomTimer(false);
+                        setTimerDuration(item.duration);
+                      }}
+                      className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
+                        !isCustomTimer && timerDuration === item.duration
+                          ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                          : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCustomTimer(true);
+                      if (customTimerMinutes <= 0) setCustomTimerMinutes(3);
+                    }}
+                    className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
+                      isCustomTimer
+                        ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                        : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Custom
+                  </button>
+                </div>
+
+                {isCustomTimer && (
+                  <div className="flex items-center justify-between gap-4 mt-2 bg-white/[0.03] p-3 rounded-2xl border border-white/10 shadow-inner">
+                    <div className="flex flex-col">
+                      <span className="text-xs font-medium text-foreground">
+                        Custom Duration
+                      </span>
+                      <span className="text-[10px] font-mono text-muted-foreground">
+                        {customTimerMinutes * 60} seconds total
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCustomTimerMinutes((prev) => Math.max(1, prev - 1))
+                        }
+                        disabled={customTimerMinutes <= 1}
+                        className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/10 bg-white/5 rounded-xl text-foreground transition-all disabled:opacity-30 disabled:pointer-events-none"
+                      >
+                        <Minus className="size-3.5" />
+                      </button>
+
+                      <div className="flex items-center justify-center gap-1 min-w-[64px]">
+                        <input
+                          type="number"
+                          min={1}
+                          max={60}
+                          value={customTimerMinutes}
+                          onChange={(e) =>
+                            setCustomTimerMinutes(
+                              Math.max(1, Math.min(60, parseInt(e.target.value) || 1)),
+                            )
+                          }
+                          className="w-10 py-1 text-center bg-white/5 border border-white/10 rounded-lg text-sm font-mono font-bold text-foreground focus:outline-none focus:border-primary"
+                        />
+                        <span className="text-xs font-mono text-muted-foreground font-semibold">
+                          m
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCustomTimerMinutes((prev) => Math.min(60, prev + 1))
+                        }
+                        disabled={customTimerMinutes >= 60}
+                        className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/10 bg-white/5 rounded-xl text-foreground transition-all disabled:opacity-30 disabled:pointer-events-none"
+                      >
+                        <Plus className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button
@@ -648,9 +757,17 @@ function LobbyPage() {
                   maxLength={10}
                   placeholder="ZK-XXXX"
                   value={joinCodeInput}
-                  onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
+                  onChange={(e) => {
+                    setJoinCodeInput(e.target.value.toUpperCase());
+                    setRoomError(null);
+                  }}
                   className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-center font-mono text-2xl tracking-[0.25em] text-foreground focus:outline-none focus:border-primary/50 transition-colors"
                 />
+                {roomError && (
+                  <div className="mt-3 text-center text-xs font-medium text-red-500/90 bg-red-500/10 py-2 rounded-lg border border-red-500/20">
+                    {roomError}
+                  </div>
+                )}
               </div>
 
               <button

@@ -30,7 +30,7 @@ export const Route = createFileRoute("/app/play")({
   component: PlayPage,
 });
 
-const MULTIPLAYER_IDS = new Set(["quick", "create", "join", "multiplayer"]);
+const MULTIPLAYER_IDS = new Set(["create", "join", "multiplayer"]);
 
 function PlayPage() {
   const [openCreate, setOpenCreate] = useState(false);

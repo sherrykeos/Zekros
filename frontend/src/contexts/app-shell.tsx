@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useLocation } from "@tanstack/react-router";
 
 type ShellState = {
   sidebarCollapsed: boolean;
@@ -23,6 +24,21 @@ export function AppShellProvider({ children }: { children: ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [rightOpen, setRightOpen] = useState(true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    if (
+      path.includes("/setup") ||
+      path.includes("/lobby") ||
+      path.includes("/game") 
+    ) {
+      setSidebarCollapsed(true);
+    } else if (typeof window !== "undefined" && window.innerWidth >= 1024) {
+      setSidebarCollapsed(false);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const onResize = () => {

@@ -104,7 +104,26 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    scrollbar-color: #504b49 #1a1a1a;
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.45);
   }
 
   body {
@@ -148,11 +167,18 @@
 }
 
 @utility glass-strong {
-  background: linear-gradient(180deg, oklch(1 0 0 / 0.08), oklch(1 0 0 / 0.03));
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.2), oklch(1 0 0 / 0.03));
   backdrop-filter: blur(28px) saturate(160%);
-  border: 1px solid oklch(1 0 0 / 0.1);
+  border: 1px solid oklch(1 0 0 / 0.2);
   box-shadow: var(--shadow-glass);
 }
+
+@utility glass-pure {
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.01), oklch(1 0 0 / 0.003));
+  backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid oklch(1 0 0 / 0.01);
+  box-shadow: var(--shadow-glass);}
+
 
 @utility text-gradient {
   background: linear-gradient(180deg, oklch(1 0 0) 0%, oklch(0.72 0 0) 100%);

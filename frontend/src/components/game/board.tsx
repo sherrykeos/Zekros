@@ -86,7 +86,7 @@ export function Board({
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mx-auto aspect-square w-full max-w-[min(72vh,700px)]"
+        className="relative mx-auto aspect-square w-full max-w-[min(85vw,48vh,420px)] lg:max-w-[min(70vh,600px)]"
       >
         <div className="absolute inset-0 rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-transparent p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_30px_90px_-35px_rgba(0,0,0,0.85)]">
           <div

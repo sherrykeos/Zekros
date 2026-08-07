@@ -34,7 +34,12 @@ function SignUpPage() {
   const [showPw, setShowPw] = useState(false);
 
   const handleGoogleLogin = () => {
-    const apiBaseUrl = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
+    const apiBaseUrl =
+      typeof window !== "undefined" &&
+      window.location.hostname !== "localhost" &&
+      window.location.hostname !== "127.0.0.1"
+        ? `http://${window.location.hostname}:5000/api`
+        : import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
     window.location.href = `${apiBaseUrl}/auth/google`;
   };
 

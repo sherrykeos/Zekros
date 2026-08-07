@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll } from "motion/react";
 import { useEffect, useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { dispatchPlayNow } from "@/contexts/play-entry";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { APP_CONSTANTS } from "@/constants/appConstants";
 
 function initials(name?: string | null) {
   if (!name) return "ZK";
@@ -50,7 +51,7 @@ export function Navigation() {
         <Link to="/" className="flex items-center gap-2.5">
           <Logo />
           <span className="font-display text-sm font-semibold tracking-[0.18em]">
-            ZEKROS
+            {APP_CONSTANTS.app.name}
           </span>
         </Link>
 
@@ -165,7 +166,7 @@ export function Navigation() {
 function Logo() {
   return (
     <div className="relative grid size-7 place-items-center rounded-md bg-gradient-to-br from-white/95 to-white/60 text-[10px] font-bold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.1)]">
-      Z
+      {APP_CONSTANTS.app.symbol}
     </div>
   );
 }

@@ -79,24 +79,24 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+import { APP_CONSTANTS, getPageTitle } from "@/constants/appConstants";
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
     head: () => ({
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "ZEKROS â€” Strategy, evolved." },
+        { title: getPageTitle() },
         {
           name: "description",
-          content:
-            "ZEKROS by ZEROTH Labs. A premium real-time strategy game built on adaptive boards, vanishing pieces, and decisions that compound.",
+          content: `${APP_CONSTANTS.app.name} by ${APP_CONSTANTS.company.name}. ${APP_CONSTANTS.app.description.short}`,
         },
-        { name: "author", content: "ZEROTH Labs" },
-        { property: "og:title", content: "ZEKROS â€” Strategy, evolved." },
+        { name: "author", content: APP_CONSTANTS.company.name },
+        { property: "og:title", content: getPageTitle() },
         {
           property: "og:description",
-          content:
-            "A premium real-time strategy game built on adaptive boards and decisions that compound.",
+          content: APP_CONSTANTS.app.description.short,
         },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },

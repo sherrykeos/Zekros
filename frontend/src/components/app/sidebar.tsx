@@ -16,6 +16,8 @@ import {
 import { useAppShell } from "@/contexts/app-shell";
 import type { ComponentType } from "react";
 
+import { APP_CONSTANTS } from "@/constants/appConstants";
+
 type NavItem = {
   to: string;
   label: string;
@@ -66,14 +68,14 @@ function SidebarInner({
     <div className="flex h-full flex-col">
       <div className="flex h-14 items-center gap-2.5 px-4">
         <div className="grid size-7 shrink-0 place-items-center rounded-md bg-gradient-to-br from-white/95 to-white/60 text-[10px] font-bold text-black">
-          Z
+          {APP_CONSTANTS.app.symbol}
         </div>
         {!collapsed && (
           <a
             href="/"
             className="font-display text-sm font-semibold tracking-[0.18em]"
           >
-            ZEKROS
+            {APP_CONSTANTS.app.name}
           </a>
         )}
       </div>
@@ -200,25 +202,26 @@ function SidebarInner({
       <div className="hairline mx-3" />
 
       <div className="p-3">
-        <div
-          className={`glass rounded-xl p-3 ${collapsed ? "text-center" : ""}`}
-        >
-          {!collapsed ? (
-            <>
-              <div className="flex items-center gap-2">
-                <span className="relative grid size-2 place-items-center">
+        <div className="p-2 text-center overflow-hidden">
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                {/* <span className="relative grid size-2 place-items-center">
                   <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/60" />
                   <span className="relative size-2 rounded-full bg-emerald-400" />
+                </span> */}
+                <span className="text-xs font-medium text-muted-foreground">
+                  Version : {APP_CONSTANTS.version.version} · {APP_CONSTANTS.version.stage}
                 </span>
-                <span className="text-xs font-medium">v0.1 · Preview</span>
-              </div>
-              <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
-                Early access build. Expect rough edges.
-              </p>
-            </>
-          ) : (
-            <span className="block size-2 rounded-full bg-emerald-400" />
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

@@ -9,20 +9,20 @@ import { FAQ } from "@/components/site/faq";
 import { CTA } from "@/components/site/cta";
 import { Footer } from "@/components/site/footer";
 
+import { APP_CONSTANTS, getPageTitle } from "@/constants/appConstants";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ZEKROS — Strategy, evolved. By ZEROTH Labs" },
+      { title: `${getPageTitle()}. By ${APP_CONSTANTS.company.name}` },
       {
         name: "description",
-        content:
-          "ZEKROS is a real-time strategy game built on adaptive boards, vanishing pieces, and decisions that compound. A premium experience by ZEROTH Labs.",
+        content: `${APP_CONSTANTS.app.description.short} A premium experience by ${APP_CONSTANTS.company.name}.`,
       },
-      { property: "og:title", content: "ZEKROS — Strategy, evolved." },
+      { property: "og:title", content: getPageTitle() },
       {
         property: "og:description",
-        content:
-          "A real-time strategy game built on adaptive boards and decisions that compound.",
+        content: APP_CONSTANTS.app.description.short,
       },
     ],
   }),

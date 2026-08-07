@@ -75,6 +75,9 @@ function SetupPage() {
   const [boardSize, setBoardSize] = useState<BoardSize>(3);
   const [maxActivePieces, setMaxActivePieces] = useState<number>(3);
   const [reclaimTokens, setReclaimTokens] = useState<number>(3);
+  const [timerDuration, setTimerDuration] = useState<number>(120);
+  const [customTimerMinutes, setCustomTimerMinutes] = useState<number>(3);
+  const [isCustomTimer, setIsCustomTimer] = useState<boolean>(false);
 
   const [isLaunching, setIsLaunching] = useState(false);
   const isStarting =
@@ -104,6 +107,7 @@ function SetupPage() {
       maxActivePieces,
       playerSymbol: "x",
       startingPlayer: "x",
+      timerDuration: isCustomTimer ? customTimerMinutes * 60 : timerDuration,
     };
 
     const normalizedConfig = normalizeMatchConfig(config);
@@ -196,7 +200,7 @@ function SetupPage() {
         >
           <ChevronLeft className="size-3.5" /> Back to play
         </Link>
-        <div className="w-full glass rounded-3xl border border-white/10 p-6 sm:p-8 space-y-8 bg-background/80 shadow-2xl backdrop-blur-xl">
+        <div className="w-full glass rounded-3xl border border-white/10 p-4 sm:p-8 space-y-6 sm:space-y-8 bg-background/80 shadow-2xl backdrop-blur-xl">
           {/* Header */}
           <div className="text-center space-y-2">
             <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">
@@ -263,7 +267,7 @@ function SetupPage() {
                 <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground block text-center">
                   Bot Difficulty
                 </label>
-                <div className="flex justify-center gap-3">
+                <div className="flex flex-col xs:flex-row justify-center gap-2.5 sm:gap-3">
                   {[
                     {
                       id: "smart",
@@ -290,7 +294,7 @@ function SetupPage() {
                       )}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-semibold">{diff.label}</span>
+                        <span className="text-xs sm:text-sm font-semibold">{diff.label}</span>
                         <InfoTooltip info={GAME_INFO[diff.infoKey]} />
                       </div>
                       <span className="text-[10px] opacity-60 font-mono font-normal">
@@ -304,23 +308,23 @@ function SetupPage() {
           </AnimatePresence>
 
           {/* Game Configuration Options */}
-          <div className="space-y-8 pt-5 border-t border-white/5">
+          <div className="space-y-6 sm:space-y-8 pt-4 sm:pt-5 border-t border-white/5">
             {/* Board Size */}
-            <div className="flex justify-between items-center px-2 py-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 sm:px-2 py-1 sm:py-2">
               <div className="flex items-center gap-2">
                 <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   Board Size
                 </label>
                 <InfoTooltip info={GAME_INFO.boardSize} />
               </div>
-              <div className="flex justify-center gap-3">
+              <div className="flex justify-center gap-2 sm:gap-3">
                 {([3, 4, 5] as BoardSize[]).map((size) => (
                   <button
                     key={size}
                     type="button"
                     onClick={() => setBoardSize(size)}
                     className={cn(
-                      "px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all",
+                      "flex-1 sm:flex-none px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all",
                       boardSize === size
                         ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
                         : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground",
@@ -333,20 +337,20 @@ function SetupPage() {
             </div>
 
             {/* Max Active Pieces */}
-            <div className="flex justify-between items-center px-2 py-2">
-              <div className="flex flex-col items-start gap-0.5">
-                <div className="flex items-center gap-2">
-                  <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="flex flex-row items-center justify-between gap-3 px-1 sm:px-2 py-1 sm:py-2">
+              <div className="flex flex-col items-start gap-0.5 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <label className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] text-muted-foreground truncate">
                     Max Active Pieces
                   </label>
                   <InfoTooltip info={GAME_INFO.maxActivePieces} />
                 </div>
-                <span className="font-mono text-xs text-muted-foreground/70">
+                <span className="font-mono text-[10px] sm:text-xs text-muted-foreground/70">
                   {boardSize === 3 ? "Fixed (3)" : `${minActive} – ${maxActive}`}
                 </span>
               </div>
 
-              <div className="flex items-center justify-center gap-5">
+              <div className="flex items-center justify-center gap-3 sm:gap-5 shrink-0">
                 <button
                   type="button"
                   onClick={() =>
@@ -357,7 +361,7 @@ function SetupPage() {
                 >
                   <Minus className="size-3.5" />
                 </button>
-                <span className="font-display text-2xl sm:text-3xl font-semibold w-10 text-center text-foreground">
+                <span className="font-display text-xl sm:text-3xl font-semibold w-8 sm:w-10 text-center text-foreground">
                   {maxActivePieces}
                 </span>
                 <button
@@ -374,20 +378,20 @@ function SetupPage() {
             </div>
 
             {/* Reclaim Tokens */}
-            <div className="flex justify-between items-center px-2 py-2">
-              <div className="flex flex-col items-start gap-0.5">
-                <div className="flex items-center gap-2">
-                  <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="flex flex-row items-center justify-between gap-3 px-1 sm:px-2 py-1 sm:py-2">
+              <div className="flex flex-col items-start gap-0.5 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <label className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.22em] text-muted-foreground truncate">
                     Reclaim Tokens
                   </label>
                   <InfoTooltip info={GAME_INFO.reclaimTokens} />
                 </div>
-                <span className="font-mono text-xs text-muted-foreground/70">
+                <span className="font-mono text-[10px] sm:text-xs text-muted-foreground/70">
                   0 – 10
                 </span>
               </div>
 
-              <div className="flex items-center justify-center gap-5">
+              <div className="flex items-center justify-center gap-3 sm:gap-5 shrink-0">
                 <button
                   type="button"
                   onClick={() =>
@@ -398,7 +402,7 @@ function SetupPage() {
                 >
                   <Minus className="size-3.5" />
                 </button>
-                <span className="font-display text-2xl sm:text-3xl font-semibold w-10 text-center text-foreground">
+                <span className="font-display text-xl sm:text-3xl font-semibold w-8 sm:w-10 text-center text-foreground">
                   {reclaimTokens}
                 </span>
                 <button
@@ -412,6 +416,115 @@ function SetupPage() {
                   <Plus className="size-3.5" />
                 </button>
               </div>
+            </div>
+
+            {/* Time Control (Chess Clock) */}
+            <div className="flex flex-col gap-3 px-1 sm:px-2 py-1 sm:py-2 border-t border-white/5 pt-4 sm:pt-5">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <label className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Time Control
+                  </label>
+                </div>
+                <span className="font-mono text-xs text-muted-foreground/70">
+                  Per Player Clock
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                {[
+                  { label: "Unlimited", duration: 0 },
+                  { label: "2 Min", duration: 120 },
+                  { label: "5 Min", duration: 300 },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      setIsCustomTimer(false);
+                      setTimerDuration(item.duration);
+                    }}
+                    className={cn(
+                      "flex-1 py-2 px-3 rounded-xl border text-xs font-semibold transition-all",
+                      !isCustomTimer && timerDuration === item.duration
+                        ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                        : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustomTimer(true);
+                    if (customTimerMinutes <= 0) setCustomTimerMinutes(3);
+                  }}
+                  className={cn(
+                    "flex-1 py-2 px-3 rounded-xl border text-xs font-semibold transition-all",
+                    isCustomTimer
+                      ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                      : "border-white/[0.08] bg-white/[0.02] text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  Custom
+                </button>
+              </div>
+
+              {isCustomTimer && (
+                <div className="flex items-center justify-between gap-4 mt-2 bg-white/[0.03] p-3.5 rounded-2xl border border-white/10 shadow-inner">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-foreground">
+                      Custom Duration
+                    </span>
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      {customTimerMinutes * 60} seconds total
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCustomTimerMinutes((prev) => Math.max(1, prev - 1))
+                      }
+                      disabled={customTimerMinutes <= 1}
+                      className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/10 bg-white/5 rounded-xl text-foreground transition-all disabled:opacity-30 disabled:pointer-events-none"
+                    >
+                      <Minus className="size-3.5" />
+                    </button>
+
+                    <div className="flex items-center justify-center gap-1 min-w-[64px]">
+                      <input
+                        type="number"
+                        min={1}
+                        max={60}
+                        value={customTimerMinutes}
+                        onChange={(e) =>
+                          setCustomTimerMinutes(
+                            Math.max(1, Math.min(60, parseInt(e.target.value) || 1)),
+                          )
+                        }
+                        className="w-10 py-1 text-center bg-white/5 border border-white/10 rounded-lg text-sm font-mono font-bold text-foreground focus:outline-none focus:border-primary"
+                      />
+                      <span className="text-xs font-mono text-muted-foreground font-semibold">
+                        m
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCustomTimerMinutes((prev) => Math.min(60, prev + 1))
+                      }
+                      disabled={customTimerMinutes >= 60}
+                      className="w-8 h-8 flex items-center justify-center border border-white/10 hover:bg-white/10 bg-white/5 rounded-xl text-foreground transition-all disabled:opacity-30 disabled:pointer-events-none"
+                    >
+                      <Plus className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -1,3 +1,8 @@
+import {
+  APP_CONSTANTS,
+  getCopyrightString,
+} from "@/constants/appConstants";
+
 export function Footer() {
   const cols = [
     {
@@ -20,15 +25,15 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2.5">
               <div className="grid size-7 place-items-center rounded-md bg-gradient-to-br from-white/95 to-white/60 text-[10px] font-bold text-black">
-                Z
+                {APP_CONSTANTS.app.symbol}
               </div>
               <span className="font-display text-sm font-semibold tracking-[0.18em]">
-                ZEKROS
+                {APP_CONSTANTS.app.name}
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              A real-time strategy game by ZEROTH Labs. Designed for repeat
-              play.
+              A real-time strategy game by {APP_CONSTANTS.company.name}. Designed
+              for repeat play.
             </p>
           </div>
           {cols.map((c) => (
@@ -54,14 +59,13 @@ export function Footer() {
 
         <div className="hairline mt-14" />
         <div className="mt-6 flex flex-col items-start justify-between gap-3 text-xs text-muted-foreground sm:flex-row sm:items-center">
-          <div>
-            © {new Date().getFullYear()} ZEROTH Labs. All rights reserved.
-          </div>
+          <div>{getCopyrightString()}</div>
           <div className="font-mono uppercase tracking-[0.18em]">
-            v0.1 · Alpha
+            v{APP_CONSTANTS.version.version} · {APP_CONSTANTS.version.stage}
           </div>
         </div>
       </div>
     </footer>
   );
 }
+

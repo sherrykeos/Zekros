@@ -3,9 +3,11 @@ import { ArrowRight } from "lucide-react";
 import { HeroBoard } from "./hero-board";
 import { dispatchPlayNow } from "@/contexts/play-entry";
 
-const ease = [0.22, 1, 0.36, 1] as const;
+import { APP_CONSTANTS } from "@/constants/appConstants";
 
 export function Hero() {
+  const ease = [0.22, 1, 0.36, 1] as const;
+
   return (
     <section className="relative overflow-hidden px-4 pt-32 pb-16 md:pt-44 md:pb-24">
       {/* ambient halo */}
@@ -20,7 +22,7 @@ export function Hero() {
             className="glass inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs text-muted-foreground"
           >
             <span className="size-1.5 rounded-full bg-white/70" />
-            ZEROTH Labs · Now in private alpha
+            {APP_CONSTANTS.company.name} · Now in {APP_CONSTANTS.version.stage.toLowerCase()}
           </motion.div>
 
           <motion.h1
@@ -40,9 +42,7 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.15, ease }}
             className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg"
           >
-            ZEKROS is a real-time strategy game where boards adapt, pieces
-            vanish, and every move compounds. A minimal surface hiding a deep,
-            evolving lattice of decisions.
+            {APP_CONSTANTS.app.description.hero}
           </motion.p>
 
           <motion.div

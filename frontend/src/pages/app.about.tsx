@@ -13,32 +13,29 @@ import {
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { GlassPanel, SectionHeader } from "@/components/app/primitives";
+import {
+  APP_CONSTANTS,
+  getPageTitle,
+  getCopyrightString,
+} from "@/constants/appConstants";
 
 export const Route = createFileRoute("/app/about")({
-  head: () => ({ meta: [{ title: "About — ZEKROS" }] }),
+  head: () => ({ meta: [{ title: getPageTitle("About") }] }),
   component: AboutPage,
 });
 
 const FAQ = [
   {
-    q: "What is ZEKROS?",
-    a: "ZEKROS is a strategy game by ZEROTH Labs. It reimagines a classic grid duel with dynamic boards, disappearing pieces, and reclaim tokens — every match evolves under your decisions.",
+    q: `What is ${APP_CONSTANTS.app.name}?`,
+    a: `${APP_CONSTANTS.app.name} is a strategy game by ${APP_CONSTANTS.company.name}. It reimagines a classic grid duel with dynamic boards, disappearing pieces, and reclaim tokens — every match evolves under your decisions.`,
   },
   {
     q: "How are matches different from a normal grid duel?",
-    a: "Boards scale from 3×3 to 6×6, each player has a cap on active pieces, and the oldest piece vanishes once that cap is exceeded — pulling the board into constant motion.",
+    a: "Boards scale from 3×3 to 5×5, each player has a cap on active pieces, and the oldest piece vanishes once that cap is exceeded — pulling the board into constant motion.",
   },
   {
     q: "What are Reclaim Tokens?",
     a: "Reclaim Tokens let you remove one of your own pieces from the board on your turn instead of placing a new one — a tactical reset for clutch moments.",
-  },
-  {
-    q: "Can I play offline?",
-    a: "Yes. Local and AI matches run fully client-side. Multiplayer requires an account once the backend launches.",
-  },
-  {
-    q: "Is there a mobile version?",
-    a: "The full experience is responsive today. Native apps are on the roadmap after the web platform stabilizes.",
   },
 ];
 
@@ -55,21 +52,18 @@ function AboutPage() {
   return (
     <div className="space-y-10">
       <SectionHeader
-        title="About ZEKROS"
-        description="A premium strategy experience by ZEROTH Labs."
+        title={`About ${APP_CONSTANTS.app.name}`}
+        description={`A premium strategy experience by ${APP_CONSTANTS.company.name}.`}
       />
 
-      <Section title="What is ZEKROS" icon={Info}>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          ZEKROS turns a familiar grid into a living arena. Boards shift in
-          size, pieces decay, and tokens let you rewrite the board mid-fight. It
-          is built for fast, expressive matches — beautifully simple to play,
-          deep to master.
+      <Section title={`What is ${APP_CONSTANTS.app.name}`} icon={Info}>
+        <p className="text-sm leading-relaxed text-muted-foreground hover:text-white">
+          {APP_CONSTANTS.app.description.full}
         </p>
       </Section>
 
       <Section title="Game rules" icon={BookOpen}>
-        <ul className="space-y-2 text-sm text-muted-foreground">
+        <ul className="space-y-2 text-sm text-muted-foreground hover:text-white">
           <li>
             · Players alternate turns placing a single piece on an empty cell.
           </li>
@@ -92,7 +86,7 @@ function AboutPage() {
       </Section>
 
       <Section title="Dynamic pieces" icon={Sparkles}>
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground hover:text-white">
           The board is never static. As your active-piece count nears its cap,
           the oldest pieces pulse to warn you — placing the next one removes
           them entirely. This keeps every position fluid and rewards forward
@@ -101,49 +95,18 @@ function AboutPage() {
       </Section>
 
       <Section title="Reclaim Tokens" icon={RefreshCcw}>
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground hover:text-white">
           Reclaim Tokens are a tactical lifeline. Spend one to take back a piece
           you've already placed, opening space and disrupting your opponent's
           reads. Token counts are configurable per match (0–10).
         </p>
       </Section>
 
-      <Section title="Frequently asked questions" icon={Info}>
-        <div className="divide-y divide-white/5">
-          {FAQ.map((f, i) => (
-            <FAQRow key={i} q={f.q} a={f.a} />
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Keyboard shortcuts" icon={Keyboard}>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {SHORTCUTS.map((s, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2"
-            >
-              <span className="text-sm">{s.label}</span>
-              <div className="flex items-center gap-1">
-                {s.keys.map((k, j) => (
-                  <kbd
-                    key={j}
-                    className="rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
-                  >
-                    {k}
-                  </kbd>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
       <Section title="Version" icon={Cpu}>
         <div className="grid gap-2 sm:grid-cols-3">
-          <Meta label="Build" value="0.1.0-preview.3" />
-          <Meta label="Engine" value="D3T · pre-alpha" />
-          <Meta label="Release" value="Jun 28, 2026" />
+          <Meta label="Build" value={APP_CONSTANTS.version.build} />
+          <Meta label="Engine" value={APP_CONSTANTS.version.engine.version} />
+          <Meta label="Release" value={APP_CONSTANTS.version.releaseDate} />
         </div>
       </Section>
 
@@ -154,11 +117,10 @@ function AboutPage() {
               Powered by
             </div>
             <div className="mt-1 font-display text-base font-semibold">
-              D3T Engine
+              {APP_CONSTANTS.version.engine.name}
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Custom strategy engine handling dynamic boards, vanish queues, and
-              reclaim logic.
+              {APP_CONSTANTS.version.engine.description}
             </p>
           </div>
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
@@ -166,18 +128,17 @@ function AboutPage() {
               Built by
             </div>
             <div className="mt-1 font-display text-base font-semibold">
-              ZEROTH Labs
+              {APP_CONSTANTS.company.name}
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              A studio crafting premium digital products with obsessive
-              attention to detail.
+              {APP_CONSTANTS.company.tagline}
             </p>
           </div>
         </div>
       </Section>
 
       <div className="pt-2 text-center text-[11px] text-muted-foreground">
-        © {new Date().getFullYear()} ZEROTH Labs. All rights reserved.
+        {getCopyrightString()}
       </div>
     </div>
   );
@@ -250,3 +211,4 @@ function Meta({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

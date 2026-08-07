@@ -28,7 +28,7 @@ function AppLayout() {
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <TopBar />
-          <motion.main className="glass flex-1 overflow-y-auto rounded-2xl">
+          <motion.main className="glass flex-1 overflow-y-auto rounded-2xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <div className="p-5 sm:p-7">
               <Outlet />
             </div>
