@@ -30,10 +30,10 @@ export function Navigation() {
   }, [scrollY]);
 
   const links = [
-    { label: "Features", href: "#features" },
-    { label: "How it works", href: "#how" },
-    { label: "Modes", href: "#modes" },
-    { label: "FAQ", href: "#faq" },
+    { label: "Features", href: "/#features" },
+    { label: "How it works", href: "/#how" },
+    { label: "Modes", href: "/#modes" },
+    { label: "About Us", href: "/about?tab=about" },
   ];
 
   return (
@@ -88,14 +88,23 @@ export function Navigation() {
               <span className="max-w-[100px] truncate">{user.username}</span>
             </Link>
           ) : (
+            <div className="flex gap-2">
             <button
               type="button"
               onClick={() => dispatchPlayNow("default")}
-              className="hidden items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98] md:inline-flex"
+              className="hidden items-center gap-1.5 rounded-lg text-white border-3 px-3.5 py-1 text-sm font-medium transition-transform hover:scale-[1.02] active:scale-[0.98] md:inline-flex"
             >
-              Play Now
-              <ArrowRight className="size-3.5" />
+              Sign up
             </button>
+             <button
+              type="button"
+              onClick={() => dispatchPlayNow("default")}
+              className="hidden items-center gap-1.5 rounded-lg bg-white text-black border-2 border-black  px-3.5 py-1 text-sm font-medium transition-transform hover:scale-[1.02] active:scale-[0.98] md:inline-flex"
+            >
+              Login
+            </button>
+            </div>
+
           )}
           <button
             onClick={() => setOpen((v) => !v)}
@@ -145,6 +154,17 @@ export function Navigation() {
                 <span className="truncate">{user.username}</span>
               </Link>
             ) : (
+              <div className=" flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  dispatchPlayNow("default");
+                }}
+                className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-lg border-2 px-3.5 py-2.5 text-sm font-medium text-white"
+              >
+                Log in 
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -153,8 +173,9 @@ export function Navigation() {
                 }}
                 className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-2.5 text-sm font-medium text-primary-foreground"
               >
-                Play Now <ArrowRight className="size-3.5" />
+                Sign up
               </button>
+              </div>
             )}
           </div>
         </motion.div>

@@ -74,7 +74,7 @@ export const APP_CONSTANTS: AppConstants = {
       "A studio crafting premium digital products with obsessive attention to detail.",
     copyrightYear: 2026,
     website: "https://keos.studio",
-    supportEmail: "support@zerothlabs.com",
+    supportEmail: "shaj7492@gmail.com",
   },
   version: {
     version: "0.1.0",
@@ -89,10 +89,10 @@ export const APP_CONSTANTS: AppConstants = {
     },
   },
   socials: {
-    github: "https://github.com",
+    github: "https://github.com/sherrykeos",
     twitter: "https://twitter.com",
     discord: "https://discord.gg",
-    linkedin: "https://linkedin.com",
+    linkedin: "https://www.linkedin.com/in/sharad--kumar/",
     docs: "#",
   },
 };

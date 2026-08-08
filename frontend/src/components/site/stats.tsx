@@ -9,11 +9,22 @@ const stats = [
 
 export function Stats() {
   return (
-    <section className="relative px-4 py-24 md:py-28">
+    <section className="relative px-4 py-10 md:py-14">
       <div className="mx-auto max-w-6xl">
-        <div className="glass-strong relative overflow-hidden rounded-3xl p-8 md:p-12">
-          <div className="pointer-events-none absolute -inset-y-12 left-0 w-1/2 -skew-x-12 bg-gradient-to-r from-white/[0.05] to-transparent" />
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="glass-strong group relative overflow-hidden rounded-3xl p-6 sm:p-7 md:py-8 md:px-10">
+          {/* Background Image: stats-band-bg.jpg */}
+          <img
+            src="/assets/stats-band-bg.jpg"
+            alt="Stats Background"
+            className="absolute inset-0 size-full object-cover opacity-65 mix-blend-luminosity pointer-events-none transition-transform duration-700 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/70 pointer-events-none" />
+
+          {/* Glass Highlight Line */}
+          <div className="pointer-events-none absolute -inset-y-12 left-0 w-1/2 -skew-x-12 bg-gradient-to-r from-white/10 to-transparent" />
+
+          {/* Stats Grid */}
+          <div className="relative z-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 sm:gap-8">
             {stats.map((s, i) => (
               <motion.div
                 key={s.k}

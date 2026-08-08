@@ -28,7 +28,7 @@ const navSections: FooterSection[] = [
       { label: "About", href: "/about", search: { tab: "about" } },
       { label: "Privacy Policy", href: "/about", search: { tab: "privacy" } },
       { label: "Terms of Service", href: "/about", search: { tab: "terms" } },
-      { label: "Cookies", href: "/about", search: { tab: "cookies" } },
+      // { label: "Cookies", href: "/about", search: { tab: "cookies" } },
     ],
   },
 ];
@@ -71,7 +71,7 @@ export function Footer() {
         {/* -------------------------------------------------------------------------- */}
         {/* Hero Background Typography ("ZEKROS")                                     */}
         {/* -------------------------------------------------------------------------- */}
-        <div className="text-center pointer-events-none relative top-26">
+        <div className="text-center pointer-events-none relative top-12 sm:top-20 lg:top-26">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -100,8 +100,8 @@ export function Footer() {
         </div>
       </div>
 
-       {/* Subtle Micro-Grid Pattern */}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_2px),linear-gradient(to_bottom,#ffffff04_1px,transparent_2px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-80" />
+      {/* Subtle Micro-Grid Pattern */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_2px),linear-gradient(to_bottom,#ffffff04_1px,transparent_2px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-80" />
 
       {/* -------------------------------------------------------------------------- */}
       {/* Footer Content Grid                                                       */}
@@ -111,9 +111,9 @@ export function Footer() {
         {/* Subtle Micro-Grid Pattern */}
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_2px),linear-gradient(to_bottom,#ffffff04_1px,transparent_2px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-90" />
         <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-          <div className="flex flex-col md:flex-row items-start justify-between gap-12 pt-2 pb-14">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-12 pt-2 pb-14 text-left">
             {/* Left Column: Brand & Description */}
-            <div className="space-y-6 max-w-sm">
+            <div className="space-y-6 max-w-sm w-full">
               <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground/80 font-normal">
                 ZEKROS is a modern competitive strategy game built around skill,
                 tactical thinking and beautiful gameplay experiences.
@@ -163,7 +163,7 @@ export function Footer() {
             </div>
 
             {/* Right Navigation Columns (Features & Company) */}
-            <div className="flex items-start gap-12 sm:gap-20">
+            <div className="grid grid-cols-2 gap-x-12 gap-y-8 sm:flex sm:items-start sm:gap-20">
               {navSections.map((sec) => (
                 <div key={sec.title} className="space-y-4">
                   <h3 className="font-mono text-[10px] uppercase tracking-[0.26em] text-muted-foreground/70 font-semibold">
@@ -204,33 +204,31 @@ export function Footer() {
           {/* -------------------------------------------------------------------------- */}
           {/* Bottom Bar                                                                */}
           {/* -------------------------------------------------------------------------- */}
-          <div className="pt-4 border-t border-white/[0.08] flex flex-col gap-4 sm:flex-row sm:items-center justify-between font-mono text-xs text-muted-foreground/70">
+          <div className="pt-6 border-t border-white/[0.08] flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-center sm:text-left font-mono text-xs text-muted-foreground/70">
             {/* Left: company branding */}
-            <p className="text-foreground/40 font-medium hover:text-purple-300 transition-colors cursor-default mb-1">KEOS Labs Product</p>
+            <p className="text-foreground/40 font-medium hover:text-purple-300 transition-colors cursor-default mb-1 sm:mb-0">
+              KEOS Labs Product
+            </p>
 
             {/* Center: Author Credit and copyright */}
-            <div className="text-muted-foreground/60 text-center flex flex-col gap-1 ">
-            
-            <p>
-              Made with passion by{" "}
-              <span className="text-foreground/40 font-medium hover:text-white transition-colors cursor-default">
-                Sherry Keos
-              </span>
+            <div className="text-muted-foreground/60 flex flex-col gap-1 sm:items-center">
+              <p>
+                Made with passion by{" "}
+                <span className="text-foreground/40 font-medium hover:text-white transition-colors cursor-default">
+                  Sherry Keos
+                </span>
               </p>
               <div>© {new Date().getFullYear()} ZEKROS. Copyright reserved</div>
             </div>
 
             {/* Right: Version & Platform Status */}
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center justify-center sm:justify-end gap-4">
               <span className="text-muted-foreground/60">
                 Version v{APP_CONSTANTS.version.version}
               </span>
-
-              
             </div>
           </div>
         </div>
-
       </div>
     </footer>
   );

@@ -2,18 +2,33 @@ import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { HeroBoard } from "./hero-board";
 import { dispatchPlayNow } from "@/contexts/play-entry";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useNavigate } from "@tanstack/react-router";
 
 import { APP_CONSTANTS } from "@/constants/appConstants";
 
 export function Hero() {
   const ease = [0.22, 1, 0.36, 1] as const;
+  const currentUser = useCurrentUser();
+  const user = currentUser.data;
+  const navigate = useNavigate();
+
+  const handlePlayNow = () => {
+    if (user) {
+      navigate({ to: "/app/play" });
+    } else {
+      dispatchPlayNow("default");
+    }
+  };
 
   return (
     <section className="relative overflow-hidden px-4 pt-32 pb-16 md:pt-44 md:pb-24">
       {/* ambient halo */}
       <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-white/[0.04] blur-[120px]" />
-
-      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+    {/* Subtle Micro-Grid Pattern */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_4px),linear-gradient(to_bottom,#ffffff04_1px,transparent_2px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-90" />
+      
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:items-center px-4 sm:px-6 lg:px-8">
         <div>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -53,8 +68,8 @@ export function Hero() {
           >
             <button
               type="button"
-              onClick={() => dispatchPlayNow("default")}
-              className="group inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[0_10px_40px_-10px_rgba(255,255,255,0.4)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              onClick={handlePlayNow}
+              className="group inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[0_10px_40px_-10px_rgba(255,255,255,0.4)] transition-transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               Play Now
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -87,7 +102,13 @@ export function Hero() {
           transition={{ duration: 1, delay: 0.2, ease }}
           className="relative mx-auto w-full max-w-md"
         >
-          <HeroBoard />
+          <div className="relative aspect-square w-full overflow-hidden">
+            <img
+              src="/assets/hero-pvp-element.gif"
+              alt="ZEKROS Hero Preview"
+              className="size-full rounded-2xl object-cover select-none pointer-events-none"
+            />
+          </div>
         </motion.div>
       </div>
     </section>

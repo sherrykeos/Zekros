@@ -46,7 +46,7 @@ function AboutPage() {
     { id: "about" as const, label: "About" },
     { id: "privacy" as const, label: "Privacy Policy" },
     { id: "terms" as const, label: "Terms of Service" },
-    { id: "cookies" as const, label: "Cookies" },
+    // { id: "cookies" as const, label: "Cookies" },
   ];
 
   return (
@@ -88,7 +88,7 @@ function AboutPage() {
                   {active && (
                     <motion.div
                       layoutId="activeTabGlow"
-                      className="absolute inset-x-4 -bottom-6 h-px bg-purple-500/50 blur-[2px]"
+                      className="absolute inset-x-4 -bottom-6 h-px bg-purple-500/30 blur-[2px]"
                       transition={{ duration: 0.3 }}
                     />
                   )}
@@ -223,7 +223,7 @@ function AboutPage() {
                 </motion.div>
               )}
 
-              {activeTab === "cookies" && (
+              {/* {activeTab === "cookies" && (
                 <motion.div
                   key="cookies-pane"
                   initial={{ opacity: 0, y: 10 }}
@@ -249,7 +249,7 @@ function AboutPage() {
                     </p>
                   </section>
                 </motion.div>
-              )}
+              )} */}
             </AnimatePresence>
           </div>
         </div>
