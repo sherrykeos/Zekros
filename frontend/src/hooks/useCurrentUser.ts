@@ -45,7 +45,14 @@ export async function loadCurrentUser(): Promise<AuthUser | null> {
   } catch (error) {
     if (getApiErrorStatus(error) === 401) {
       setAccessToken(null);
-      return null;
+      try {
+        const session = await authApi.refresh();
+        setAccessToken(session.accessToken);
+        return await authApi.getCurrentUser();
+      } catch {
+        setAccessToken(null);
+        return null;
+      }
     }
 
     throw error;

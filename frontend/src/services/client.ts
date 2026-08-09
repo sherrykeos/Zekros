@@ -13,14 +13,43 @@ export type DevRestLog = {
   at: string;
 };
 
+const TOKEN_KEY = "zekros_access_token";
+
 let accessToken: string | null = null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
+  if (typeof window !== "undefined") {
+    if (token) {
+      try {
+        localStorage.setItem(TOKEN_KEY, token);
+      } catch {
+        // Ignore quota/storage errors
+      }
+    } else {
+      try {
+        localStorage.removeItem(TOKEN_KEY);
+      } catch {
+        // Ignore quota/storage errors
+      }
+    }
+  }
 }
 
-export function getAccessToken() {
-  return accessToken;
+export function getAccessToken(): string | null {
+  if (accessToken) return accessToken;
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(TOKEN_KEY);
+      if (stored) {
+        accessToken = stored;
+        return stored;
+      }
+    } catch {
+      // Ignore quota/storage errors
+    }
+  }
+  return null;
 }
 
 const requestStart = new WeakMap<object, number>();
