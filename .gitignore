@@ -34,3 +34,7 @@ Thumbs.db
 
 # Misc
 *.tmp
+
+#readme files 
+*.md
+!README.md

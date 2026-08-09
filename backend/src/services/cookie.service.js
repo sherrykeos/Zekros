@@ -6,11 +6,17 @@ const REFRESH_COOKIE_NAME = "refreshToken";
  * Returns cookie options for refresh token
  */
 function getRefreshTokenCookieOptions() {
+  const isProduction = process.env.NODE_ENV === "production";
+  const sameSite = isProduction
+    ? process.env.COOKIE_SAME_SITE || "none"
+    : "lax";
+
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProduction,
+    sameSite: sameSite,
     maxAge: auth.session.expiresInDays * 24 * 60 * 60 * 1000,
+    path: "/",
   };
 }
 

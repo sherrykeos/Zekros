@@ -13,6 +13,7 @@ import {
 } from "../../utils/socket.utils.js";
 
 const DEFAULT_CLEANUP_GRACE_MS = 30000;
+const DEFAULT_FORFEIT_GRACE_MS = 10000;
 const PLAYER_CONNECTED_EVENT = "player:connected";
 const PLAYER_DISCONNECTED_EVENT = "player:disconnected";
 const ROOM_UPDATE_EVENT = "room:update";
@@ -22,6 +23,7 @@ const LEGACY_ROOM_UPDATE_EVENT = "room-updated";
 const LEGACY_GAME_STATE_EVENT = "game-state";
 
 const cleanupGraceMs = Number(process.env.SOCKET_CLEANUP_GRACE_MS ?? DEFAULT_CLEANUP_GRACE_MS);
+const forfeitGraceMs = Number(process.env.SOCKET_FORFEIT_GRACE_MS ?? DEFAULT_FORFEIT_GRACE_MS);
 const connections = new Map();
 const playerSessions = new Map();
 const cleanupTimers = new Map();
@@ -59,7 +61,7 @@ function scheduleForfeitTimer(io, roomCode, playerId) {
       }
     }
     forfeitTimers.delete(key);
-  }, 10000); // 10 seconds grace period
+  }, forfeitGraceMs);
 
   if (typeof timer.unref === "function") {
     timer.unref();
@@ -72,6 +74,17 @@ function cancelForfeitTimer(roomCode, playerId) {
   if (forfeitTimers.has(key)) {
     clearTimeout(forfeitTimers.get(key));
     forfeitTimers.delete(key);
+  }
+}
+
+function cancelRoomForfeitTimers(roomCode) {
+  if (!roomCode) return;
+  const normCode = String(roomCode).toUpperCase();
+  for (const [key, timer] of forfeitTimers.entries()) {
+    if (key.startsWith(`${normCode}:`)) {
+      clearTimeout(timer);
+      forfeitTimers.delete(key);
+    }
   }
 }
 
@@ -137,6 +150,7 @@ function cleanupRoomIfEmpty(roomCode) {
   }
 
   if (!hasConnectedClientParticipant(room)) {
+    cancelRoomForfeitTimers(room.code);
     RoomManager.deleteRoom(room.code);
     clearRoomSessions(room.code);
     console.log(`Socket room cleaned up: ${room.code}`);
@@ -470,6 +484,8 @@ registerConnectionEvents.getConnections = getConnections;
 registerConnectionEvents.getPlayerSession = getPlayerSession;
 registerConnectionEvents.scheduleRoomCleanup = scheduleRoomCleanup;
 registerConnectionEvents.cleanupRoomIfEmpty = cleanupRoomIfEmpty;
+registerConnectionEvents.cancelForfeitTimer = cancelForfeitTimer;
+registerConnectionEvents.cancelRoomForfeitTimers = cancelRoomForfeitTimers;
 registerConnectionEvents.isSocketConnected = isSocketConnected;
 registerConnectionEvents.createSyncState = createSyncState;
 registerConnectionEvents.emitCurrentState = emitCurrentState;

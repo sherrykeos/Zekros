@@ -967,7 +967,7 @@ function LobbyPage() {
                       : "bg-primary text-primary-foreground hover:bg-primary/90"
                   }`}
                 >
-                  {isUserReady ? "Ready" : "Toggle Ready"}
+                  {isUserReady ? "Ready" : "Lets Start"}
                 </button>
               )}
             </div>

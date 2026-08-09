@@ -11,21 +11,12 @@ import errorHandler from "../middleware/errorHandler.js";
 
 
 
+import { getCorsOptions } from "../config/app.config.js";
+
 const app = express();
 
 // Enable CORS
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (process.env.NODE_ENV === "development" || !origin) {
-        callback(null, true);
-      } else {
-        callback(null, process.env.FRONTEND_URL);
-      }
-    },
-    credentials: true,
-  }),
-);
+app.use(cors(getCorsOptions()));
 app.use(cookieParser());
 
 app.use(passport.initialize());

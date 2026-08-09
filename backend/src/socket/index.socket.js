@@ -3,6 +3,7 @@ import registerConnectionEvents from "./events/connectionEvents.js";
 import registerRoomEvents from "./events/roomEvents.js";
 import registerGameEvents from "./events/gameEvents.js";
 import socketAuth from "./middleware/socketAuth.js";
+import { getCorsOptions } from "../config/app.config.js";
 
 /**
  * Initializes Socket.IO alongside the existing HTTP server.
@@ -12,10 +13,7 @@ import socketAuth from "./middleware/socketAuth.js";
  */
 function initializeSocket(httpServer) {
   const io = new Server(httpServer, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-    },
+    cors: getCorsOptions(),
   });
 
   io.use(socketAuth);
