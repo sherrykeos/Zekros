@@ -73,12 +73,12 @@ export const APP_CONSTANTS: AppConstants = {
     tagline:
       "A studio crafting premium digital products with obsessive attention to detail.",
     copyrightYear: 2026,
-    website: "https://keos.studio",
+    website: "https://github.com/sherrykeos",
     supportEmail: "shaj7492@gmail.com",
   },
   version: {
-    version: "1.0.0",
-    build: "1.0.0",
+    version: "1.0.1",
+    build: "1.0.1",
     stage: "Beta",
     releaseDate: "August 1, 2026",
     engine: {
@@ -113,9 +113,9 @@ export const ENGINE_NAME = APP_CONSTANTS.version.engine.name;
  */
 export function getPageTitle(pageName?: string): string {
   if (!pageName) {
-    return `${APP_CONSTANTS.app.name} — ${APP_CONSTANTS.app.tagline}`;
+    return `${APP_CONSTANTS.app.name} - ${APP_CONSTANTS.app.tagline}`;
   }
-  return `${pageName} — ${APP_CONSTANTS.app.name}`;
+  return `${pageName} - ${APP_CONSTANTS.app.name}`;
 }
 
 /**

@@ -87,13 +87,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: getPageTitle() },
+        { title: "ZEKROS :)" },
         {
           name: "description",
           content: `${APP_CONSTANTS.app.name} by ${APP_CONSTANTS.company.name}. ${APP_CONSTANTS.app.description.short}`,
         },
         { name: "author", content: APP_CONSTANTS.company.name },
-        { property: "og:title", content: getPageTitle() },
+        { property: "og:title", content: "ZEKROS by KEOS Labs" },
         {
           property: "og:description",
           content: APP_CONSTANTS.app.description.short,

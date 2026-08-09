@@ -20,7 +20,7 @@ import type { MatchHistoryItem } from "@/services/api/matchService";
 import { audioManager } from "@/services/audio/AudioManager";
 
 export const Route = createFileRoute("/app/replay/$id")({
-  head: () => ({ meta: [{ title: "Replay — ZEKROS" }] }),
+  head: () => ({ meta: [{ title: "Replay - ZEKROS" }] }),
   component: ReplayPage,
 });
 

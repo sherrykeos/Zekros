@@ -16,7 +16,7 @@ import type { ComponentType } from "react";
 import { GlassPanel, SectionHeader } from "@/components/app/primitives";
 
 export const Route = createFileRoute("/app/achievements")({
-  head: () => ({ meta: [{ title: "Achievements — ZEKROS" }] }),
+  head: () => ({ meta: [{ title: "Achievements - ZEKROS" }] }),
   component: AchievementsPage,
 });
 

@@ -196,44 +196,6 @@ function GamePage() {
   const prevMoveCount = useRef(0);
   const prevGameOver = useRef(false);
 
-  // Play gameStart sound on initial match load or matchId change
-  useEffect(() => {
-    audioManager.play("gameStart");
-    prevMoveCount.current = 0;
-    prevGameOver.current = false;
-  }, [matchId]);
-
-  // Track moves count for move/reclaim/opponentMove audio cues
-  useEffect(() => {
-    if (moves.length > prevMoveCount.current) {
-      const latestMove = moves[moves.length - 1];
-      const isMyMove = latestMove.player === config.playerSymbol;
-
-      if (latestMove.kind === "reclaim") {
-        audioManager.play("reclaim");
-      } else if (isMyMove) {
-        audioManager.play("move");
-      } else {
-        audioManager.play("opponentMove");
-      }
-      prevMoveCount.current = moves.length;
-    }
-  }, [moves, config.playerSymbol]);
-
-  // Track game outcome for victory/defeat/draw audio cues
-  useEffect(() => {
-    if (resultOpen && !prevGameOver.current) {
-      prevGameOver.current = true;
-      if (outcome === "win") {
-        audioManager.play("victory");
-      } else if (outcome === "loss") {
-        audioManager.play("defeat");
-      } else {
-        audioManager.play("draw");
-      }
-    }
-  }, [resultOpen, outcome]);
-
   const {
     data: gameStateResponse,
     isLoading: isLoadingGameState,
@@ -390,6 +352,45 @@ function GamePage() {
     }
     return config.playerSymbol ?? "x";
   }, [config.mode, config.playerSymbol, localPlayerId, serverState]);
+
+  // Play gameStart sound on initial match load or matchId change
+  useEffect(() => {
+    audioManager.play("gameStart");
+    prevMoveCount.current = 0;
+    prevGameOver.current = false;
+  }, [matchId]);
+
+  // Track moves count for move/reclaim/opponentMove audio cues
+  useEffect(() => {
+    if (moves.length > prevMoveCount.current) {
+      const latestMove = moves[moves.length - 1];
+      const isMyMove = latestMove.player === actualSymbol;
+
+      // Only play opponent moves here because human moves trigger optimistically on click in handleCell
+      if (!isMyMove) {
+        if (latestMove.kind === "reclaim") {
+          audioManager.play("reclaim");
+        } else {
+          audioManager.play("opponentMove");
+        }
+      }
+      prevMoveCount.current = moves.length;
+    }
+  }, [moves, actualSymbol]);
+
+  // Track game outcome for victory/defeat/draw audio cues
+  useEffect(() => {
+    if (resultOpen && !prevGameOver.current) {
+      prevGameOver.current = true;
+      if (outcome === "win") {
+        audioManager.play("victory");
+      } else if (outcome === "loss") {
+        audioManager.play("defeat");
+      } else {
+        audioManager.play("draw");
+      }
+    }
+  }, [resultOpen, outcome]);
 
   const status = statusFromState(serverState, actualSymbol);
 
@@ -692,6 +693,11 @@ function GamePage() {
   const handleCell = async (i: number) => {
     if (!playableCells.includes(i) || !isHumanTurn) return;
 
+    const isReclaim = cells[i] === turn && aboutToVanish.includes(i);
+    const currentTokens = turn === "x" ? tokensX : tokensO;
+
+    if (cells[i] && (!isReclaim || currentTokens <= 0)) return;
+
     if (matchId) {
       const row = Math.floor(i / config.boardSize);
       const col = i % config.boardSize;
@@ -706,6 +712,15 @@ function GamePage() {
         await syncGameState();
         return;
       }
+
+      // Optimistic UI update: place piece immediately for 0ms perceived lag
+      setCells((prev) => {
+        const next = [...prev];
+        next[i] = turn;
+        return next;
+      });
+      setLastMove(i);
+      audioManager.play(isReclaim ? "reclaim" : "move");
 
       try {
         setIsPlayingMove(true);
@@ -727,7 +742,6 @@ function GamePage() {
 
             const state = response.data;
             applyServerState(state);
-            setLastMove(i);
             await syncGameState();
           },
         );
@@ -738,11 +752,6 @@ function GamePage() {
       }
       return;
     }
-
-    const isReclaim = cells[i] === turn && aboutToVanish.includes(i);
-    const currentTokens = turn === "x" ? tokensX : tokensO;
-
-    if (cells[i] && (!isReclaim || currentTokens <= 0)) return;
 
     const next = cells.slice();
     next[i] = turn;

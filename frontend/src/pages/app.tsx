@@ -8,7 +8,7 @@ import { RightPanel } from "@/components/app/right-panel";
 export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
-      { title: "ZEKROS — Console" },
+      { title: "ZEKROS - Console" },
       {
         name: "description",
         content: "The ZEKROS application shell. Play, analyze, and configure.",

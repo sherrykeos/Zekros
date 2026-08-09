@@ -19,7 +19,7 @@ import { usePlayEntry } from "@/contexts/play-entry";
 export const Route = createFileRoute("/app/play")({
   head: () => ({
     meta: [
-      { title: "Play â€” ZEKROS" },
+      { title: "Play - ZEKROS" },
       {
         name: "description",
         content:

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './../pages/__root'
 import { Route as AppRouteImport } from './../pages/app'
 import { Route as AboutRouteImport } from './../pages/about'
 import { Route as IndexRouteImport } from './../pages/index'
+import { Route as AppIndexRouteImport } from './../pages/app.index'
 import { Route as AuthVerifyRouteImport } from './../pages/auth.verify'
 import { Route as AuthSuccessRouteImport } from './../pages/auth.success'
 import { Route as AuthSignUpRouteImport } from './../pages/auth.sign-up'
@@ -47,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
 } as any)
 const AuthVerifyRoute = AuthVerifyRouteImport.update({
   id: '/auth/verify',
@@ -172,12 +178,12 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/success': typeof AuthSuccessRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/app/': typeof AppIndexRoute
   '/app/replay/$id': typeof AppReplayIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/app': typeof AppRouteWithChildren
   '/app/about': typeof AppAboutRoute
   '/app/achievements': typeof AppAchievementsRoute
   '/app/game': typeof AppGameRoute
@@ -197,6 +203,7 @@ export interface FileRoutesByTo {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/success': typeof AuthSuccessRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/app': typeof AppIndexRoute
   '/app/replay/$id': typeof AppReplayIdRoute
 }
 export interface FileRoutesById {
@@ -223,6 +230,7 @@ export interface FileRoutesById {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/success': typeof AuthSuccessRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/app/': typeof AppIndexRoute
   '/app/replay/$id': typeof AppReplayIdRoute
 }
 export interface FileRouteTypes {
@@ -250,12 +258,12 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/success'
     | '/auth/verify'
+    | '/app/'
     | '/app/replay/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/app'
     | '/app/about'
     | '/app/achievements'
     | '/app/game'
@@ -275,6 +283,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/success'
     | '/auth/verify'
+    | '/app'
     | '/app/replay/$id'
   id:
     | '__root__'
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/success'
     | '/auth/verify'
+    | '/app/'
     | '/app/replay/$id'
   fileRoutesById: FileRoutesById
 }
@@ -338,6 +348,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/auth/verify': {
       id: '/auth/verify'
@@ -495,6 +512,7 @@ interface AppRouteChildren {
   AppProfileRoute: typeof AppProfileRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSetupRoute: typeof AppSetupRoute
+  AppIndexRoute: typeof AppIndexRoute
   AppReplayIdRoute: typeof AppReplayIdRoute
 }
 
@@ -511,6 +529,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppProfileRoute: AppProfileRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSetupRoute: AppSetupRoute,
+  AppIndexRoute: AppIndexRoute,
   AppReplayIdRoute: AppReplayIdRoute,
 }
 

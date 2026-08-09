@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 
 export function GlassPanel({
   children,
@@ -52,7 +53,8 @@ export function DashboardCard({
   icon: Icon,
   cta,
   accent,
-  live,
+  to,
+  search,
   onClick,
 }: {
   title: string;
@@ -60,12 +62,12 @@ export function DashboardCard({
   icon: ComponentType<{ className?: string }>;
   cta?: string;
   accent?: boolean;
-  live?: boolean;
+  to?: string;
+  search?: Record<string, unknown>;
   onClick?: () => void;
 }) {
-  return (
-    <motion.button
-      onClick={onClick}
+  const content = (
+    <motion.div
       whileHover={{ y: -3 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
       className={`group relative flex h-full flex-col items-start overflow-hidden rounded-2xl p-5 text-left transition-colors ${
@@ -96,7 +98,21 @@ export function DashboardCard({
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
         <div className="absolute -right-20 -top-20 size-48 rounded-full bg-white/[0.06] blur-3xl" />
       </div>
-    </motion.button>
+    </motion.div>
+  );
+
+  if (to) {
+    return (
+      <Link to={to as any} search={search as any} className="block h-full">
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button onClick={onClick} className="block h-full w-full">
+      {content}
+    </button>
   );
 }
 

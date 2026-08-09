@@ -14,7 +14,7 @@ import { APP_CONSTANTS, getPageTitle } from "@/constants/appConstants";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `${getPageTitle()}. By ${APP_CONSTANTS.company.name}` },
+      { title: "ZEKROS :)" },
       {
         name: "description",
         content: `${APP_CONSTANTS.app.description.short} A premium experience by ${APP_CONSTANTS.company.name}.`,
