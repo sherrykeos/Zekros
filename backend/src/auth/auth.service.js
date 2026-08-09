@@ -186,6 +186,7 @@ async function createUserSession(user, res) {
 
   return {
     accessToken,
+    refreshToken,
     user: {
       id: user.id,
       username: user.username,
@@ -370,6 +371,7 @@ async function refresh(refreshToken, res) {
   return {
     success: true,
     accessToken,
+    refreshToken: newRefreshToken,
   };
 }
 

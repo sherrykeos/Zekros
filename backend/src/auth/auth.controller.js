@@ -65,9 +65,8 @@ async function resendVerification(req, res, next) {
 }
 
 async function refresh(req, res, next) {
-  // console.log(req.cookies);
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.body?.refreshToken || req.cookies?.refreshToken;
 
     const result = await authService.refresh(refreshToken, res);
 
@@ -79,7 +78,7 @@ async function refresh(req, res, next) {
 
 async function logout(req, res, next) {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.body?.refreshToken || req.cookies?.refreshToken;
 
     const result = await authService.logout(refreshToken);
 
@@ -127,6 +126,9 @@ async function googleCallback(req, res, next) {
 
     if (session?.accessToken) {
       redirectUrl.searchParams.set("token", session.accessToken);
+    }
+    if (session?.refreshToken) {
+      redirectUrl.searchParams.set("refreshToken", session.refreshToken);
     }
 
     return res.redirect(redirectUrl.toString());

@@ -13,22 +13,24 @@ export type DevRestLog = {
   at: string;
 };
 
-const TOKEN_KEY = "zekros_access_token";
+const ACCESS_TOKEN_KEY = "zekros_access_token";
+const REFRESH_TOKEN_KEY = "zekros_refresh_token";
 
 let accessToken: string | null = null;
+let refreshToken: string | null = null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
   if (typeof window !== "undefined") {
     if (token) {
       try {
-        localStorage.setItem(TOKEN_KEY, token);
+        localStorage.setItem(ACCESS_TOKEN_KEY, token);
       } catch {
         // Ignore quota/storage errors
       }
     } else {
       try {
-        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(ACCESS_TOKEN_KEY);
       } catch {
         // Ignore quota/storage errors
       }
@@ -36,13 +38,55 @@ export function setAccessToken(token: string | null) {
   }
 }
 
+export function setRefreshToken(token: string | null) {
+  refreshToken = token;
+  if (typeof window !== "undefined") {
+    if (token) {
+      try {
+        localStorage.setItem(REFRESH_TOKEN_KEY, token);
+      } catch {
+        // Ignore quota/storage errors
+      }
+    } else {
+      try {
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
+      } catch {
+        // Ignore quota/storage errors
+      }
+    }
+  }
+}
+
+export function setTokens(access: string | null, refresh?: string | null) {
+  setAccessToken(access);
+  if (refresh !== undefined) {
+    setRefreshToken(refresh);
+  }
+}
+
 export function getAccessToken(): string | null {
   if (accessToken) return accessToken;
   if (typeof window !== "undefined") {
     try {
-      const stored = localStorage.getItem(TOKEN_KEY);
+      const stored = localStorage.getItem(ACCESS_TOKEN_KEY);
       if (stored) {
         accessToken = stored;
+        return stored;
+      }
+    } catch {
+      // Ignore quota/storage errors
+    }
+  }
+  return null;
+}
+
+export function getRefreshToken(): string | null {
+  if (refreshToken) return refreshToken;
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(REFRESH_TOKEN_KEY);
+      if (stored) {
+        refreshToken = stored;
         return stored;
       }
     } catch {

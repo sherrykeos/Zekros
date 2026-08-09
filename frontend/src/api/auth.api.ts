@@ -1,4 +1,4 @@
-import { api } from "@/services/client";
+import { api, getRefreshToken } from "@/services/client";
 import type {
   AuthMessage,
   AuthUser,
@@ -27,12 +27,20 @@ export const authApi = {
   },
 
   async logout(): Promise<AuthMessage> {
-    const response = await api.post<AuthMessage>("/auth/logout");
+    const refreshToken = getRefreshToken();
+    const response = await api.post<AuthMessage>(
+      "/auth/logout",
+      refreshToken ? { refreshToken } : undefined,
+    );
     return response.data;
   },
 
   async refresh(): Promise<RefreshResult> {
-    const response = await api.post<RefreshResult>("/auth/refresh");
+    const refreshToken = getRefreshToken();
+    const response = await api.post<RefreshResult>(
+      "/auth/refresh",
+      refreshToken ? { refreshToken } : undefined,
+    );
     return response.data;
   },
 
