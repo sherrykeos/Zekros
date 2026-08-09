@@ -501,7 +501,7 @@ async function googleLogin(profile, res) {
       username,
       email: profile.emails[0].value.toLowerCase(),
       avatar: profile.photos?.[0]?.value,
-      provider: "google",
+      provider: "GOOGLE",
       providerId: profile.id,
       isEmailVerified: true,
       emailVerifiedAt: new Date(),
