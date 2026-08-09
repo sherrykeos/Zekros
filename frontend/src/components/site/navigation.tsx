@@ -186,8 +186,10 @@ export function Navigation() {
 
 function Logo() {
   return (
-    <div className="relative grid size-7 place-items-center rounded-md bg-gradient-to-br from-white/95 to-white/60 text-[10px] font-bold text-black shadow-[0_0_0_1px_rgba(255,255,255,0.1)]">
-      {APP_CONSTANTS.app.symbol}
-    </div>
+    <img
+      src="/assets/zekrosLogov1.png"
+      alt="ZEKROS"
+      className="size-7 object-contain"
+    />
   );
 }

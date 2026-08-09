@@ -25,9 +25,11 @@ export function AuthShell({
 
       <header className="relative mx-auto flex max-w-5xl items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="grid size-7 place-items-center rounded-md bg-gradient-to-br from-white/95 to-white/60 text-[10px] font-bold text-black">
-            Z
-          </div>
+          <img
+            src="/assets/zekrosLogov1.png"
+            alt="ZEKROS"
+            className="size-7 object-contain"
+          />
           <span className="font-display text-sm font-semibold tracking-[0.18em]">
             ZEKROS
           </span>

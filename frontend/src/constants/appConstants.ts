@@ -77,9 +77,9 @@ export const APP_CONSTANTS: AppConstants = {
     supportEmail: "shaj7492@gmail.com",
   },
   version: {
-    version: "0.1.0",
-    build: "0.1.0-preview.3",
-    stage: "Alpha",
+    version: "1.0.0",
+    build: "1.0.0",
+    stage: "Beta",
     releaseDate: "August 1, 2026",
     engine: {
       name: "D3T Engine",

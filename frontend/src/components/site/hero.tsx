@@ -37,7 +37,7 @@ export function Hero() {
             className="glass inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs text-muted-foreground"
           >
             <span className="size-1.5 rounded-full bg-white/70" />
-            {APP_CONSTANTS.company.name} · Now in {APP_CONSTANTS.version.stage.toLowerCase()}
+            {APP_CONSTANTS.company.name}
           </motion.div>
 
           <motion.h1

@@ -67,17 +67,18 @@ function SidebarInner({
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-14 items-center gap-2.5 px-4">
-        <div className="grid size-7 shrink-0 place-items-center rounded-md bg-gradient-to-br from-white/95 to-white/60 text-[10px] font-bold text-black">
-          {APP_CONSTANTS.app.symbol}
-        </div>
-        {!collapsed && (
-          <a
-            href="/"
-            className="font-display text-sm font-semibold tracking-[0.18em]"
-          >
-            {APP_CONSTANTS.app.name}
-          </a>
-        )}
+        <a href="/" className="flex items-center gap-2.5">
+          <img
+            src="/assets/zekrosLogov1.png"
+            alt="ZEKROS"
+            className="size-7 shrink-0 object-contain"
+          />
+          {!collapsed && (
+            <span className="font-display text-sm font-semibold tracking-[0.18em]">
+              {APP_CONSTANTS.app.name}
+            </span>
+          )}
+        </a>
       </div>
 
       <div className="hairline mx-3" />
