@@ -118,11 +118,14 @@ async function resetPassword(req, res, next) {
 
 async function googleCallback(req, res, next) {
   try {
-    await authService.googleLogin(req.user, res);
+    const session = await authService.googleLogin(req.user, res);
 
-    return res.redirect(
-      `${app.frontendUrl}/auth/success`
-    );
+    const redirectUrl = new URL(`${app.frontendUrl}/auth/success`);
+    if (session?.accessToken) {
+      redirectUrl.searchParams.set("token", session.accessToken);
+    }
+
+    return res.redirect(redirectUrl.toString());
   } catch (error) {
     next(error);
   }

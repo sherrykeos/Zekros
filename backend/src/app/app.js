@@ -15,6 +15,9 @@ import { getCorsOptions } from "../config/app.config.js";
 
 const app = express();
 
+// Trust reverse proxy (e.g. Render / Cloudflare / Vercel load balancers)
+app.set("trust proxy", 1);
+
 // Enable CORS
 app.use(cors(getCorsOptions()));
 app.use(cookieParser());

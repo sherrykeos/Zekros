@@ -26,7 +26,7 @@ export function Hero() {
       {/* ambient halo */}
       <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-white/[0.04] blur-[120px]" />
     {/* Subtle Micro-Grid Pattern */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_4px),linear-gradient(to_bottom,#ffffff04_1px,transparent_2px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-90" />
+      {/* <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_4px),linear-gradient(to_bottom,#ffffff04_1px,transparent_2px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-90" /> */}
       
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:items-center px-4 sm:px-6 lg:px-8">
         <div>

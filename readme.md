@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚔️ ZEKROS
+# <img src="./frontend/public/assets/zekrosLogov1.png" alt="ZEKROS Logo" height="42" align="absmiddle" /> ZEKROS
 ### *Where Every Move Decays.*
 
 A Next-Gen Monochromatic Real-Time Strategy Arena built on adaptive boards, vanishing piece queues, and tactical token mechanics.

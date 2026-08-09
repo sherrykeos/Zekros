@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { useQueryClient } from "@tanstack/react-query";
+import { setAccessToken } from "@/services/client";
 import { CURRENT_USER_QUERY_KEY, loadCurrentUser } from "@/hooks/useCurrentUser";
 
 export const Route = createFileRoute("/auth/success")({
@@ -21,6 +22,13 @@ function SuccessPage() {
     async function completeAuth() {
       try {
         setStatus("Restoring session...");
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+
+        if (token) {
+          setAccessToken(token);
+        }
+
         // Reset query state first to ensure no stale cached 'null' user blocks
         queryClient.removeQueries({ queryKey: CURRENT_USER_QUERY_KEY });
 
