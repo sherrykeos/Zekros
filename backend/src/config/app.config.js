@@ -1,8 +1,14 @@
+const configuredFrontend = process.env.FRONTEND_URL || "http://localhost:8080";
+const primaryFrontendUrl = configuredFrontend
+  .split(",")[0]
+  .trim()
+  .replace(/\/+$/, "");
+
 const app = {
   name: "ZEKROS",
-  company: "ZEROTH Labs",
+  company: "KEOS Labs",
   supportEmail: process.env.EMAIL_FROM,
-  frontendUrl: process.env.FRONTEND_URL || "http://localhost:8080",
+  frontendUrl: primaryFrontendUrl,
 };
 
 /**

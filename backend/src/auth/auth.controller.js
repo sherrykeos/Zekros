@@ -120,14 +120,22 @@ async function googleCallback(req, res, next) {
   try {
     const session = await authService.googleLogin(req.user, res);
 
-    const redirectUrl = new URL(`${app.frontendUrl}/auth/success`);
+    const targetBase = app.frontendUrl.endsWith("/")
+      ? app.frontendUrl.slice(0, -1)
+      : app.frontendUrl;
+    const redirectUrl = new URL(`${targetBase}/auth/success`);
+
     if (session?.accessToken) {
       redirectUrl.searchParams.set("token", session.accessToken);
     }
 
     return res.redirect(redirectUrl.toString());
   } catch (error) {
-    next(error);
+    console.error("Google OAuth callback error:", error);
+    const targetBase = app.frontendUrl.endsWith("/")
+      ? app.frontendUrl.slice(0, -1)
+      : app.frontendUrl;
+    return res.redirect(`${targetBase}/auth/sign-in?error=oauth_failed`);
   }
 }
 

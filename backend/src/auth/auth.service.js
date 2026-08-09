@@ -475,24 +475,35 @@ async function resetPassword(data) {
 async function googleLogin(profile, res) {
   let user = await findUserByProviderId(profile.id);
 
-  if (!user) {
+  if (!user && profile.emails?.[0]?.value) {
     user = await findUserByEmail(profile.emails[0].value.toLowerCase());
   }
 
   if (!user) {
+    let baseUsername = profile.displayName
+      ? profile.displayName.replace(/\s+/g, "").toLowerCase()
+      : "player";
+    if (!baseUsername || baseUsername.length < 2) {
+      baseUsername = "player";
+    }
+
+    let username = baseUsername;
+    let existing = await findUserByUsername(username);
+    let attempts = 0;
+    while (existing && attempts < 10) {
+      attempts++;
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      username = `${baseUsername}${randomSuffix}`;
+      existing = await findUserByUsername(username);
+    }
+
     user = await createGoogleUser({
-      username: profile.displayName.replace(/\s+/g, "").toLowerCase(),
-
+      username,
       email: profile.emails[0].value.toLowerCase(),
-
       avatar: profile.photos?.[0]?.value,
-
       provider: "google",
-
       providerId: profile.id,
-
       isEmailVerified: true,
-
       emailVerifiedAt: new Date(),
     });
   } else if (!user.providerId) {
