@@ -11,6 +11,8 @@ import {
 } from "@/components/auth/auth-shell";
 import { useRegister } from "@/hooks/useRegister";
 
+import { getApiBaseUrl } from "@/services/client";
+
 export const Route = createFileRoute("/auth/sign-up")({
   head: () => ({ meta: [{ title: "Create account - ZEKROS" }] }),
   component: SignUpPage,
@@ -34,12 +36,7 @@ function SignUpPage() {
   const [showPw, setShowPw] = useState(false);
 
   const handleGoogleLogin = () => {
-    const apiBaseUrl =
-      typeof window !== "undefined" &&
-      window.location.hostname !== "localhost" &&
-      window.location.hostname !== "127.0.0.1"
-        ? `http://${window.location.hostname}:5000/api`
-        : import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
+    const apiBaseUrl = getApiBaseUrl();
     window.location.href = `${apiBaseUrl}/auth/google`;
   };
 

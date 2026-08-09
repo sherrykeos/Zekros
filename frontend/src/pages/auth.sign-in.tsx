@@ -11,6 +11,8 @@ import {
 } from "@/components/auth/auth-shell";
 import { useLogin } from "@/hooks/useLogin";
 
+import { getApiBaseUrl } from "@/services/client";
+
 export const Route = createFileRoute("/auth/sign-in")({
   validateSearch: (search: Record<string, unknown>): { redirect?: string } => ({
     redirect: (search.redirect as string) || undefined,
@@ -30,12 +32,7 @@ function SignInPage() {
     if (search.redirect) {
       sessionStorage.setItem("auth_redirect", search.redirect);
     }
-    const apiBaseUrl =
-      typeof window !== "undefined" &&
-      window.location.hostname !== "localhost" &&
-      window.location.hostname !== "127.0.0.1"
-        ? `http://${window.location.hostname}:5000/api`
-        : import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
+    const apiBaseUrl = getApiBaseUrl();
     window.location.href = `${apiBaseUrl}/auth/google`;
   };
 

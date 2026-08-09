@@ -10,18 +10,14 @@ class SocketService {
     let socketBaseURL =
       import.meta.env.VITE_SOCKET_URL ||
       import.meta.env.VITE_API_URL?.replace(/\/api$/, "") ||
-      api.defaults.baseURL?.replace(/\/api$/, "") ||
-      "http://localhost:5000";
+      api.defaults.baseURL?.replace(/\/api$/, "");
 
-    if (
-      typeof window !== "undefined" &&
-      window.location.hostname !== "localhost" &&
-      window.location.hostname !== "127.0.0.1"
-    ) {
-      socketBaseURL = `http://${window.location.hostname}:5000`;
+    if (!socketBaseURL && typeof window !== "undefined") {
+      const protocol = window.location.protocol === "https:" ? "https:" : "http:";
+      socketBaseURL = `${protocol}//${window.location.hostname}:5000`;
     }
 
-    this.baseURL = socketBaseURL;
+    this.baseURL = socketBaseURL || "http://localhost:5000";
   }
 
   public connect(): Socket {
