@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PlayEntryProvider } from "@/contexts/play-entry";
+import { BackendWarmupProvider, BackendWarmupBanner } from "@/lib/backend-warmup";
 import { PlayEntryModal } from "@/components/auth/play-entry-modal";
 import { AccountRequiredModal } from "@/components/auth/account-required-modal";
 import { DeveloperOverlay } from "@/components/dev/developer-overlay";
@@ -143,12 +144,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PlayEntryProvider>
-        <Outlet />
-        <PlayEntryModal />
-        <AccountRequiredModal />
-        <DeveloperOverlay />
-      </PlayEntryProvider>
+      <BackendWarmupProvider>
+        <PlayEntryProvider>
+          <Outlet />
+          <PlayEntryModal />
+          <AccountRequiredModal />
+          <DeveloperOverlay />
+          <BackendWarmupBanner />
+        </PlayEntryProvider>
+      </BackendWarmupProvider>
     </QueryClientProvider>
   );
 }
