@@ -17,12 +17,12 @@ A Next-Gen Real-Time Strategy Arena built on adaptive boards, vanishing piece qu
 
 <br/>
 
-[![Play Now](https://img.shields.io/badge/🎮_Play_Now-zekros.vercel.app-FACC12?style=for-the-badge&logoColor=black&labelColor=000000)](https://zekros.vercel.app/)
+[![Play Now](https://img.shields.io/badge/🎮_Play_Now-zekros.vercel.app-FACC2?style=for-the-badge&logoColor=black&labelColor=000000)](https://zekros.vercel.app/)
 
 
 <br />
 
-![ZEKROS Hero Preview](/frontend/public/assets/hero-pvp-element.gif)
+![ZEKROS Hero Preview](/frontend/public/assets/Zekros-product-img.png)
 
 </div>
 
