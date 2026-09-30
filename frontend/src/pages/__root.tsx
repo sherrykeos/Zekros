@@ -103,8 +103,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [
-        { rel: "icon", href: "/assets/zekrosLogov1.png" },
-        { rel: "apple-touch-icon", href: "/assets/zekrosLogov1.png" },
+        { rel: "icon", href: "/assets/zekroslogo.png" },
+        { rel: "apple-touch-icon", href: "/assets/zekroslogo.png" },
         { rel: "stylesheet", href: appCss },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         {

@@ -1,9 +1,9 @@
 <div align="center">
 
-# <img src="./frontend/public/assets/zekrosLogov1.png" alt="ZEKROS Logo" height="42" align="absmiddle" /> ZEKROS
+# <img src="./frontend/public/assets/zekroslogo.png" alt="ZEKROS Logo" height="42" align="absmiddle" /> ZEKROS
 ### *Where Every Move Decays.*
 
-A Next-Gen Monochromatic Real-Time Strategy Arena built on adaptive boards, vanishing piece queues, and tactical token mechanics.
+A Next-Gen Real-Time Strategy Arena built on adaptive boards, vanishing piece queues, and tactical token mechanics.
 
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -15,11 +15,18 @@ A Next-Gen Monochromatic Real-Time Strategy Arena built on adaptive boards, vani
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-v16+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-v6.19-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
 
+<br/>
+
+[![Play Now](https://img.shields.io/badge/🎮_Play_Now-zekros.vercel.app-FACC12?style=for-the-badge&logoColor=black&labelColor=000000)](https://zekros.vercel.app/)
+
+
 <br />
 
 ![ZEKROS Hero Preview](/frontend/public/assets/hero-pvp-element.gif)
 
 </div>
+
+
 
 ---
 
@@ -176,68 +183,6 @@ Zekros/
 
 ---
 
-## 🚀 Quick Start & Local Setup
-
-### Prerequisites
-- **Node.js** v20.0.0 or higher
-- **npm** v10.0.0 or higher
-- **PostgreSQL** database instance (Local or hosted on Supabase/Neon/Render)
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/sherrykeos/Zekros.git
-cd Zekros
-```
-
-### 2. Configure Environment Variables
-
-Create `.env` in `backend/`:
-```env
-PORT=5000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:8080
-
-# Database Connection
-DATABASE_URL="postgresql://postgres:password@localhost:5432/zekros?schema=public"
-
-# Auth Secrets
-JWT_SECRET="your_super_secret_jwt_key_here"
-REFRESH_TOKEN_SECRET="your_super_secret_refresh_key_here"
-
-# Google OAuth (Optional)
-GOOGLE_CLIENT_ID="your_google_client_id"
-GOOGLE_CLIENT_SECRET="your_google_client_secret"
-GOOGLE_CALLBACK_URL="http://localhost:5000/api/auth/google/callback"
-
-# Email Service (Brevo - Optional)
-BREVO_API_KEY="your_brevo_api_key"
-```
-
-Create `.env` in `frontend/`:
-```env
-VITE_API_URL=http://localhost:5000/api
-VITE_SOCKET_URL=http://localhost:5000
-```
-
-### 3. Setup & Start Backend
-```bash
-cd backend
-npm install
-npx prisma db push
-npm start
-```
-
-### 4. Setup & Start Frontend
-```bash
-cd ../frontend
-npm install
-npm run dev
-```
-
-Open your browser at `http://localhost:8080` to experience ZEKROS!
-
----
-
 ## 🌐 API & Socket Protocol
 
 ### REST Endpoints
@@ -259,17 +204,8 @@ Open your browser at `http://localhost:8080` to experience ZEKROS!
 | `timer-tick` | Server ➔ Client | Synchronizes active player turn countdown |
 | `reclaim-cell` | Client ➔ Server | Spend token to lock/preserve cell |
 
----
 
-## 🚢 Production Deployment
 
-### Deploying Frontend
-- Build the production bundle: `npm run build` inside `frontend/`
-- Deploy output `dist/` directory to **Vercel**, **Netlify**, or **Render Static Site**.
-
-### Deploying Backend & WebSockets
-- Deploy `backend/` to **Render Web Service**, **Railway**, **Fly.io**, or **AWS EC2**.
-- Ensure WebSockets are enabled and configure `FRONTEND_URL` in environment variables for CORS.
 
 ---
 
@@ -277,8 +213,8 @@ Open your browser at `http://localhost:8080` to experience ZEKROS!
 
 Designed & Developed with high precision by **KEOS Labs / Sherry Keos**.
 
-- **Author / Lead Engineer:** Sharad Kumar ([GitHub](https://github.com/sherrykeos) · [LinkedIn](https://www.linkedin.com/in/sharad--kumar/))
-- **Support Contact:** `shaj7492@gmail.com`
-- **Studio:** [KEOS Studio](https://keos.studio)
+- **Engineered by:** Sharad Kumar ([GitHub](https://github.com/sherrykeos) · [LinkedIn](https://www.linkedin.com/in/sharad--kumar/))
+- **Support Contact:** `hey.sharad.pro@gmail.com`
+
 
 *Copyright © 2026 KEOS Labs. All rights reserved.*

@@ -26,7 +26,7 @@ export function AuthShell({
       <header className="relative mx-auto flex max-w-5xl items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
           <img
-            src="/assets/zekrosLogov1.png"
+            src="/assets/zekroslogo.png"
             alt="ZEKROS"
             className="size-7 object-contain"
           />

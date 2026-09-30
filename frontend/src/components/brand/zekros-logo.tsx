@@ -7,7 +7,7 @@ interface ZekrosLogoProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 /**
- * ZEKROS Official Brand Logo component using /assets/zekrosLogov1.png
+ * ZEKROS official brand logo component using /assets/zekroslogo.png
  */
 export function ZekrosLogo({
   className = "",
@@ -18,7 +18,7 @@ export function ZekrosLogo({
 }: ZekrosLogoProps) {
   return (
     <img
-      src="/assets/zekrosLogov1.png"
+      src="/assets/zekroslogo.png"
       alt={alt}
       className={`object-contain ${className}`}
       style={{

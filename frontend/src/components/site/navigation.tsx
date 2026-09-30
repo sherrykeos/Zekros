@@ -187,7 +187,7 @@ export function Navigation() {
 function Logo() {
   return (
     <img
-      src="/assets/zekrosLogov1.png"
+      src="/assets/zekroslogo.png"
       alt="ZEKROS"
       className="size-7 object-contain"
     />

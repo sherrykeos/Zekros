@@ -69,7 +69,7 @@ function SidebarInner({
       <div className="flex h-14 items-center gap-2.5 px-4">
         <a href="/" className="flex items-center gap-2.5">
           <img
-            src="/assets/zekrosLogov1.png"
+            src="/assets/zekroslogo.png"
             alt="ZEKROS"
             className="size-7 shrink-0 object-contain"
           />
