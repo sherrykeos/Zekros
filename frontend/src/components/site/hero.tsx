@@ -1,9 +1,11 @@
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
-import { HeroBoard } from "./hero-board";
+import { HeroPvPPreview } from "./hero-pvp-preview";
 import { dispatchPlayNow } from "@/contexts/play-entry";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useNavigate } from "@tanstack/react-router";
+import { AeroShards } from "@/components/ui/AeroShards";
+import PatternWaves from '@/components/ui/PatternWaves';
 
 import { APP_CONSTANTS } from "@/constants/appConstants";
 
@@ -22,13 +24,75 @@ export function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden px-4 pt-32 pb-16 md:pt-44 md:pb-24">
+    <section className="relative isolate overflow-hidden px-4 pt-32 pb-16 md:pt-44 md:pb-24">
+      {/* Hero-only AeroShards Background Effect */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        
+  <PatternWaves
+    preset="silk"
+    color="#4b4e50"
+    backgroundColor="#000000"
+    fade="edges"
+    interactive
+    cursorSize={50}
+    cursorStrength={0.6}
+    pattern="dot"
+    wave="silk"
+    spacing={9}
+    markSize={0.95}
+    depth={0.95}
+    light={0}
+    shine={0.8}
+    contrast={1.2}
+    speed={0.35}
+    scale={1}
+    direction={20}
+    opacity={1}
+    fadeSize={0.5}
+    characters=".:-=+*#%@"
+    intro
+    paused={false}
+/>
+
+        {/* <AeroShards
+          className="size-full"
+          flipX
+          shardColor="#ffffff"
+          accentColor="#ffffff"
+          placement="full"
+          material="glass"
+          markers="plus"
+          count={1300}
+          depthOfField={0.75}
+          vignette={0.3}
+          mouseInteraction
+          pulseOnClick
+          holdToGather
+          lightMode={false}
+          shardSize={1}
+          spread={1}
+          twist={1}
+          billow={1}
+          speed={1}
+          scale={1}
+          glow={0.35}
+          grain={0.06}
+          intro
+          mouseStrength={0.6}
+          parallax={0.5}
+          paused={false}
+          onError={(err) => console.error("AeroShards error:", err)}
+        /> */}
+        {/* Soft bottom blend to transition smoothly into the next section */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-background to-transparent" />
+      </div>
+
       {/* ambient halo */}
-      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-white/[0.04] blur-[120px]" />
-    {/* Subtle Micro-Grid Pattern */}
+      <div className="pointer-events-none absolute left-1/2 top-0 z-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-white/[0.04] blur-[120px]" />
+      {/* Subtle Micro-Grid Pattern */}
       {/* <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_4px),linear-gradient(to_bottom,#ffffff04_1px,transparent_2px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-90" /> */}
       
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:items-center px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:items-center px-4 sm:px-6 lg:px-8">
         <div>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -100,15 +164,9 @@ export function Hero() {
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2, ease }}
-          className="relative mx-auto w-full max-w-md"
+          className="relative w-full max-w-md mx-auto lg:ml-auto lg:mr-0 lg:translate-x-8 xl:translate-x-14"
         >
-          <div className="relative aspect-square w-full overflow-hidden">
-            <img
-              src="/assets/hero-pvp-element.gif"
-              alt="ZEKROS Hero Preview"
-              className="size-full rounded-2xl object-cover select-none pointer-events-none"
-            />
-          </div>
+          <HeroPvPPreview />
         </motion.div>
       </div>
     </section>
